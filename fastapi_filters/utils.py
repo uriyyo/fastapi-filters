@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Awaitable, Callable, TypeVar, get_origin, List
+from typing import Awaitable, Callable, TypeVar, get_origin, Sequence
 
 from pydantic.utils import lenient_issubclass
 from typing_extensions import ParamSpec
@@ -16,11 +16,11 @@ def async_safe(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
     return wrapper
 
 
-def is_list(tp: type) -> bool:
-    return lenient_issubclass(get_origin(tp), List)
+def is_seq(tp: type) -> bool:
+    return lenient_issubclass(get_origin(tp), Sequence)
 
 
 __all__ = [
     "async_safe",
-    "is_list",
+    "is_seq",
 ]

@@ -8,7 +8,7 @@ from fastapi import Query, Depends
 from .fields import CSVList
 from .operators import Operators, get_operators
 from .types import FilterValues
-from .utils import async_safe, is_list
+from .utils import async_safe, is_seq
 
 
 @dataclass
@@ -22,14 +22,14 @@ class FieldFilter:
             self.operators = [*get_operators(self.type)]
 
         if self.default_op is None:
-            if is_list(self.type):
+            if is_seq(self.type):
                 self.default_op = Operators.ov
             else:
                 self.default_op = Operators.eq
 
 
 def adapt_type(tp: Type[Any], op: Operators) -> Any:
-    if is_list(tp):
+    if is_seq(tp):
         return CSVList[tuple(get_args(tp))]  # type: ignore
 
     if op == Operators.is_null:
@@ -82,13 +82,13 @@ def create_filters(
         ],
     )
 
-    async def _get_filters(f: Any = Depends(async_safe(filter_model))) -> Any:
-        values = defaultdict(list)
+    async def _get_filters(f: Any = Depends(async_safe(filter_model))) -> FilterValues:
+        values: FilterValues = defaultdict(dict)
 
         for key, value in asdict(f).items():
             if value is not None:
                 name, op = defs[key]
-                values[name].append((op, value))
+                values[name][op] = value
 
         return {**values}
 

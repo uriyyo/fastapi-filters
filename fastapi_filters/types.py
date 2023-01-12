@@ -1,9 +1,9 @@
-from typing import Dict, List, Tuple, Any
+from typing import Dict, Any
 from typing_extensions import TypeAlias
 
 from .operators import Operators
 
-FilterValues: TypeAlias = Dict[str, List[Tuple[Operators, Any]]]
+FilterValues: TypeAlias = Dict[str, Dict[Operators, Any]]
 
 __all__ = [
     "FilterValues",
