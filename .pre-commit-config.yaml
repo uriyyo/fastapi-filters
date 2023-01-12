@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/ambv/black
+    rev: '22.12.0'
+    hooks:
+      - id: black
+        language_version: python3.8
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.192'
+    hooks:
+      - id: ruff
+
+  - repo: local
+    hooks:
+      - id: mypy
+        language: python
+        name: mypy
+        pass_filenames: false
+        entry: poetry run mypy fastapi_filters --show-error-codes
