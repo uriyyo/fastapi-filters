@@ -42,7 +42,7 @@ def adapt_type(tp: Type[Any], op: Operators) -> Any:
 
 
 def default_alias_generator(name: str, op: Operators) -> str:
-    return f"{name}[{op}]"
+    return f"{name}[{op.name}]"
 
 
 def field_filter_to_raw_fields(
@@ -53,7 +53,7 @@ def field_filter_to_raw_fields(
     yield name, field.type, cast(Operators, field.default_op), None
 
     for op in field.operators or ():
-        yield f"{name}__{op}", field.type, op, alias_generator(name, op)
+        yield f"{name}__{op.name}", field.type, op, alias_generator(name, op)
 
 
 def create_filters(
