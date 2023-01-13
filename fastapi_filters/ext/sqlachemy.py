@@ -1,5 +1,5 @@
 import operator
-from collections import ChainMap
+from contextlib import suppress
 from typing import TypeVar, Mapping, Any, Callable, cast
 
 from sqlalchemy.sql.selectable import Select
@@ -30,9 +30,21 @@ EntityNamespace: TypeAlias = Mapping[str, Any]
 
 
 def _get_entity_namespace(stmt: TSelectable) -> EntityNamespace:
-    froms = stmt.get_final_froms()
+    ns = {}
 
-    return ChainMap(*[from_.c for from_ in froms])
+    for entity in reversed(stmt.get_final_froms()):
+        for name, clause in reversed(entity.c.items()):
+            ns[name] = clause
+            ns[clause.name] = clause
+
+            with suppress(AttributeError):
+                table_name = clause.table.name
+                ns[f"{table_name}.{clause.name}"] = clause
+
+                if table_name.endswith("s"):
+                    ns[f"{table_name[:-1]}.{clause.name}"] = clause
+
+    return ns
 
 
 def _apply_filter(
