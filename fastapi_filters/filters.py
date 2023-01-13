@@ -42,7 +42,7 @@ def adapt_type(tp: Type[Any], op: Operators) -> Any:
 
 
 def default_alias_generator(name: str, op: Operators) -> str:
-    return f"{name}[{op.name}]"
+    return f"{name}[{op.name.rstrip('_')}]"
 
 
 def field_filter_to_raw_fields(

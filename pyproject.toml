@@ -11,6 +11,7 @@ python = "^3.8"
 pydantic = "^1.10.4"
 fastapi = "^0.89.1"
 typing-extensions = "^4.4.0"
+sqlalchemy = { version = "^1.4.46", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
@@ -84,7 +85,7 @@ exclude = [
     "venv",
     ".venv",
 ]
-per-file-ignores = {}
+per-file-ignores = { }
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 target-version = "py38"
 
@@ -97,8 +98,8 @@ strict = true
 follow_imports = "normal"
 ignore_missing_imports = true
 no_implicit_reexport = false
-show_column_numbers= true
-show_error_codes= true
+show_column_numbers = true
+show_error_codes = true
 
 [tool.coverage.paths]
 source = ["fastapi_filters"]
