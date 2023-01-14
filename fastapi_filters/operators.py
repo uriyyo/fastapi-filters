@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Iterator
 
 from pydantic.utils import lenient_issubclass
-from .utils import is_seq
+from .utils import is_seq, is_optional, unwrap_type
 
 
 class Operators(str, Enum):
@@ -25,7 +25,6 @@ DEFAULT_OPERATORS = [
     Operators.ne,
     Operators.in_,
     Operators.not_in,
-    Operators.is_null,
 ]
 
 NUMERIC_OPERATORS = [
@@ -42,17 +41,22 @@ SEQ_OPERATORS = [
 
 
 def get_operators(t: type) -> Iterator[Operators]:
+    if is_optional(t):
+        yield Operators.is_null
+
     if is_seq(t):
         yield from SEQ_OPERATORS
         return
 
-    if lenient_issubclass(t, bool):
+    tp = unwrap_type(t)
+
+    if lenient_issubclass(tp, bool):
         yield Operators.eq
         return
 
     yield from DEFAULT_OPERATORS
 
-    if lenient_issubclass(t, (int, float, date, datetime, timedelta)):
+    if lenient_issubclass(tp, (int, float, date, datetime, timedelta)):
         yield from NUMERIC_OPERATORS
 
 

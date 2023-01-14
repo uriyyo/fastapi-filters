@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime, date
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from pytest import mark
 
@@ -12,6 +12,7 @@ from fastapi_filters.operators import get_operators, SEQ_OPERATORS, Operators, D
         *[(tp, SEQ_OPERATORS) for tp in (List[int], Tuple[float, ...])],
         (bool, [Operators.eq]),
         *[(tp, DEFAULT_OPERATORS + NUMERIC_OPERATORS) for tp in (int, float, date, datetime, timedelta)],
+        (Optional[int], [Operators.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),
     ],
     ids=str,
 )
