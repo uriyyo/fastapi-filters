@@ -18,6 +18,8 @@ class Operators(str, Enum):
     is_null = "is_null"
     ov = "ov"
     not_ov = "not_ov"
+    contains = "contains"
+    not_contains = "not_contains"
 
 
 DEFAULT_OPERATORS = [
@@ -37,6 +39,8 @@ NUMERIC_OPERATORS = [
 SEQ_OPERATORS = [
     Operators.ov,
     Operators.not_ov,
+    Operators.contains,
+    Operators.not_contains,
 ]
 
 

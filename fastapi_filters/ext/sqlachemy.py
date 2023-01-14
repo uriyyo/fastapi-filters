@@ -21,8 +21,10 @@ DEFAULT_FILTERS: Mapping[Operators, Callable[[Any, Any], Any]] = {
     Operators.in_: lambda a, b: a.in_(b),
     Operators.not_in: lambda a, b: a.not_in(b),
     Operators.is_null: lambda a, b: a.is_(None) if b else a.isnot(None),
-    Operators.ov: lambda a, b: a.overlaps(b),
-    Operators.not_ov: lambda a, b: ~a.overlaps(b),
+    Operators.ov: lambda a, b: a.overlap(b),
+    Operators.not_ov: lambda a, b: ~a.overlap(b),
+    Operators.contains: lambda a, b: a.contains(b),
+    Operators.not_contains: lambda a, b: ~a.contains(b),
 }
 
 

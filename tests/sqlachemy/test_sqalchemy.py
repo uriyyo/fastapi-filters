@@ -3,6 +3,7 @@ from typing import Any
 from pytest import mark
 from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from fastapi_filters.ext.sqlachemy import apply_filters
 from fastapi_filters.operators import Operators
@@ -28,6 +29,7 @@ class User(Base):
 
     name = Column(String)
     age = Column(Integer)
+    languages = Column(ARRAY(String))
     created_at = Column(DateTime)
 
     group = relationship("Group", back_populates="users")
@@ -70,6 +72,33 @@ def test_apply_filters(op, val, expected):
     filtered_stmt = apply_filters(stmt, {"age": {op: val}})
 
     assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
+
+
+@mark.parametrize(
+    "op, val, expected",
+    [
+        (Operators.ov, ["en", "ua"], User.languages.overlap(["en", "ua"])),
+        (Operators.not_ov, ["en", "ua"], ~User.languages.overlap(["en", "ua"])),
+        (Operators.contains, "en", User.languages.contains("en")),
+        (Operators.not_contains, "en", ~User.languages.contains("en")),
+    ],
+    ids=[
+        "ov",
+        "not_ov",
+        "contains",
+        "not_contains",
+    ],
+)
+def test_arrays_apply_filters(op, val, expected):
+    stmt = select(User)
+
+    filtered_stmt = apply_filters(stmt, {"languages": {op: val}})
+
+    actual_sql = filtered_stmt.whereclause.compile()
+    expected_sql = expected.compile()
+
+    assert str(actual_sql) == str(expected_sql)
+    assert actual_sql.params == expected_sql.params
 
 
 def test_apply_filters_with_join():
