@@ -1,9 +1,25 @@
+import sys
 from datetime import timedelta, datetime, date
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Any
 
 from pytest import mark
 
 from fastapi_filters.operators import get_operators, SEQ_OPERATORS, Operators, DEFAULT_OPERATORS, NUMERIC_OPERATORS
+
+
+ADDITIONAL_CASES: List[Tuple[Any, Any]] = []
+
+if sys.version_info >= (3, 9):
+    ADDITIONAL_CASES += [
+        (list[int], SEQ_OPERATORS),  # noqa
+        (tuple[float, ...], SEQ_OPERATORS),  # noqa
+    ]
+
+
+if sys.version_info >= (3, 10):
+    ADDITIONAL_CASES += [
+        (eval("int | None"), [Operators.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),  # noqa
+    ]
 
 
 @mark.parametrize(
@@ -13,6 +29,7 @@ from fastapi_filters.operators import get_operators, SEQ_OPERATORS, Operators, D
         (bool, [Operators.eq]),
         *[(tp, DEFAULT_OPERATORS + NUMERIC_OPERATORS) for tp in (int, float, date, datetime, timedelta)],
         (Optional[int], [Operators.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),
+        *ADDITIONAL_CASES,
     ],
     ids=str,
 )
