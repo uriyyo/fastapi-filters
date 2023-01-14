@@ -66,6 +66,10 @@ async def test_filters(app):
         "c__is_null": ("c", Operators.is_null),
         "c__ne": ("c", Operators.ne),
         "c__not_in": ("c", Operators.not_in),
+        "c__like": ("c", Operators.like),
+        "c__not_like": ("c", Operators.not_like),
+        "c__ilike": ("c", Operators.ilike),
+        "c__not_ilike": ("c", Operators.not_ilike),
     }
 
 
@@ -92,6 +96,10 @@ async def test_filters_from_model(app):
         "name__in_": ("name", Operators.in_),
         "name__ne": ("name", Operators.ne),
         "name__not_in": ("name", Operators.not_in),
+        "name__like": ("name", Operators.like),
+        "name__not_like": ("name", Operators.not_like),
+        "name__ilike": ("name", Operators.ilike),
+        "name__not_ilike": ("name", Operators.not_ilike),
     }
     assert create_filters_from_model(UserModel, include={"name"}).__defs__ == {
         "name": ("name", Operators.eq),
@@ -99,6 +107,10 @@ async def test_filters_from_model(app):
         "name__in_": ("name", Operators.in_),
         "name__ne": ("name", Operators.ne),
         "name__not_in": ("name", Operators.not_in),
+        "name__like": ("name", Operators.like),
+        "name__not_like": ("name", Operators.not_like),
+        "name__ilike": ("name", Operators.ilike),
+        "name__not_ilike": ("name", Operators.not_ilike),
     }
     assert create_filters_from_model(UserModel, exclude={"id"}).__defs__ == {
         "is_active": ("is_active", Operators.eq),
@@ -108,4 +120,8 @@ async def test_filters_from_model(app):
         "name__in_": ("name", Operators.in_),
         "name__ne": ("name", Operators.ne),
         "name__not_in": ("name", Operators.not_in),
+        "name__like": ("name", Operators.like),
+        "name__not_like": ("name", Operators.not_like),
+        "name__ilike": ("name", Operators.ilike),
+        "name__not_ilike": ("name", Operators.not_ilike),
     }

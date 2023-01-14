@@ -18,6 +18,10 @@ DEFAULT_FILTERS: Mapping[Operators, Callable[[Any, Any], Any]] = {
     Operators.ge: operator.ge,
     Operators.lt: operator.lt,
     Operators.le: operator.le,
+    Operators.like: lambda a, b: a.like(b),
+    Operators.not_like: lambda a, b: ~a.like(b),
+    Operators.ilike: lambda a, b: a.ilike(b),
+    Operators.not_ilike: lambda a, b: ~a.ilike(b),
     Operators.in_: lambda a, b: a.in_(b),
     Operators.not_in: lambda a, b: a.not_in(b),
     Operators.is_null: lambda a, b: a.is_(None) if b else a.isnot(None),
@@ -56,7 +60,10 @@ def _apply_filter(
     op: Operators,
     val: Any,
 ) -> TSelectable:
-    cond = DEFAULT_FILTERS[op](ns[field], val)
+    try:
+        cond = DEFAULT_FILTERS[op](ns[field], val)
+    except KeyError:
+        raise NotImplementedError(f"Operator {op} is not implemented")
 
     return cast(TSelectable, stmt.where(cond))
 

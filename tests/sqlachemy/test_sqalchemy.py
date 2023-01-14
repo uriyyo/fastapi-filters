@@ -1,11 +1,11 @@
 from typing import Any
 
-from pytest import mark
+from pytest import mark, raises
 from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 
-from fastapi_filters.ext.sqlachemy import apply_filters
+from fastapi_filters.ext.sqlalchemy import apply_filters
 from fastapi_filters.operators import Operators
 
 Base = declarative_base()
@@ -77,6 +77,23 @@ def test_apply_filters(op, val, expected):
 @mark.parametrize(
     "op, val, expected",
     [
+        (Operators.like, "%test%", User.name.like("%test%")),
+        (Operators.ilike, "%test%", User.name.ilike("%test%")),
+        (Operators.not_like, "%test%", ~User.name.like("%test%")),
+        (Operators.not_ilike, "%test%", ~User.name.ilike("%test%")),
+    ],
+)
+def test_apply_filters_string(op, val, expected):
+    stmt = select(User)
+
+    filtered_stmt = apply_filters(stmt, {"name": {op: val}})
+
+    assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
+
+
+@mark.parametrize(
+    "op, val, expected",
+    [
         (Operators.ov, ["en", "ua"], User.languages.overlap(["en", "ua"])),
         (Operators.not_ov, ["en", "ua"], ~User.languages.overlap(["en", "ua"])),
         (Operators.contains, "en", User.languages.contains("en")),
@@ -115,3 +132,10 @@ def test_apply_filters_with_join():
     )
 
     assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
+
+
+def test_unknown_operator():
+    stmt = select(User)
+
+    with raises(NotImplementedError, match=r"Operator unknown is not implemented"):
+        apply_filters(stmt, {"name": {"unknown": "test"}})  # type: ignore

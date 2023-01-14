@@ -13,6 +13,10 @@ class Operators(str, Enum):
     ge = "ge"
     lt = "lt"
     le = "le"
+    like = "like"
+    not_like = "not_like"
+    ilike = "ilike"
+    not_ilike = "not_ilike"
     in_ = "in"
     not_in = "not_in"
     is_null = "is_null"
@@ -39,6 +43,13 @@ NUMERIC_OPERATORS = [
     Operators.le,
 ]
 
+STRING_OPERATORS = [
+    Operators.like,
+    Operators.ilike,
+    Operators.not_like,
+    Operators.not_ilike,
+]
+
 SEQ_OPERATORS = [
     Operators.ov,
     Operators.not_ov,
@@ -63,6 +74,9 @@ def get_operators(t: type) -> Iterator[Operators]:
 
     yield from DEFAULT_OPERATORS
 
+    if lenient_issubclass(tp, str):
+        yield from STRING_OPERATORS
+
     if lenient_issubclass(tp, (int, float, date, datetime, timedelta)):
         yield from NUMERIC_OPERATORS
 
@@ -71,6 +85,7 @@ __all__ = [
     "SEQ_OPERATORS",
     "DEFAULT_OPERATORS",
     "NUMERIC_OPERATORS",
+    "STRING_OPERATORS",
     "Operators",
     "get_operators",
 ]
