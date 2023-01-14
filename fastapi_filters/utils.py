@@ -25,11 +25,19 @@ def is_seq(tp: Any) -> bool:
     return lenient_issubclass(get_origin(tp), Sequence)
 
 
+def _create_union(*args: Any, exclude_none: bool = True) -> Any:
+    args = tuple(arg for arg in args if arg is not ...)
+    if exclude_none:
+        args = tuple(arg for arg in args if not is_none_type(arg))
+
+    return Union[args]
+
+
 def unwrap_type(tp: Any) -> Any:
     if is_optional(tp):
-        return Union[tuple(arg for arg in get_args(tp) if not is_none_type(arg))]
+        return _create_union(*get_args(tp), exclude_none=True)
     if is_seq(tp):
-        return Union[tuple(get_args(tp))]
+        return _create_union(*get_args(tp), exclude_none=False)
 
     return tp
 

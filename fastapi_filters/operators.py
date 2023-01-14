@@ -21,6 +21,9 @@ class Operators(str, Enum):
     contains = "contains"
     not_contains = "not_contains"
 
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}.{self.name}"
+
 
 DEFAULT_OPERATORS = [
     Operators.eq,
