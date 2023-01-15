@@ -1,77 +1,53 @@
 from collections import defaultdict
-from dataclasses import asdict, dataclass, make_dataclass
+from dataclasses import asdict, make_dataclass
 from dataclasses import field as dataclass_field
 from typing import (
     Any,
     Iterator,
-    List,
     cast,
-    get_args,
     Dict,
     Tuple,
     Optional,
     Type,
-    Union,
-    Callable,
     Container,
 )
 
 from fastapi import Query, Depends
 from pydantic import BaseModel
-from typing_extensions import TypeAlias
 
-from .fields import CSVList
-from .operators import Operators, get_operators
-from .types import FilterValues, FiltersResolver
-from .utils import async_safe, is_seq
-
-
-@dataclass
-class FieldFilter:
-    type: Type[Any]
-    operators: Optional[List[Operators]] = None
-    default_op: Optional[Operators] = None
-
-    def __post_init__(self) -> None:
-        if self.operators is None:
-            self.operators = [*get_operators(self.type)]
-
-        if self.default_op is None:
-            if is_seq(self.type):
-                self.default_op = Operators.ov
-            else:
-                self.default_op = Operators.eq
+from .schemas import CSVList
+from .operators import FilterOperator
+from .types import FilterValues, FiltersResolver, FilterAliasGenerator, FilterFieldDef, FilterPlace
+from .utils import async_safe, is_seq, unwrap_seq_type
+from .fields import FieldFilter
 
 
-def adapt_type(tp: Type[Any], op: Operators) -> Any:
+def adapt_type(tp: Type[Any], op: FilterOperator) -> Any:
     if is_seq(tp):
-        return CSVList[get_args(tp)]  # type: ignore
+        return CSVList[unwrap_seq_type(tp)]  # type: ignore
 
-    if op == Operators.is_null:
+    if op == FilterOperator.is_null:
         return bool
 
-    if op in {Operators.in_, Operators.not_in}:
+    if op in {FilterOperator.in_, FilterOperator.not_in}:
         return CSVList[tp]  # type: ignore
 
     return tp
 
 
-AliasGenerator: TypeAlias = Callable[[str, Operators], str]
-
-
-def default_alias_generator(name: str, op: Operators) -> str:
+def default_alias_generator(name: str, op: FilterOperator) -> str:
     return f"{name}[{op.name.rstrip('_')}]"
 
 
 def field_filter_to_raw_fields(
     name: str,
     field: FieldFilter,
-    alias_generator: Optional[AliasGenerator] = None,
-) -> Iterator[Tuple[str, Any, Operators, Optional[str]]]:
+    alias_generator: Optional[FilterAliasGenerator] = None,
+) -> Iterator[Tuple[str, Any, FilterOperator, Optional[str]]]:
     if alias_generator is None:
         alias_generator = default_alias_generator
 
-    yield name, field.type, cast(Operators, field.default_op), None
+    yield name, field.type, cast(FilterOperator, field.default_op), None
 
     for op in field.operators or ():
         yield f"{name}__{op.name}", field.type, op, alias_generator(name, op)
@@ -80,11 +56,11 @@ def field_filter_to_raw_fields(
 def create_filters_from_model(
     model: Type[BaseModel],
     *,
-    in_: Callable[..., Any] = Query,
-    alias_generator: Optional[AliasGenerator] = None,
+    in_: Optional[FilterPlace] = None,
+    alias_generator: Optional[FilterAliasGenerator] = None,
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
-    **overrides: Union[Type[Any], FieldFilter],
+    **overrides: FilterFieldDef,
 ) -> FiltersResolver:
     if include is None:
         include = {*model.__fields__}
@@ -107,10 +83,13 @@ def create_filters_from_model(
 
 def create_filters(
     *,
-    in_: Callable[..., Any] = Query,
-    alias_generator: Optional[AliasGenerator] = None,
-    **kwargs: Union[Type[Any], FieldFilter],
+    in_: Optional[FilterPlace] = None,
+    alias_generator: Optional[FilterAliasGenerator] = None,
+    **kwargs: FilterFieldDef,
 ) -> FiltersResolver:
+    if in_ is None:
+        in_ = Query
+
     fields: Dict[str, FieldFilter] = {
         name: f_def if isinstance(f_def, FieldFilter) else FieldFilter(f_def) for name, f_def in kwargs.items()
     }

@@ -4,7 +4,13 @@ from typing import List, Tuple, Optional, Any
 
 from pytest import mark
 
-from fastapi_filters.operators import get_operators, SEQ_OPERATORS, Operators, DEFAULT_OPERATORS, NUMERIC_OPERATORS
+from fastapi_filters.operators import (
+    get_filter_operators,
+    SEQ_OPERATORS,
+    FilterOperator,
+    DEFAULT_OPERATORS,
+    NUMERIC_OPERATORS,
+)
 
 
 ADDITIONAL_CASES: List[Tuple[Any, Any]] = []
@@ -18,7 +24,7 @@ if sys.version_info >= (3, 9):
 
 if sys.version_info >= (3, 10):
     ADDITIONAL_CASES += [
-        (eval("int | None"), [Operators.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),  # noqa
+        (eval("int | None"), [FilterOperator.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),  # noqa
     ]
 
 
@@ -26,12 +32,12 @@ if sys.version_info >= (3, 10):
     "tp,operators",
     [
         *[(tp, SEQ_OPERATORS) for tp in (List[int], Tuple[float, ...])],
-        (bool, [Operators.eq]),
+        (bool, [FilterOperator.eq]),
         *[(tp, DEFAULT_OPERATORS + NUMERIC_OPERATORS) for tp in (int, float, date, datetime, timedelta)],
-        (Optional[int], [Operators.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),
+        (Optional[int], [FilterOperator.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),
         *ADDITIONAL_CASES,
     ],
     ids=str,
 )
 def test_get_default_operators(tp, operators):
-    assert {*get_operators(tp)} == {*operators}
+    assert {*get_filter_operators(tp)} == {*operators}

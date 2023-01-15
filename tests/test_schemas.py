@@ -2,7 +2,7 @@ from fastapi import Query, status
 from pydantic import parse_obj_as, ValidationError
 from pytest import raises
 
-from fastapi_filters.fields import CSVList
+from fastapi_filters.schemas import CSVList
 
 
 def test_csv_list():

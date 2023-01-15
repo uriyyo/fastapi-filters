@@ -3,10 +3,10 @@ from enum import Enum
 from typing import Iterator
 
 from pydantic.utils import lenient_issubclass
-from .utils import is_seq, is_optional, unwrap_type
+from .utils import is_seq, is_optional, unwrap_type, unwrap_optional_type
 
 
-class Operators(str, Enum):
+class FilterOperator(str, Enum):
     eq = "eq"
     ne = "ne"
     gt = "gt"
@@ -30,37 +30,38 @@ class Operators(str, Enum):
 
 
 DEFAULT_OPERATORS = [
-    Operators.eq,
-    Operators.ne,
-    Operators.in_,
-    Operators.not_in,
+    FilterOperator.eq,
+    FilterOperator.ne,
+    FilterOperator.in_,
+    FilterOperator.not_in,
 ]
 
 NUMERIC_OPERATORS = [
-    Operators.gt,
-    Operators.ge,
-    Operators.lt,
-    Operators.le,
+    FilterOperator.gt,
+    FilterOperator.ge,
+    FilterOperator.lt,
+    FilterOperator.le,
 ]
 
 STRING_OPERATORS = [
-    Operators.like,
-    Operators.ilike,
-    Operators.not_like,
-    Operators.not_ilike,
+    FilterOperator.like,
+    FilterOperator.ilike,
+    FilterOperator.not_like,
+    FilterOperator.not_ilike,
 ]
 
 SEQ_OPERATORS = [
-    Operators.ov,
-    Operators.not_ov,
-    Operators.contains,
-    Operators.not_contains,
+    FilterOperator.ov,
+    FilterOperator.not_ov,
+    FilterOperator.contains,
+    FilterOperator.not_contains,
 ]
 
 
-def get_operators(t: type) -> Iterator[Operators]:
+def get_filter_operators(t: type) -> Iterator[FilterOperator]:
     if is_optional(t):
-        yield Operators.is_null
+        t = unwrap_optional_type(t)
+        yield FilterOperator.is_null
 
     if is_seq(t):
         yield from SEQ_OPERATORS
@@ -69,7 +70,7 @@ def get_operators(t: type) -> Iterator[Operators]:
     tp = unwrap_type(t)
 
     if lenient_issubclass(tp, bool):
-        yield Operators.eq
+        yield FilterOperator.eq
         return
 
     yield from DEFAULT_OPERATORS
@@ -86,6 +87,6 @@ __all__ = [
     "DEFAULT_OPERATORS",
     "NUMERIC_OPERATORS",
     "STRING_OPERATORS",
-    "Operators",
-    "get_operators",
+    "FilterOperator",
+    "get_filter_operators",
 ]

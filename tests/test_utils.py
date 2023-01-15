@@ -1,11 +1,11 @@
 import sys
 import threading
-from pytest import mark
 from typing import List, Tuple, Sequence, Awaitable, Optional, Union
 
 from fastapi import Depends
+from pytest import mark, raises
 
-from fastapi_filters.utils import async_safe, is_seq, is_optional, unwrap_type
+from fastapi_filters.utils import async_safe, is_seq, is_optional, unwrap_type, unwrap_optional_type, unwrap_seq_type
 
 
 async def test_async_safe(app, client):
@@ -77,3 +77,27 @@ def test_unwrap_type_union_operator():
     assert unwrap_type(eval("int | None")) == int
     assert unwrap_type(eval("int | float | None")) == Union[int, float]
     assert unwrap_type(eval("int | float")) == Union[int, float]
+
+
+def test_unwrap_optional_type():
+    assert unwrap_optional_type(Optional[int]) == int
+    assert unwrap_optional_type(Optional[List[int]]) == List[int]
+    assert unwrap_optional_type(Union[int, float, None]) == Union[int, float]
+
+    with raises(TypeError):
+        assert unwrap_optional_type(None) is None
+
+    with raises(TypeError):
+        assert unwrap_optional_type(int) == int
+
+
+def test_unwrap_seq_type():
+    assert unwrap_seq_type(List[int]) == int
+    assert unwrap_seq_type(Tuple[int, ...]) == int
+    assert unwrap_seq_type(Sequence[int]) == int
+
+    with raises(TypeError):
+        assert unwrap_seq_type(None) is None
+
+    with raises(TypeError):
+        assert unwrap_seq_type(int) == int

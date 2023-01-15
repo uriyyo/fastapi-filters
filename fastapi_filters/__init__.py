@@ -1,6 +1,7 @@
+from .fields import FieldFilter
+from .filters import create_filters, create_filters_from_model
+from .operators import FilterOperator
 from .types import FilterValues, FiltersResolver
-from .filters import create_filters, create_filters_from_model, FieldFilter
-from .operators import Operators
 
 __all__ = [
     "FilterValues",
@@ -8,5 +9,5 @@ __all__ = [
     "FieldFilter",
     "create_filters",
     "create_filters_from_model",
-    "Operators",
+    "FilterOperator",
 ]

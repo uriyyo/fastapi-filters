@@ -3,7 +3,7 @@ from typing import List
 from fastapi import Query
 
 from fastapi_filters.docs import fix_docs
-from fastapi_filters.fields import CSVList
+from fastapi_filters.schemas import CSVList
 from pytest import fixture
 
 

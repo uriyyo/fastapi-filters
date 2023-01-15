@@ -22,7 +22,9 @@ def is_optional(tp: Any) -> bool:
 
 
 def is_seq(tp: Any) -> bool:
-    return lenient_issubclass(get_origin(tp), Sequence)
+    return not lenient_issubclass(tp, (str, bytes)) and (
+        lenient_issubclass(tp, Sequence) or lenient_issubclass(get_origin(tp), Sequence)
+    )
 
 
 def _create_union(*args: Any, exclude_none: bool = True) -> Any:
@@ -33,11 +35,25 @@ def _create_union(*args: Any, exclude_none: bool = True) -> Any:
     return Union[args]
 
 
+def unwrap_optional_type(tp: Any) -> Any:
+    if not is_optional(tp):
+        raise TypeError(f"Expected optional type, got {tp}")
+
+    return _create_union(*get_args(tp), exclude_none=True)
+
+
+def unwrap_seq_type(tp: Any) -> Any:
+    if not is_seq(tp):
+        raise TypeError(f"Expected sequence type, got {tp}")
+
+    return _create_union(*(get_args(tp) or (Any,)), exclude_none=False)
+
+
 def unwrap_type(tp: Any) -> Any:
     if is_optional(tp):
-        return _create_union(*get_args(tp), exclude_none=True)
+        return unwrap_optional_type(tp)
     if is_seq(tp):
-        return _create_union(*get_args(tp), exclude_none=False)
+        return unwrap_seq_type(tp)
 
     return tp
 
@@ -47,4 +63,6 @@ __all__ = [
     "is_seq",
     "is_optional",
     "unwrap_type",
+    "unwrap_optional_type",
+    "unwrap_seq_type",
 ]
