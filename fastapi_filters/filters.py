@@ -15,14 +15,32 @@ from typing import (
 from fastapi import Query, Depends
 from pydantic import BaseModel
 
+from .config import ConfigVar
 from .schemas import CSVList
 from .operators import FilterOperator
-from .types import FilterValues, FiltersResolver, FilterAliasGenerator, FilterFieldDef, FilterPlace
+from .types import (
+    FilterValues,
+    FiltersResolver,
+    FilterAliasGenerator,
+    FilterFieldDef,
+    FilterPlace,
+    AbstractFilterOperator,
+)
 from .utils import async_safe, is_seq, unwrap_seq_type
 from .fields import FieldFilter
 
 
-def adapt_type(tp: Type[Any], op: FilterOperator) -> Any:
+def default_alias_generator(name: str, op: AbstractFilterOperator) -> str:
+    return f"{name}[{op.name.rstrip('_')}]"
+
+
+alias_generator_config: ConfigVar[FilterAliasGenerator] = ConfigVar(
+    "alias_generator",
+    default=default_alias_generator,
+)
+
+
+def adapt_type(tp: Type[Any], op: AbstractFilterOperator) -> Any:
     if is_seq(tp):
         return CSVList[unwrap_seq_type(tp)]  # type: ignore
 
@@ -35,19 +53,15 @@ def adapt_type(tp: Type[Any], op: FilterOperator) -> Any:
     return tp
 
 
-def default_alias_generator(name: str, op: FilterOperator) -> str:
-    return f"{name}[{op.name.rstrip('_')}]"
-
-
 def field_filter_to_raw_fields(
     name: str,
     field: FieldFilter,
     alias_generator: Optional[FilterAliasGenerator] = None,
-) -> Iterator[Tuple[str, Any, FilterOperator, Optional[str]]]:
+) -> Iterator[Tuple[str, Any, AbstractFilterOperator, Optional[str]]]:
     if alias_generator is None:
-        alias_generator = default_alias_generator
+        alias_generator = alias_generator_config.get()
 
-    yield name, field.type, cast(FilterOperator, field.default_op), None
+    yield name, field.type, cast(AbstractFilterOperator, field.default_op), None
 
     for op in field.operators or ():
         yield f"{name}__{op.name}", field.type, op, alias_generator(name, op)
@@ -127,7 +141,7 @@ def create_filters(
 
 
 __all__ = [
-    "FieldFilter",
+    "alias_generator_config",
     "create_filters",
     "create_filters_from_model",
 ]

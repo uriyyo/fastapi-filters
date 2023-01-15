@@ -8,13 +8,21 @@ from sqlalchemy import inspect, ARRAY
 from typing_extensions import TypeAlias
 
 from fastapi_filters import create_filters
+from fastapi_filters.config import ConfigVar
 from fastapi_filters.operators import FilterOperator
-from fastapi_filters.types import FilterValues, FilterAliasGenerator, FilterFieldDef, FiltersResolver, FilterPlace
+from fastapi_filters.types import (
+    FilterValues,
+    FilterAliasGenerator,
+    FilterFieldDef,
+    FiltersResolver,
+    FilterPlace,
+    AbstractFilterOperator,
+)
 
 TSelectable = TypeVar("TSelectable", bound=Select)
 
 
-DEFAULT_FILTERS: Mapping[FilterOperator, Callable[[Any, Any], Any]] = {
+DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
     FilterOperator.eq: operator.eq,
     FilterOperator.ne: operator.ne,
     FilterOperator.gt: operator.gt,
@@ -56,17 +64,34 @@ def _get_entity_namespace(stmt: TSelectable) -> EntityNamespace:
     return ns
 
 
+def _default_apply_filter(*_: Any) -> Any:
+    raise NotImplementedError
+
+
+custom_apply_filter: ConfigVar[
+    Callable[[TSelectable, EntityNamespace, str, AbstractFilterOperator, Any], TSelectable]
+] = ConfigVar(
+    "apply_filter",
+    default=_default_apply_filter,
+)
+
+
 def _apply_filter(
     stmt: TSelectable,
     ns: EntityNamespace,
     field: str,
-    op: FilterOperator,
+    op: AbstractFilterOperator,
     val: Any,
 ) -> TSelectable:
+    custom_apply_filter_impl = custom_apply_filter.get()
+
     try:
-        cond = DEFAULT_FILTERS[op](ns[field], val)
-    except KeyError:
-        raise NotImplementedError(f"Operator {op} is not implemented")
+        cond = custom_apply_filter_impl(stmt, ns, field, op, val)
+    except NotImplementedError:
+        try:
+            cond = DEFAULT_FILTERS[op](ns[field], val)
+        except KeyError:
+            raise NotImplementedError(f"Operator {op} is not implemented") from None
 
     return cast(TSelectable, stmt.where(cond))
 
@@ -74,10 +99,16 @@ def _apply_filter(
 def apply_filters(
     stmt: TSelectable,
     filters: FilterValues,
+    *,
+    remapping: Optional[Mapping[str, str]] = None,
+    additional: Optional[EntityNamespace] = None,
 ) -> TSelectable:
-    ns = _get_entity_namespace(stmt)
+    remapping = remapping or {}
+    ns = {**_get_entity_namespace(stmt), **(additional or {})}
 
     for field, field_filters in filters.items():
+        field = remapping.get(field, field)
+
         for op, val in field_filters.items():
             stmt = _apply_filter(stmt, ns, field, op, val)
 
@@ -107,10 +138,12 @@ def create_filters_from_orm(
     include_fk: bool = False,
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
+    remapping: Optional[Mapping[str, str]] = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
     inspected = inspect(obj, raiseerr=True)
 
+    remapping = remapping or {}
     if include is None:
         include = {*inspected.mapper.attrs.keys()}
     if exclude is None:
@@ -118,6 +151,8 @@ def create_filters_from_orm(
 
     fields = {}
     for name, column in inspected.mapper.attrs.items():
+        name = remapping.get(name, name)
+
         if name not in include or name in exclude:
             continue
 
@@ -137,7 +172,8 @@ def create_filters_from_orm(
 
 
 __all__ = [
-    "adapt_sqlalchemy_column_type",
+    "custom_apply_filter",
     "apply_filters",
+    "adapt_sqlalchemy_column_type",
     "create_filters_from_orm",
 ]

@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Type, Any, Optional, List
+from typing import Type, Any, Optional, List, TYPE_CHECKING
 
 from .operators import FilterOperator, get_filter_operators
 from .utils import is_seq
+
+if TYPE_CHECKING:
+    from .types import AbstractFilterOperator
 
 
 @dataclass
 class FieldFilter:
     type: Type[Any]
-    operators: Optional[List[FilterOperator]] = None
-    default_op: Optional[FilterOperator] = None
+    operators: Optional[List[AbstractFilterOperator]] = None
+    default_op: Optional[AbstractFilterOperator] = None
 
     def __post_init__(self) -> None:
         if self.operators is None:

@@ -1,9 +1,16 @@
+from __future__ import annotations
 from datetime import date, datetime, timedelta
 from enum import Enum
-from typing import Iterator
+from typing import Iterator, Container, Callable, TYPE_CHECKING
 
 from pydantic.utils import lenient_issubclass
+
+from .config import ConfigVar
 from .utils import is_seq, is_optional, unwrap_type, unwrap_optional_type
+
+
+if TYPE_CHECKING:
+    from .types import AbstractFilterOperator
 
 
 class FilterOperator(str, Enum):
@@ -58,7 +65,7 @@ SEQ_OPERATORS = [
 ]
 
 
-def get_filter_operators(t: type) -> Iterator[FilterOperator]:
+def default_filter_operators_generator(t: type) -> Iterator[AbstractFilterOperator]:
     if is_optional(t):
         t = unwrap_optional_type(t)
         yield FilterOperator.is_null
@@ -82,11 +89,33 @@ def get_filter_operators(t: type) -> Iterator[FilterOperator]:
         yield from NUMERIC_OPERATORS
 
 
+disabled_filters_config: ConfigVar[Container[AbstractFilterOperator]] = ConfigVar(
+    "disabled_filters",
+    default=(),
+)
+filter_operators_generator_config: ConfigVar[Callable[[type], Iterator[AbstractFilterOperator]]] = ConfigVar(
+    "filter_operators_generator",
+    default=default_filter_operators_generator,
+)
+
+
+def get_filter_operators(t: type) -> Iterator[AbstractFilterOperator]:
+    disabled = disabled_filters_config.get()
+    operator_generator = filter_operators_generator_config.get()
+
+    for op in operator_generator(t):
+        if op not in disabled:
+            yield op
+
+
 __all__ = [
     "SEQ_OPERATORS",
     "DEFAULT_OPERATORS",
     "NUMERIC_OPERATORS",
     "STRING_OPERATORS",
     "FilterOperator",
+    "default_filter_operators_generator",
     "get_filter_operators",
+    "disabled_filters_config",
+    "filter_operators_generator_config",
 ]

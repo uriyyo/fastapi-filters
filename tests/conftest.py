@@ -8,6 +8,8 @@ from pytest import Function
 from pytest import fixture
 from pytest_asyncio import fixture as async_fixture
 
+import fastapi_filters.configs  # noqa
+
 
 def pytest_collection_modifyitems(items):
     items.sort(key=lambda it: (it.path, it.name))
