@@ -1,15 +1,16 @@
 import operator
 from contextlib import suppress
-from typing import TypeVar, Mapping, Any, Callable, cast, Optional, Container, List
+from typing import TypeVar, Mapping, Any, Callable, cast, Optional, Container, List, Iterator, Tuple
 
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.sql.selectable import Select
-from sqlalchemy import inspect, ARRAY
+from sqlalchemy import inspect, ARRAY, asc, desc
 from typing_extensions import TypeAlias
 
 from fastapi_filters import create_filters
 from fastapi_filters.config import ConfigVar
 from fastapi_filters.operators import FilterOperator
+from fastapi_filters.sorters import create_sorting
 from fastapi_filters.types import (
     FilterValues,
     FilterAliasGenerator,
@@ -17,6 +18,9 @@ from fastapi_filters.types import (
     FiltersResolver,
     FilterPlace,
     AbstractFilterOperator,
+    SortingValues,
+    SortingDirection,
+    SortingResolver,
 )
 
 TSelectable = TypeVar("TSelectable", bound=Select)
@@ -41,7 +45,10 @@ DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
     FilterOperator.contains: lambda a, b: a.contains(b),
     FilterOperator.not_contains: lambda a, b: ~a.contains(b),
 }
-
+SORT_FUNCS: Mapping[SortingDirection, Callable[[Any], Any]] = {
+    "asc": asc,
+    "desc": desc,
+}
 
 EntityNamespace: TypeAlias = Mapping[str, Any]
 
@@ -115,6 +122,41 @@ def apply_filters(
     return stmt
 
 
+def apply_sorting(
+    stmt: TSelectable,
+    sorting: SortingValues,
+    *,
+    remapping: Optional[Mapping[str, str]] = None,
+    additional: Optional[EntityNamespace] = None,
+) -> TSelectable:
+    remapping = remapping or {}
+    ns = {**_get_entity_namespace(stmt), **(additional or {})}
+
+    for field, direction in sorting:
+        field = remapping.get(field, field)
+
+        if sort_func := SORT_FUNCS.get(direction):
+            stmt = cast(TSelectable, stmt.order_by(sort_func(ns[field])))
+        else:
+            raise ValueError(f"Unknown sorting direction {direction}")
+
+    return stmt
+
+
+def apply_filters_and_sorting(
+    stmt: TSelectable,
+    filters: FilterValues,
+    sorting: SortingValues,
+    *,
+    remapping: Optional[Mapping[str, str]] = None,
+    additional: Optional[EntityNamespace] = None,
+) -> TSelectable:
+    stmt = apply_filters(stmt, filters, remapping=remapping, additional=additional)
+    stmt = apply_sorting(stmt, sorting, remapping=remapping, additional=additional)
+
+    return stmt
+
+
 def adapt_sqlalchemy_column_type(column: ColumnProperty) -> FilterFieldDef:
     expr: Any = column.expression
 
@@ -130,17 +172,14 @@ def adapt_sqlalchemy_column_type(column: ColumnProperty) -> FilterFieldDef:
     return cast(FilterFieldDef, type_)
 
 
-def create_filters_from_orm(
+def _iter_over_orm_columns(
     obj: Any,
     *,
-    in_: Optional[FilterPlace] = None,
-    alias_generator: Optional[FilterAliasGenerator] = None,
     include_fk: bool = False,
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
     remapping: Optional[Mapping[str, str]] = None,
-    **overrides: FilterFieldDef,
-) -> FiltersResolver:
+) -> Iterator[Tuple[str, ColumnProperty]]:
     inspected = inspect(obj, raiseerr=True)
 
     remapping = remapping or {}
@@ -149,7 +188,6 @@ def create_filters_from_orm(
     if exclude is None:
         exclude = ()
 
-    fields = {}
     for name, column in inspected.mapper.attrs.items():
         name = remapping.get(name, name)
 
@@ -162,7 +200,30 @@ def create_filters_from_orm(
         if not include_fk and column.expression.foreign_keys:
             continue
 
-        fields[name] = adapt_sqlalchemy_column_type(column)
+        yield name, column
+
+
+def create_filters_from_orm(
+    obj: Any,
+    *,
+    in_: Optional[FilterPlace] = None,
+    alias_generator: Optional[FilterAliasGenerator] = None,
+    include_fk: bool = False,
+    include: Optional[Container[str]] = None,
+    exclude: Optional[Container[str]] = None,
+    remapping: Optional[Mapping[str, str]] = None,
+    **overrides: FilterFieldDef,
+) -> FiltersResolver:
+    fields = {
+        name: adapt_sqlalchemy_column_type(column)
+        for name, column in _iter_over_orm_columns(
+            obj,
+            include_fk=include_fk,
+            include=include,
+            exclude=exclude,
+            remapping=remapping,
+        )
+    }
 
     return create_filters(
         in_=in_,
@@ -171,9 +232,40 @@ def create_filters_from_orm(
     )
 
 
+def create_sorting_from_orm(
+    obj: Any,
+    *,
+    default: Optional[str] = None,
+    in_: Optional[FilterPlace] = None,
+    include_fk: bool = False,
+    include: Optional[Container[str]] = None,
+    exclude: Optional[Container[str]] = None,
+    remapping: Optional[Mapping[str, str]] = None,
+) -> SortingResolver:
+    fields = [
+        name
+        for name, _ in _iter_over_orm_columns(
+            obj,
+            include_fk=include_fk,
+            include=include,
+            exclude=exclude,
+            remapping=remapping,
+        )
+    ]
+
+    return create_sorting(
+        *fields,
+        in_=in_,
+        default=default,
+    )
+
+
 __all__ = [
     "custom_apply_filter",
     "apply_filters",
+    "apply_sorting",
+    "apply_filters_and_sorting",
     "adapt_sqlalchemy_column_type",
     "create_filters_from_orm",
+    "create_sorting_from_orm",
 ]

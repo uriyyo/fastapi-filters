@@ -5,7 +5,13 @@ from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 
-from fastapi_filters.ext.sqlalchemy import apply_filters, create_filters_from_orm
+from fastapi_filters.ext.sqlalchemy import (
+    apply_filters,
+    create_filters_from_orm,
+    apply_sorting,
+    create_sorting_from_orm,
+    apply_filters_and_sorting,
+)
 from fastapi_filters.operators import FilterOperator
 
 Base = declarative_base()
@@ -141,6 +147,38 @@ def test_unknown_operator():
         apply_filters(stmt, {"name": {"unknown": "test"}})  # type: ignore
 
 
+def test_apply_sorting():
+    stmt = select(User)
+
+    sorted_stmt = apply_sorting(stmt, [("name", "asc"), ("age", "desc")])
+
+    assert _compile_expr(sorted_stmt) == _compile_expr(stmt.order_by(User.name.asc(), User.age.desc()))
+
+
+def test_apply_sorting_invalid_direction():
+    stmt = select(User)
+
+    with raises(ValueError, match=r"^Unknown sorting direction .*$"):
+        apply_sorting(stmt, [("name", "invalid")])  # type: ignore
+
+
+def test_apply_filtering_sorting():
+    stmt = select(User)
+
+    result_stmt = apply_filters_and_sorting(
+        stmt,
+        {
+            "name": {FilterOperator.eq: "test"},
+            "age": {FilterOperator.gt: 10},
+        },
+        [("name", "asc"), ("age", "desc")],
+    )
+
+    assert _compile_expr(result_stmt) == _compile_expr(
+        stmt.where(User.name == "test").where(User.age > 10).order_by(User.name.asc(), User.age.desc())
+    )
+
+
 def test_create_filters_from_orm():
     resolver = create_filters_from_orm(User, include={"age"})
 
@@ -181,4 +219,21 @@ def test_create_filters_from_orm():
         "languages__not_ov": ("languages", FilterOperator.not_ov),
         "languages__contains": ("languages", FilterOperator.contains),
         "languages__not_contains": ("languages", FilterOperator.not_contains),
+    }
+
+
+def test_create_sorting_from_orm():
+    resolver = create_sorting_from_orm(User)
+
+    assert resolver.__defs__ == {
+        "-id": ("id", "desc"),
+        "+id": ("id", "asc"),
+        "+age": ("age", "asc"),
+        "-age": ("age", "desc"),
+        "-created_at": ("created_at", "desc"),
+        "+created_at": ("created_at", "asc"),
+        "-languages": ("languages", "desc"),
+        "+languages": ("languages", "asc"),
+        "-name": ("name", "desc"),
+        "+name": ("name", "asc"),
     }
