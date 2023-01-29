@@ -23,7 +23,7 @@ python = "^3.8"
 pydantic = "^1.10.4"
 fastapi = "^0.89.1"
 typing-extensions = "^4.4.0"
-sqlalchemy = { version = "^1.4.46", optional = true }
+sqlalchemy = { version = "^2.0.0", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
