@@ -23,7 +23,7 @@ from fastapi_filters.types import (
     SortingResolver,
 )
 
-TSelectable = TypeVar("TSelectable", bound=Select)
+TSelectable = TypeVar("TSelectable", bound=Select[Any])
 
 
 DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
@@ -100,7 +100,7 @@ def _apply_filter(
         except KeyError:
             raise NotImplementedError(f"Operator {op} is not implemented") from None
 
-    return cast(TSelectable, stmt.where(cond))
+    return stmt.where(cond)  # type: ignore[arg-type]
 
 
 def apply_filters(
@@ -136,7 +136,7 @@ def apply_sorting(
         field = remapping.get(field, field)
 
         if sort_func := SORT_FUNCS.get(direction):
-            stmt = cast(TSelectable, stmt.order_by(sort_func(ns[field])))
+            stmt = stmt.order_by(sort_func(ns[field]))
         else:
             raise ValueError(f"Unknown sorting direction {direction}")
 
@@ -157,7 +157,7 @@ def apply_filters_and_sorting(
     return stmt
 
 
-def adapt_sqlalchemy_column_type(column: ColumnProperty) -> FilterFieldDef:
+def adapt_sqlalchemy_column_type(column: ColumnProperty[Any]) -> FilterFieldDef:
     expr: Any = column.expression
 
     type_: Any
@@ -179,7 +179,7 @@ def _iter_over_orm_columns(
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
     remapping: Optional[Mapping[str, str]] = None,
-) -> Iterator[Tuple[str, ColumnProperty]]:
+) -> Iterator[Tuple[str, ColumnProperty[Any]]]:
     inspected = inspect(obj, raiseerr=True)
 
     remapping = remapping or {}
@@ -197,7 +197,7 @@ def _iter_over_orm_columns(
         if not isinstance(column, ColumnProperty):
             continue
 
-        if not include_fk and column.expression.foreign_keys:
+        if not include_fk and getattr(column.expression, "foreign_keys", None):
             continue
 
         yield name, column
