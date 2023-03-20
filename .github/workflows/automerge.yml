@@ -16,7 +16,7 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' && (github.event?.workflow_run?.conclusion ?? 'success') == 'success' }}
+    if: ${{ github.actor == 'dependabot[bot]' && (github.event.workflow_run.conclusion || 'success') == 'success' }}
 
     steps:
       - name: Enable auto-merge for Dependabot PRs
