@@ -1,13 +1,8 @@
 name: Dependabot auto-merge
 
-on:
-  workflow_run:
-    workflows: 
-      - "Test"
-    types:
-      - "completed"
-    branches:
-      - "dependabot/**"
+on: 
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,8 +11,7 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' && (github.event.workflow_run.conclusion || 'success') == 'success' }}
-
+    if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Enable auto-merge for Dependabot PRs
         run: gh pr merge --auto --merge "$PR_URL"
