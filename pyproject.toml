@@ -29,7 +29,7 @@ sqlalchemy = { version = "^2.0.0", optional = true }
 pytest = "^7.2.0"
 pytest-cov = "^4.0.0"
 pytest-asyncio = ">=0.20.3,<0.22.0"
-httpx = "^0.23.3"
+httpx = ">=0.23.3,<0.25.0"
 asgi-lifespan = "^2.0.0"
 ruff = ">=0.0.218,<0.0.262"
 mypy = ">=0.991,<1.3"
