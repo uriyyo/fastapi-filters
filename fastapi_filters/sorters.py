@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from .schemas import CSVList
 from .types import FilterPlace, SortingResolver, SortingValues
+from .utils import fields_include_exclude
 
 
 def create_sorting_from_model(
@@ -15,17 +16,10 @@ def create_sorting_from_model(
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
 ) -> SortingResolver:
-    if include is None:
-        include = {*model.__fields__}
-    if exclude is None:
-        exclude = ()
+    checker = fields_include_exclude(model.__fields__, include, exclude)
 
     return create_sorting(
-        *[
-            name
-            for name, field in model.__fields__.items()
-            if name in include and name not in exclude and not field.is_complex()
-        ],
+        *[name for name, field in model.__fields__.items() if checker(name) and not field.is_complex()],
         in_=in_,
         default=default,
     )

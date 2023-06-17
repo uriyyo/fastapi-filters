@@ -26,7 +26,7 @@ from .types import (
     FilterPlace,
     AbstractFilterOperator,
 )
-from .utils import async_safe, is_seq, unwrap_seq_type
+from .utils import async_safe, is_seq, unwrap_seq_type, fields_include_exclude
 from .fields import FieldFilter
 
 
@@ -76,20 +76,13 @@ def create_filters_from_model(
     exclude: Optional[Container[str]] = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
-    if include is None:
-        include = {*model.__fields__}
-    if exclude is None:
-        exclude = ()
+    checker = fields_include_exclude(model.__fields__, include, exclude)
 
     return create_filters(
         in_=in_,
         alias_generator=alias_generator,
         **{
-            **{
-                name: field.outer_type_
-                for name, field in model.__fields__.items()
-                if name in include and name not in exclude
-            },
+            **{name: field.outer_type_ for name, field in model.__fields__.items() if checker(name)},
             **(overrides or {}),
         },
     )

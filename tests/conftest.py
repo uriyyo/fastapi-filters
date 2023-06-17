@@ -1,4 +1,3 @@
-from asyncio import new_event_loop
 from inspect import iscoroutinefunction
 
 from asgi_lifespan import LifespanManager
@@ -17,11 +16,6 @@ def pytest_collection_modifyitems(items):
     for item in items:
         if isinstance(item, Function) and iscoroutinefunction(item.obj):
             item.add_marker("asyncio")
-
-
-@fixture(scope="session")
-def event_loop():
-    return new_event_loop()
 
 
 @fixture

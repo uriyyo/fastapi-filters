@@ -22,6 +22,7 @@ from fastapi_filters.types import (
     SortingDirection,
     SortingResolver,
 )
+from fastapi_filters.utils import fields_include_exclude
 
 TSelectable = TypeVar("TSelectable", bound=Select[Any])
 
@@ -183,15 +184,12 @@ def _iter_over_orm_columns(
     inspected = inspect(obj, raiseerr=True)
 
     remapping = remapping or {}
-    if include is None:
-        include = {*inspected.mapper.attrs.keys()}
-    if exclude is None:
-        exclude = ()
+    checker = fields_include_exclude(inspected.mapper.attrs.keys(), include, exclude)
 
     for name, column in inspected.mapper.attrs.items():
         name = remapping.get(name, name)
 
-        if name not in include or name in exclude:
+        if not checker(name):
             continue
 
         if not isinstance(column, ColumnProperty):

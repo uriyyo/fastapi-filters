@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Awaitable, Callable, TypeVar, Sequence, Any, Union
+from typing import Awaitable, Callable, TypeVar, Sequence, Any, Union, Iterable, Optional, Container
 
 from pydantic.utils import lenient_issubclass
 from pydantic.typing import is_union, get_args, is_none_type, get_origin
@@ -58,6 +58,22 @@ def unwrap_type(tp: Any) -> Any:
     return tp
 
 
+def fields_include_exclude(
+    fields: Iterable[str],
+    include: Optional[Container[str]] = None,
+    exclude: Optional[Container[str]] = None,
+) -> Callable[[str], bool]:
+    if include is None:
+        include = {*fields}
+    if exclude is None:
+        exclude = ()
+
+    def checker(field: str) -> bool:
+        return field in include and field not in exclude  # type: ignore[operator]
+
+    return checker
+
+
 __all__ = [
     "async_safe",
     "is_seq",
@@ -65,4 +81,5 @@ __all__ = [
     "unwrap_type",
     "unwrap_optional_type",
     "unwrap_seq_type",
+    "fields_include_exclude",
 ]
