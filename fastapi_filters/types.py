@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Any, Protocol, Tuple, Type, Callable, Union, Literal, List
+from typing import Dict, Any, Protocol, Tuple, Type, Callable, Union, Literal, List, Optional
 from typing_extensions import TypeAlias
 
 from .fields import FieldFilter
@@ -20,12 +20,13 @@ class FiltersResolver(Protocol):
 
 
 SortingDirection: TypeAlias = Literal["asc", "desc"]
-SortingValues: TypeAlias = List[Tuple[str, SortingDirection]]
+SortingNulls: TypeAlias = Optional[Literal["bigger", "smaller"]]
+SortingValues: TypeAlias = List[Tuple[str, SortingDirection, SortingNulls]]
 
 
 class SortingResolver(Protocol):
     __tp__: Any
-    __defs__: Dict[str, Tuple[str, SortingDirection]]
+    __defs__: Dict[str, Tuple[str, SortingDirection, SortingNulls]]
 
     async def __call__(self, _: Any, /) -> SortingValues:  # pragma: no cover
         pass
@@ -39,6 +40,7 @@ __all__ = [
     "FilterValues",
     "FiltersResolver",
     "SortingDirection",
+    "SortingNulls",
     "SortingValues",
     "SortingResolver",
 ]

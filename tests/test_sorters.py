@@ -20,19 +20,19 @@ async def test_filters_as_dep(app, client):
     res = await client.get("/", params={"sort": "+name,-age"})
 
     assert res.status_code == status.HTTP_200_OK
-    assert res.json() == [["name", "asc"], ["age", "desc"]]
+    assert res.json() == [["name", "asc", None], ["age", "desc", None]]
 
 
 def test_create_sorting():
     model = create_sorting("name", "age", "created_at")
 
     assert model.__defs__ == {
-        "+age": ("age", "asc"),
-        "-age": ("age", "desc"),
-        "+name": ("name", "asc"),
-        "-name": ("name", "desc"),
-        "+created_at": ("created_at", "asc"),
-        "-created_at": ("created_at", "desc"),
+        "+age": ("age", "asc", None),
+        "-age": ("age", "desc", None),
+        "+name": ("name", "asc", None),
+        "-name": ("name", "desc", None),
+        "+created_at": ("created_at", "asc", None),
+        "-created_at": ("created_at", "desc", None),
     }
 
 
@@ -52,12 +52,12 @@ def test_create_sorting_from_model():
     model = create_sorting_from_model(User)
 
     assert model.__defs__ == {
-        "+age": ("age", "asc"),
-        "-age": ("age", "desc"),
-        "+name": ("name", "asc"),
-        "-name": ("name", "desc"),
-        "+created_at": ("created_at", "asc"),
-        "-created_at": ("created_at", "desc"),
+        "+age": ("age", "asc", None),
+        "-age": ("age", "desc", None),
+        "+name": ("name", "asc", None),
+        "-name": ("name", "desc", None),
+        "+created_at": ("created_at", "asc", None),
+        "-created_at": ("created_at", "desc", None),
     }
 
 

@@ -4,7 +4,7 @@ from typing import TypeVar, Mapping, Any, Callable, cast, Optional, Container, L
 
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.sql.selectable import Select
-from sqlalchemy import inspect, ARRAY, asc, desc
+from sqlalchemy import inspect, ARRAY, asc, desc, nulls_last, nulls_first, ColumnExpressionArgument
 from typing_extensions import TypeAlias
 
 from fastapi_filters import create_filters
@@ -21,6 +21,7 @@ from fastapi_filters.types import (
     SortingValues,
     SortingDirection,
     SortingResolver,
+    SortingNulls,
 )
 from fastapi_filters.utils import fields_include_exclude
 
@@ -46,9 +47,21 @@ DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
     FilterOperator.contains: lambda a, b: a.contains(b),
     FilterOperator.not_contains: lambda a, b: ~a.contains(b),
 }
-SORT_FUNCS: Mapping[SortingDirection, Callable[[Any], Any]] = {
+SORT_FUNCS: Mapping[
+    SortingDirection,
+    Callable[[ColumnExpressionArgument[Any]], ColumnExpressionArgument[Any]],
+] = {
     "asc": asc,
     "desc": desc,
+}
+SORT_NULLS_FUNCS: Mapping[
+    Tuple[SortingDirection, SortingNulls],
+    Callable[[ColumnExpressionArgument[Any]], ColumnExpressionArgument[Any]],
+] = {
+    ("asc", "bigger"): nulls_last,
+    ("asc", "smaller"): nulls_first,
+    ("desc", "bigger"): nulls_first,
+    ("desc", "smaller"): nulls_last,
 }
 
 EntityNamespace: TypeAlias = Mapping[str, Any]
@@ -133,11 +146,16 @@ def apply_sorting(
     remapping = remapping or {}
     ns = {**_get_entity_namespace(stmt), **(additional or {})}
 
-    for field, direction in sorting:
+    for field, direction, nulls in sorting:
         field = remapping.get(field, field)
 
         if sort_func := SORT_FUNCS.get(direction):
-            stmt = stmt.order_by(sort_func(ns[field]))
+            sort_expr = sort_func(ns[field])
+
+            if nulls is not None:
+                sort_expr = SORT_NULLS_FUNCS[(direction, nulls)](sort_expr)
+
+            stmt = stmt.order_by(sort_expr)
         else:
             raise ValueError(f"Unknown sorting direction {direction}")
 
