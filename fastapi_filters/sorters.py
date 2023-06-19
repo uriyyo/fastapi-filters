@@ -1,10 +1,10 @@
-from typing import Literal, Optional, cast, Type, Container
+from typing import Literal, Optional, cast, Type, Container, Union, Tuple
 
 from fastapi import Query
 from pydantic import BaseModel
 
 from .schemas import CSVList
-from .types import FilterPlace, SortingResolver, SortingValues
+from .types import FilterPlace, SortingResolver, SortingValues, SortingNulls
 from .utils import fields_include_exclude
 
 
@@ -26,20 +26,22 @@ def create_sorting_from_model(
 
 
 def create_sorting(
-    *fields: str,
+    *fields: Union[str, Tuple[str, SortingNulls]],
     in_: Optional[FilterPlace] = None,
     default: Optional[str] = None,
 ) -> SortingResolver:
     if in_ is None:
         in_ = Query
 
-    defs = {f"{d}{f}": (f, v) for (v, d) in (("asc", "+"), ("desc", "-")) for f in fields}
+    normalized_fields = [(f, None) if isinstance(f, str) else f for f in fields]
+
+    defs = {f"{d}{f}": (f, v, n) for (v, d) in (("asc", "+"), ("desc", "-")) for f, n in normalized_fields}
     tp = Literal[tuple(defs)]  # type: ignore
 
     if default and default not in defs:
-        raise ValueError(f"Default sort field {default} is not in {fields}")
+        raise ValueError(f"Default sort field {default} is not in {','.join(f for f, _ in normalized_fields)}")
 
-    async def _get_sorters(sort: CSVList[str] = in_(default)) -> SortingValues:  # type: ignore
+    async def _get_sorters(sort: CSVList[tp] = in_(default)) -> SortingValues:  # type: ignore
         return cast(SortingValues, [defs[f] for f in sort or ()])
 
     _get_sorters.__tp__ = tp  # type: ignore
