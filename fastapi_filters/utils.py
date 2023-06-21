@@ -69,7 +69,7 @@ def fields_include_exclude(
         exclude = ()
 
     def checker(field: str) -> bool:
-        return field in include and field not in exclude  # type: ignore[operator]
+        return field in include and field not in exclude
 
     return checker
 
