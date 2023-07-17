@@ -35,7 +35,7 @@ ruff = ">=0.0.218,<0.0.279"
 mypy = ">=0.991,<1.5"
 black = ">=22.12,<24.0"
 pre-commit = ">=2.21,<4.0"
-uvicorn = ">=0.20,<0.23"
+uvicorn = ">=0.20,<0.24"
 
 [tool.poetry.extras]
 sqlalchemy = ["sqlalchemy"]
