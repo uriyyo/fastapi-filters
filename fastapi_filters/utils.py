@@ -1,9 +1,10 @@
 from functools import wraps
-from typing import Awaitable, Callable, TypeVar, Sequence, Any, Union, Iterable, Optional, Container
+from typing import Awaitable, Callable, TypeVar, Sequence, Any, Union, Iterable, Optional, Container, Literal
 
-from pydantic.utils import lenient_issubclass
-from pydantic.typing import is_union, get_args, is_none_type, get_origin
-from typing_extensions import ParamSpec
+from fastapi._compat import field_annotation_is_complex
+from pydantic.fields import FieldInfo
+from typing_extensions import ParamSpec, get_args, get_origin
+from typing_inspect import is_union_type
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -17,8 +18,12 @@ def async_safe(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
     return wrapper
 
 
+def is_none_type(tp: Any) -> bool:
+    return tp in {None, type(None), Literal[None]}
+
+
 def is_optional(tp: Any) -> bool:
-    return is_union(get_origin(tp)) and any(is_none_type(arg) for arg in get_args(tp))
+    return is_union_type(get_origin(tp)) and any(is_none_type(arg) for arg in get_args(tp))
 
 
 def is_seq(tp: Any) -> bool:
@@ -74,10 +79,20 @@ def fields_include_exclude(
     return checker
 
 
+def is_complex_field(field: FieldInfo) -> bool:
+    return field_annotation_is_complex(field.annotation)
+
+
+def lenient_issubclass(tp: Any, sub: Any) -> bool:
+    return isinstance(tp, type) and issubclass(tp, sub)
+
+
 __all__ = [
     "async_safe",
     "is_seq",
     "is_optional",
+    "is_complex_field",
+    "lenient_issubclass",
     "unwrap_type",
     "unwrap_optional_type",
     "unwrap_seq_type",

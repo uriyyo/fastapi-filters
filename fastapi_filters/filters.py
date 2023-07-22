@@ -14,6 +14,8 @@ from typing import (
 
 from fastapi import Query, Depends
 from pydantic import BaseModel
+from pydantic.fields import FieldInfo
+from typing_extensions import Annotated
 
 from .config import ConfigVar
 from .schemas import CSVList
@@ -76,13 +78,19 @@ def create_filters_from_model(
     exclude: Optional[Container[str]] = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
-    checker = fields_include_exclude(model.__fields__, include, exclude)
+    checker = fields_include_exclude(model.model_fields, include, exclude)
+
+    def _get_type(f: FieldInfo) -> Any:
+        if f.metadata:
+            return Annotated[tuple([f.annotation, *f.metadata])]
+
+        return f.annotation
 
     return create_filters(
         in_=in_,
         alias_generator=alias_generator,
         **{
-            **{name: field.outer_type_ for name, field in model.__fields__.items() if checker(name)},
+            **{name: _get_type(field) for name, field in model.model_fields.items() if checker(name)},
             **(overrides or {}),
         },
     )
@@ -112,7 +120,11 @@ def create_filters(
     filter_model = make_dataclass(
         "Filters",
         [
-            (fname, adapt_type(tp, op), dataclass_field(default=in_(None, alias=alias)))
+            (
+                fname,
+                new_tp := adapt_type(tp, op),
+                dataclass_field(default=in_(None, alias=alias, annotation=new_tp)),
+            )
             for _, fname, tp, alias, op in fields_defs
         ],
     )
