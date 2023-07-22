@@ -11,7 +11,7 @@ from pytest import fixture
 def app(app):
     @app.get("/")
     def route(
-        q1: CSVList[int] = Query(None),
+        q1: CSVList[int] = Query(None, annotation=CSVList[int]),  # FIXME: looks like FastAPI bug
         q2: List[int] = Query(None),
     ):
         return []

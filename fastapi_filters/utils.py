@@ -1,8 +1,10 @@
 from functools import wraps
 from typing import Awaitable, Callable, TypeVar, Sequence, Any, Union, Iterable, Optional, Container
 
-from pydantic.utils import lenient_issubclass
-from pydantic.typing import is_union, get_args, is_none_type, get_origin
+from fastapi._compat import field_annotation_is_complex
+from pydantic.fields import FieldInfo
+from pydantic.v1.utils import lenient_issubclass
+from pydantic.v1.typing import is_union, get_args, is_none_type, get_origin
 from typing_extensions import ParamSpec
 
 P = ParamSpec("P")
@@ -74,10 +76,16 @@ def fields_include_exclude(
     return checker
 
 
+def is_complex_field(field: FieldInfo) -> bool:
+    return field_annotation_is_complex(field.annotation)
+
+
 __all__ = [
     "async_safe",
     "is_seq",
     "is_optional",
+    "is_complex_field",
+    "lenient_issubclass",
     "unwrap_type",
     "unwrap_optional_type",
     "unwrap_seq_type",

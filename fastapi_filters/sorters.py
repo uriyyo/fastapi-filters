@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from .schemas import CSVList
 from .types import FilterPlace, SortingResolver, SortingValues, SortingNulls
-from .utils import fields_include_exclude
+from .utils import fields_include_exclude, is_complex_field
 
 
 def create_sorting_from_model(
@@ -16,10 +16,10 @@ def create_sorting_from_model(
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
 ) -> SortingResolver:
-    checker = fields_include_exclude(model.__fields__, include, exclude)
+    checker = fields_include_exclude(model.model_fields, include, exclude)
 
     return create_sorting(
-        *[name for name, field in model.__fields__.items() if checker(name) and not field.is_complex()],
+        *[name for name, field in model.model_fields.items() if checker(name) and not is_complex_field(field)],
         in_=in_,
         default=default,
     )
@@ -41,7 +41,7 @@ def create_sorting(
     if default and default not in defs:
         raise ValueError(f"Default sort field {default} is not in {','.join(f for f, _ in normalized_fields)}")
 
-    async def _get_sorters(sort: CSVList[tp] = in_(default)) -> SortingValues:  # type: ignore
+    async def _get_sorters(sort: CSVList[tp] = in_(default, annotation=CSVList[tp])) -> SortingValues:  # type: ignore
         return cast(SortingValues, [defs[f] for f in sort or ()])
 
     _get_sorters.__tp__ = tp  # type: ignore

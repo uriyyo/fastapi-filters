@@ -3,10 +3,8 @@ from datetime import date, datetime, timedelta
 from enum import Enum
 from typing import Iterator, Container, Callable, TYPE_CHECKING
 
-from pydantic.utils import lenient_issubclass
-
 from .config import ConfigVar
-from .utils import is_seq, is_optional, unwrap_type, unwrap_optional_type
+from .utils import is_seq, is_optional, unwrap_type, unwrap_optional_type, lenient_issubclass
 
 
 if TYPE_CHECKING:

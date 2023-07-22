@@ -1,8 +1,10 @@
 from fastapi import Query, status
-from pydantic import parse_obj_as, ValidationError
+from pydantic import ValidationError
 from pytest import raises
 
 from fastapi_filters.schemas import CSVList
+
+from .utils import parse_obj_as
 
 
 def test_csv_list():
@@ -17,9 +19,11 @@ def test_csv_list_errors():
 
     assert exc.value.errors() == [
         {
-            "loc": ("__root__", 0),
-            "msg": "value is not a valid integer",
-            "type": "type_error.integer",
+            "input": "abc",
+            "loc": (0,),
+            "msg": "Input should be a valid integer, unable to parse string as an integer",
+            "type": "int_parsing",
+            "url": "https://errors.pydantic.dev/2.0.3/v/int_parsing",
         }
     ]
 
@@ -40,9 +44,11 @@ async def test_csv_list_as_query_param(app, client):
     assert res.json() == {
         "detail": [
             {
-                "loc": ["query", "q", 1],
-                "msg": "value is not a valid integer",
-                "type": "type_error.integer",
+                "input": "1,abc",
+                "loc": ["query", "q", 0],
+                "msg": "Input should be a valid integer, unable to parse string as an integer",
+                "type": "int_parsing",
+                "url": "https://errors.pydantic.dev/2.0.3/v/int_parsing",
             },
         ]
     }

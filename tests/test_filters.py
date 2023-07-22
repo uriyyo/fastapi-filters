@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional, List
 
 from fastapi import Depends, status
 from pydantic import BaseModel
