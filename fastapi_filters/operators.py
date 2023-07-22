@@ -4,8 +4,7 @@ from enum import Enum
 from typing import Iterator, Container, Callable, TYPE_CHECKING
 
 from .config import ConfigVar
-from .utils import is_seq, is_optional, unwrap_type, unwrap_optional_type, lenient_issubclass
-
+from .utils import is_seq, is_optional, unwrap_type, unwrap_optional_type, lenient_issubclass, unwrap_annotated
 
 if TYPE_CHECKING:
     from .types import AbstractFilterOperator
@@ -64,6 +63,8 @@ SEQ_OPERATORS = [
 
 
 def default_filter_operators_generator(t: type) -> Iterator[AbstractFilterOperator]:
+    t = unwrap_annotated(t)
+
     if is_optional(t):
         t = unwrap_optional_type(t)
         yield FilterOperator.is_null

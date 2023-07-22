@@ -1,7 +1,8 @@
 from typing import Optional, List
 
 from fastapi import Depends, status
-from pydantic import BaseModel
+from pydantic import BaseModel, BeforeValidator
+from typing_extensions import Annotated
 
 from fastapi_filters import create_filters, FieldFilter, create_filters_from_model, FilterValues, FilterOperator
 
@@ -76,7 +77,7 @@ async def test_filters(app):
 async def test_filters_from_model(app):
     class UserModel(BaseModel):
         id: int
-        name: str
+        name: Annotated[str, BeforeValidator(lambda v: v)]
         is_active: bool
 
     assert create_filters_from_model(UserModel).__defs__ == {

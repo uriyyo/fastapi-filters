@@ -5,7 +5,7 @@ from fastapi._compat import field_annotation_is_complex
 from pydantic.fields import FieldInfo
 from pydantic.v1.utils import lenient_issubclass
 from pydantic.v1.typing import is_union, get_args, is_none_type, get_origin
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, Annotated
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -60,6 +60,13 @@ def unwrap_type(tp: Any) -> Any:
     return tp
 
 
+def unwrap_annotated(tp: Any) -> Any:
+    if get_origin(tp) is Annotated:  # type: ignore
+        return tp.__origin__
+
+    return tp
+
+
 def fields_include_exclude(
     fields: Iterable[str],
     include: Optional[Container[str]] = None,
@@ -87,6 +94,7 @@ __all__ = [
     "is_complex_field",
     "lenient_issubclass",
     "unwrap_type",
+    "unwrap_annotated",
     "unwrap_optional_type",
     "unwrap_seq_type",
     "fields_include_exclude",
