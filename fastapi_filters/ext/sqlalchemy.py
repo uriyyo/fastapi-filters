@@ -8,7 +8,7 @@ from sqlalchemy import inspect, ARRAY, asc, desc, nulls_last, nulls_first, Colum
 from typing_extensions import TypeAlias
 
 from fastapi_filters import create_filters
-from fastapi_filters.filters_decl import FiltersDecl
+from fastapi_filters.cls_decl import FiltersDecl
 from fastapi_filters.config import ConfigVar
 from fastapi_filters.operators import FilterOperator
 from fastapi_filters.sorters import create_sorting

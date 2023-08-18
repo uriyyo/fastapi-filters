@@ -16,33 +16,35 @@ class FilterOp:
     value: Any
 
 
-def simple_op(operator: AbstractFilterOperator) -> Callable[[FilterOpBuilderMixin, Any], FilterOp]:
-    def func(self: FilterOpBuilderMixin, value: Any) -> FilterOp:
+def _simple_op(operator: AbstractFilterOperator) -> Callable[[_HasNameAndOperatorsProtocol, Any], FilterOp]:
+    def func(self: _HasNameAndOperatorsProtocol, value: Any) -> FilterOp:
         self.check_op(operator)
-        return FilterOp(self.name, operator, value)
+        return FilterOp(self.name, operator, value)  # type: ignore
 
     return func
 
 
-class _HasNameAdnOperators(Protocol):
+class _HasNameAndOperatorsProtocol(Protocol):
     name: str | None
     operators: list[AbstractFilterOperator] | None
 
+    def check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
+        pass
 
-@dataclass(frozen=True)
+
 class FilterOpBuilderMixin:
-    name: str
-    operators: list[AbstractFilterOperator]
+    def check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
+        assert self.operators is not None, "FilterField must be assigned to a class attribute"
+        assert self.name is not None, "FilterField must be assigned to a class attribute"
 
-    def check_op(self, operator: AbstractFilterOperator) -> None:
-        assert operator in self.operators, f"Operator {operator} is not allowed for {self.name}"
+        assert operator in self.operators, f"Operator {operator} is not allowed for field {self.name!r}"
 
-    __eq__ = simple_op(FilterOperator.eq)  # type: ignore
-    __ne__ = simple_op(FilterOperator.ne)  # type: ignore
-    __lt__ = simple_op(FilterOperator.lt)
-    __le__ = simple_op(FilterOperator.le)
-    __gt__ = simple_op(FilterOperator.gt)
-    __ge__ = simple_op(FilterOperator.ge)
+    __eq__ = _simple_op(FilterOperator.eq)  # type: ignore
+    __ne__ = _simple_op(FilterOperator.ne)  # type: ignore
+    __lt__ = _simple_op(FilterOperator.lt)
+    __le__ = _simple_op(FilterOperator.le)
+    __gt__ = _simple_op(FilterOperator.gt)
+    __ge__ = _simple_op(FilterOperator.ge)
 
     eq = __eq__  # type: ignore
     ne = __ne__  # type: ignore
@@ -51,22 +53,22 @@ class FilterOpBuilderMixin:
     gt = __gt__
     ge = __ge__
 
-    in_ = simple_op(FilterOperator.in_)
-    not_in = simple_op(FilterOperator.not_in)
+    in_ = _simple_op(FilterOperator.in_)
+    not_in = _simple_op(FilterOperator.not_in)
 
-    like = simple_op(FilterOperator.like)
-    not_like = simple_op(FilterOperator.not_like)
-    ilike = simple_op(FilterOperator.ilike)
+    like = _simple_op(FilterOperator.like)
+    not_like = _simple_op(FilterOperator.not_like)
+    ilike = _simple_op(FilterOperator.ilike)
 
-    is_null = simple_op(FilterOperator.is_null)
+    is_null = _simple_op(FilterOperator.is_null)
 
-    ov = simple_op(FilterOperator.ov)
-    not_ov = simple_op(FilterOperator.not_ov)
-    contains = simple_op(FilterOperator.contains)
-    not_contains = simple_op(FilterOperator.not_contains)
+    ov = _simple_op(FilterOperator.ov)
+    not_ov = _simple_op(FilterOperator.not_ov)
+    contains = _simple_op(FilterOperator.contains)
+    not_contains = _simple_op(FilterOperator.not_contains)
 
 
-def ops_to_filter_values(*ops: FilterOp) -> FilterValues:
+def create_filters_from_ops(*ops: FilterOp) -> FilterValues:
     values: FilterValues = {}
     for op in ops:
         values.setdefault(op.name, {})
@@ -82,5 +84,5 @@ def ops_to_filter_values(*ops: FilterOp) -> FilterValues:
 __all__ = [
     "FilterOp",
     "FilterOpBuilderMixin",
-    "ops_to_filter_values",
+    "create_filters_from_ops",
 ]

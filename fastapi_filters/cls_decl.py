@@ -73,7 +73,7 @@ class FiltersDecl(metaclass=FiltersDeclMeta):
     def filter_values(self) -> FilterValues:
         return {key: val for key in self.__filter_specs__ if (val := getattr(self, key)) is not None}
 
-    def consume(self, field: str, operators: Optional[List[AbstractFilterOperator]] = None) -> Self:
+    def remove_op(self, field: str, operators: Optional[List[AbstractFilterOperator]] = None) -> Self:
         if not operators:
             setattr(self, field, None)
             return self
@@ -85,6 +85,9 @@ class FiltersDecl(metaclass=FiltersDeclMeta):
             setattr(self, field, None)
 
         return self
+
+    def has_op(self, field: str, operator: AbstractFilterOperator) -> bool:
+        return operator in (getattr(self, field, None) or {})
 
 
 __all__ = [

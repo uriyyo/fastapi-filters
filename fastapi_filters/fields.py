@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 T = TypeVar("T", covariant=True)
 
 
-@dataclass
-class FilterField(Generic[T]):
+@dataclass(eq=False, order=False)
+class FilterField(FilterOpBuilderMixin, Generic[T]):
     type: Optional[Type[T]] = None
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
@@ -38,16 +38,6 @@ class FilterField(Generic[T]):
 
         def __get__(self, instance: Optional[object], owner: Any) -> Any:
             pass
-
-    @property
-    def op(self) -> FilterOpBuilderMixin:
-        assert self.name is not None, "FilterField must be assigned to a class attribute"
-        assert self.operators is not None, "FilterField must be assigned to a class attribute"
-
-        return FilterOpBuilderMixin(
-            name=self.name,
-            operators=self.operators,
-        )
 
     def __set_name__(self, owner: Any, name: str) -> None:
         self.name = name
