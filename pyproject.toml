@@ -37,6 +37,7 @@ mypy = ">=0.991,<1.6"
 black = ">=22.12,<24.0"
 pre-commit = ">=2.21,<4.0"
 uvicorn = ">=0.20,<0.24"
+dirty-equals = "^0.6.0"
 
 [tool.poetry.extras]
 sqlalchemy = ["sqlalchemy"]

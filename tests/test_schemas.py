@@ -3,6 +3,7 @@ from pydantic import ValidationError
 from pytest import raises
 
 from fastapi_filters.schemas import CSVList
+from dirty_equals import IsPartialDict
 
 from .utils import parse_obj_as
 
@@ -18,13 +19,14 @@ def test_csv_list_errors():
         parse_obj_as(CSVList[int], "abc")
 
     assert exc.value.errors() == [
-        {
-            "input": "abc",
-            "loc": (0,),
-            "msg": "Input should be a valid integer, unable to parse string as an integer",
-            "type": "int_parsing",
-            "url": "https://errors.pydantic.dev/2.0.3/v/int_parsing",
-        }
+        IsPartialDict(
+            {
+                "input": "abc",
+                "loc": (0,),
+                "msg": "Input should be a valid integer, unable to parse string as an integer",
+                "type": "int_parsing",
+            }
+        )
     ]
 
 
@@ -43,12 +45,13 @@ async def test_csv_list_as_query_param(app, client):
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert res.json() == {
         "detail": [
-            {
-                "input": "1,abc",
-                "loc": ["query", "q", 0],
-                "msg": "Input should be a valid integer, unable to parse string as an integer",
-                "type": "int_parsing",
-                "url": "https://errors.pydantic.dev/2.0.3/v/int_parsing",
-            },
+            IsPartialDict(
+                {
+                    "input": "1,abc",
+                    "loc": ["query", "q", 0],
+                    "msg": "Input should be a valid integer, unable to parse string as an integer",
+                    "type": "int_parsing",
+                }
+            ),
         ]
     }
