@@ -9,6 +9,7 @@ from typing import (
     get_args,
     Dict,
     ClassVar,
+    Type,
 )
 
 from fastapi import Depends
@@ -21,7 +22,7 @@ from .types import AbstractFilterOperator, FilterValues
 T = TypeVar("T", covariant=True)
 
 
-class FiltersDeclMeta(type):
+class FilterSetMeta(type):
     def __init__(cls, name: str, bases: Any, namespace: Dict[str, Any], **kwargs: Any) -> None:
         super().__init__(name, bases, namespace, **kwargs)
 
@@ -53,21 +54,12 @@ class FiltersDeclMeta(type):
 @dataclass_transform(
     field_specifiers=(FilterField,),
 )
-class FiltersDecl(metaclass=FiltersDeclMeta):
+class FiltersSet(metaclass=FilterSetMeta):
     __filter_specs__: ClassVar[Dict[str, FilterField[Any]]]
 
     def __post_init__(self) -> None:
         if any(isinstance(val, FilterField) for val in asdict(self).values()):  # type: ignore
             raise TypeError("Filter values incorrectly initialized")
-
-    @classmethod
-    def to_dependency(cls) -> Callable[..., Awaitable[Self]]:
-        filters_dep = create_filters(**cls.__filter_specs__)  # type: ignore
-
-        async def resolver(values: FilterValues = Depends(filters_dep)) -> Self:
-            return cls(**{**dict.fromkeys(cls.__filter_specs__, None), **values})
-
-        return resolver
 
     @property
     def filter_values(self) -> FilterValues:
@@ -90,6 +82,19 @@ class FiltersDecl(metaclass=FiltersDeclMeta):
         return operator in (getattr(self, field, None) or {})
 
 
+TFiltersSet = TypeVar("TFiltersSet", bound=FiltersSet)
+
+
+def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awaitable[TFiltersSet]]:
+    filters_dep = create_filters(**filters_set.__filter_specs__)  # type: ignore
+
+    async def resolver(values: FilterValues = Depends(filters_dep)) -> TFiltersSet:
+        return filters_set(**{**dict.fromkeys(filters_set.__filter_specs__, None), **values})
+
+    return resolver
+
+
 __all__ = [
-    "FiltersDecl",
+    "FiltersSet",
+    "create_filters_from_set",
 ]
