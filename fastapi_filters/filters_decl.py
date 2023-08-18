@@ -1,22 +1,18 @@
 from dataclasses import dataclass, asdict, replace
 from typing import (
     TypeVar,
-    TYPE_CHECKING,
-    overload,
     Any,
-    Union,
     List,
     Optional,
     Callable,
     Awaitable,
-    Mapping,
     get_args,
     Dict,
     ClassVar,
 )
 
 from fastapi import Depends
-from typing_extensions import dataclass_transform, Protocol, Self, get_type_hints, get_origin
+from typing_extensions import dataclass_transform, Self, get_type_hints, get_origin
 
 from .fields import FieldFilter
 from .filters import create_filters
@@ -25,33 +21,14 @@ from .types import AbstractFilterOperator, FilterValues
 T = TypeVar("T", covariant=True)
 
 
-class FilterSpec(Protocol[T]):
-    if TYPE_CHECKING:
-
-        @overload
-        def __get__(self, instance: None, owner: Any) -> FieldFilter:
-            pass
-
-        @overload
-        def __get__(
-            self,
-            instance: object,
-            owner: Any,
-        ) -> Optional[Mapping[AbstractFilterOperator, Union[T, List[T], bool]]]:
-            pass
-
-        def __get__(self, instance: Optional[object], owner: Any) -> Any:
-            pass
-
-
 class FiltersDeclMeta(type):
     def __init__(cls, name: str, bases: Any, namespace: Dict[str, Any], **kwargs: Any) -> None:
         super().__init__(name, bases, namespace, **kwargs)
 
         hints = get_type_hints(cls)
-        specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FilterSpec}
+        specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FieldFilter}
 
-        cls.__filter_specs__: Dict[str, FieldFilter] = {}
+        cls.__filter_specs__: Dict[str, FieldFilter[Any]] = {}
         for base in bases:
             cls.__filter_specs__.update(getattr(base, "__filter_specs__", {}))
 
@@ -76,7 +53,7 @@ class FiltersDeclMeta(type):
     field_specifiers=(FieldFilter,),
 )
 class FiltersDecl(metaclass=FiltersDeclMeta):
-    __filter_specs__: ClassVar[Dict[str, FieldFilter]]
+    __filter_specs__: ClassVar[Dict[str, FieldFilter[Any]]]
 
     def __post_init__(self) -> None:
         if any(isinstance(val, FieldFilter) for val in asdict(self).values()):  # type: ignore
@@ -110,6 +87,5 @@ class FiltersDecl(metaclass=FiltersDeclMeta):
 
 
 __all__ = [
-    "FilterSpec",
     "FiltersDecl",
 ]

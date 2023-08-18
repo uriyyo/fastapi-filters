@@ -57,7 +57,7 @@ def adapt_type(tp: Type[Any], op: AbstractFilterOperator) -> Any:
 
 def field_filter_to_raw_fields(
     name: str,
-    field: FieldFilter,
+    field: FieldFilter[Any],
     alias_generator: Optional[FilterAliasGenerator] = None,
 ) -> Iterator[Tuple[str, Any, AbstractFilterOperator, Optional[str]]]:
     if alias_generator is None:
@@ -105,7 +105,7 @@ def create_filters(
     if in_ is None:
         in_ = Query
 
-    fields: Dict[str, FieldFilter] = {
+    fields: Dict[str, FieldFilter[Any]] = {
         name: f_def if isinstance(f_def, FieldFilter) else FieldFilter(f_def) for name, f_def in kwargs.items()
     }
 
