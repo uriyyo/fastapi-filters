@@ -14,6 +14,7 @@ FilterValues: TypeAlias = Dict[str, Dict[AbstractFilterOperator, Any]]
 class FiltersResolver(Protocol):
     __model__: Type[Any]
     __defs__: Dict[str, Tuple[str, AbstractFilterOperator]]
+    __filters__: Dict[str, FilterField[Any]]
 
     async def __call__(self, _: Any, /) -> FilterValues:  # pragma: no cover
         pass

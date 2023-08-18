@@ -141,6 +141,7 @@ def create_filters(
 
     _get_filters.__model__ = filter_model  # type: ignore[attr-defined]
     _get_filters.__defs__ = defs  # type: ignore[attr-defined]
+    _get_filters.__filters__ = fields  # type: ignore[attr-defined]
 
     return cast(FiltersResolver, _get_filters)
 

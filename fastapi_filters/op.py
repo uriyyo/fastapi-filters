@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable, Protocol
 from .operators import FilterOperator
 
 if TYPE_CHECKING:
-    from .types import AbstractFilterOperator, FilterValues
+    from .types import AbstractFilterOperator
 
 
 @dataclass(frozen=True)
@@ -18,9 +18,10 @@ class FilterOp:
 
 def _simple_op(operator: AbstractFilterOperator) -> Callable[[_HasNameAndOperatorsProtocol, Any], FilterOp]:
     def func(self: _HasNameAndOperatorsProtocol, value: Any) -> FilterOp:
-        self.check_op(operator)
+        self._check_op(operator)
         return FilterOp(self.name, operator, value)  # type: ignore
 
+    func.__name__ = operator.name
     return func
 
 
@@ -28,12 +29,12 @@ class _HasNameAndOperatorsProtocol(Protocol):
     name: str | None
     operators: list[AbstractFilterOperator] | None
 
-    def check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
+    def _check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
         pass
 
 
 class FilterOpBuilderMixin:
-    def check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
+    def _check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
         assert self.operators is not None, "FilterField must be assigned to a class attribute"
         assert self.name is not None, "FilterField must be assigned to a class attribute"
 
@@ -68,21 +69,7 @@ class FilterOpBuilderMixin:
     not_contains = _simple_op(FilterOperator.not_contains)
 
 
-def create_filters_from_ops(*ops: FilterOp) -> FilterValues:
-    values: FilterValues = {}
-    for op in ops:
-        values.setdefault(op.name, {})
-
-        if op.operator in values[op.name]:
-            raise ValueError(f"Duplicate operator {op.operator} for {op.name}")
-
-        values[op.name][op.operator] = op.value
-
-    return values
-
-
 __all__ = [
     "FilterOp",
     "FilterOpBuilderMixin",
-    "create_filters_from_ops",
 ]

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, asdict, replace
 from typing import (
     TypeVar,
@@ -17,7 +19,8 @@ from typing_extensions import dataclass_transform, Self, get_type_hints, get_ori
 
 from .fields import FilterField
 from .filters import create_filters
-from .types import AbstractFilterOperator, FilterValues
+from .op import FilterOp
+from .types import AbstractFilterOperator, FilterValues, FiltersResolver
 
 T = TypeVar("T", covariant=True)
 
@@ -54,16 +57,38 @@ class FilterSetMeta(type):
 @dataclass_transform(
     field_specifiers=(FilterField,),
 )
-class FiltersSet(metaclass=FilterSetMeta):
+class FilterSet(metaclass=FilterSetMeta):
     __filter_specs__: ClassVar[Dict[str, FilterField[Any]]]
 
     def __post_init__(self) -> None:
         if any(isinstance(val, FilterField) for val in asdict(self).values()):  # type: ignore
             raise TypeError("Filter values incorrectly initialized")
 
+    @classmethod
+    def from_ops(cls, *ops: FilterOp) -> Self:
+        values: FilterValues = {k: {} for k in cls.__filter_specs__}
+        for op in ops:
+            if op.operator in values[op.name]:
+                raise ValueError(f"Duplicate operator {op.operator} for {op.name}")
+
+            values[op.name][op.operator] = op.value
+
+        return cls(**{k: v or None for k, v in values.items()})
+
+    @classmethod
+    def create_from_resolver(
+        cls,
+        resolver: FiltersResolver,
+        *,
+        name: Optional[str] = None,
+    ) -> Type[Self]:
+        anns = {k: FilterField[f.type] for k, f in resolver.__filters__.items()}  # type: ignore[name-defined]
+
+        return type(name or "FilterSet", (cls,), {**resolver.__filters__, "__annotations__": anns})
+
     @property
     def filter_values(self) -> FilterValues:
-        return {key: val for key in self.__filter_specs__ if (val := getattr(self, key)) is not None}
+        return {key: val for key in self.__filter_specs__ if (val := getattr(self, key))}
 
     def remove_op(self, field: str, operators: Optional[List[AbstractFilterOperator]] = None) -> Self:
         if not operators:
@@ -82,7 +107,7 @@ class FiltersSet(metaclass=FilterSetMeta):
         return operator in (getattr(self, field, None) or {})
 
 
-TFiltersSet = TypeVar("TFiltersSet", bound=FiltersSet)
+TFiltersSet = TypeVar("TFiltersSet", bound=FilterSet)
 
 
 def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awaitable[TFiltersSet]]:
@@ -95,6 +120,6 @@ def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awa
 
 
 __all__ = [
-    "FiltersSet",
+    "FilterSet",
     "create_filters_from_set",
 ]
