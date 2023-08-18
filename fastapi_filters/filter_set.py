@@ -65,7 +65,7 @@ class FilterSet(metaclass=FilterSetMeta):
             raise TypeError("Filter values incorrectly initialized")
 
     @classmethod
-    def from_ops(cls, *ops: FilterOp) -> Self:
+    def from_ops(cls, *ops: FilterOp[Any]) -> Self:
         values: FilterValues = {k: {} for k in cls.__filter_specs__}
         for op in ops:
             if op.operator in values[op.name]:

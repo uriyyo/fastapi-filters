@@ -16,7 +16,7 @@ T = TypeVar("T", covariant=True)
 
 
 @dataclass(eq=False, order=False)
-class FilterField(FilterOpBuilderMixin, Generic[T]):
+class FilterField(FilterOpBuilderMixin[T], Generic[T]):
     type: Optional[Type[T]] = None
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
