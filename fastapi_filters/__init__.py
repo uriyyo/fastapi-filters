@@ -1,4 +1,4 @@
-from .fields import FieldFilter
+from .fields import FilterField
 from .filters import create_filters, create_filters_from_model
 from .operators import FilterOperator
 from .types import FilterValues, FiltersResolver, SortingResolver, SortingValues
@@ -9,7 +9,7 @@ __all__ = [
     "SortingResolver",
     "FilterValues",
     "FiltersResolver",
-    "FieldFilter",
+    "FilterField",
     "FilterOperator",
     "create_filters",
     "create_filters_from_model",

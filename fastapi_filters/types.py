@@ -2,12 +2,12 @@ from enum import Enum
 from typing import Dict, Any, Protocol, Tuple, Type, Callable, Union, Literal, List, Optional
 from typing_extensions import TypeAlias
 
-from .fields import FieldFilter
+from .fields import FilterField
 
 AbstractFilterOperator: TypeAlias = Enum
 FilterAliasGenerator: TypeAlias = Callable[[str, AbstractFilterOperator], str]
 FilterPlace: TypeAlias = Callable[..., Any]
-FilterFieldDef: TypeAlias = Union[Type[Any], FieldFilter]
+FilterFieldDef: TypeAlias = Union[Type[Any], FilterField]
 FilterValues: TypeAlias = Dict[str, Dict[AbstractFilterOperator, Any]]
 
 

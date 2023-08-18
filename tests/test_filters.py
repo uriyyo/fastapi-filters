@@ -4,7 +4,7 @@ from fastapi import Depends, status
 from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
-from fastapi_filters import create_filters, FieldFilter, create_filters_from_model, FilterValues, FilterOperator
+from fastapi_filters import create_filters, FilterField, create_filters_from_model, FilterValues, FilterOperator
 
 
 async def test_filters_as_dep(app, client):
@@ -39,7 +39,7 @@ async def test_filters_as_dep(app, client):
 
 async def test_filters(app):
     resolver = create_filters(
-        a=FieldFilter(
+        a=FilterField(
             int,
             default_op=FilterOperator.ne,
             operators=[FilterOperator.eq, FilterOperator.ne],

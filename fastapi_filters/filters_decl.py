@@ -14,7 +14,7 @@ from typing import (
 from fastapi import Depends
 from typing_extensions import dataclass_transform, Self, get_type_hints, get_origin
 
-from .fields import FieldFilter
+from .fields import FilterField
 from .filters import create_filters
 from .types import AbstractFilterOperator, FilterValues
 
@@ -26,9 +26,9 @@ class FiltersDeclMeta(type):
         super().__init__(name, bases, namespace, **kwargs)
 
         hints = get_type_hints(cls)
-        specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FieldFilter}
+        specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FilterField}
 
-        cls.__filter_specs__: Dict[str, FieldFilter[Any]] = {}
+        cls.__filter_specs__: Dict[str, FilterField[Any]] = {}
         for base in bases:
             cls.__filter_specs__.update(getattr(base, "__filter_specs__", {}))
 
@@ -36,12 +36,13 @@ class FiltersDeclMeta(type):
             try:
                 filter_field = getattr(cls, key)
             except AttributeError:
-                filter_field = FieldFilter(value)
+                filter_field = FilterField(value)
                 setattr(cls, key, filter_field)
 
             if filter_field.type is None:
                 filter_field = replace(filter_field, type=value)
 
+            filter_field.__set_name__(cls, key)
             cls.__filter_specs__[key] = filter_field
 
         d_cls = dataclass(cls)  # type: ignore
@@ -50,13 +51,13 @@ class FiltersDeclMeta(type):
 
 
 @dataclass_transform(
-    field_specifiers=(FieldFilter,),
+    field_specifiers=(FilterField,),
 )
 class FiltersDecl(metaclass=FiltersDeclMeta):
-    __filter_specs__: ClassVar[Dict[str, FieldFilter[Any]]]
+    __filter_specs__: ClassVar[Dict[str, FilterField[Any]]]
 
     def __post_init__(self) -> None:
-        if any(isinstance(val, FieldFilter) for val in asdict(self).values()):  # type: ignore
+        if any(isinstance(val, FilterField) for val in asdict(self).values()):  # type: ignore
             raise TypeError("Filter values incorrectly initialized")
 
     @classmethod

@@ -3,8 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Type, Optional, List, TYPE_CHECKING, Generic, Any, TypeVar, overload, Union, Mapping
 
+from .op import FilterOpBuilderMixin
 from .operators import FilterOperator, get_filter_operators
 from .utils import is_seq
+
 
 if TYPE_CHECKING:
     from .types import AbstractFilterOperator
@@ -14,15 +16,16 @@ T = TypeVar("T", covariant=True)
 
 
 @dataclass
-class FieldFilter(Generic[T]):
+class FilterField(Generic[T]):
     type: Optional[Type[T]] = None
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
+    name: Optional[str] = None
 
     if TYPE_CHECKING:
 
         @overload
-        def __get__(self, instance: None, owner: Any) -> FieldFilter[T]:
+        def __get__(self, instance: None, owner: Any) -> FilterField[T]:
             pass
 
         @overload
@@ -36,6 +39,19 @@ class FieldFilter(Generic[T]):
         def __get__(self, instance: Optional[object], owner: Any) -> Any:
             pass
 
+    @property
+    def op(self) -> FilterOpBuilderMixin:
+        assert self.name is not None, "FilterField must be assigned to a class attribute"
+        assert self.operators is not None, "FilterField must be assigned to a class attribute"
+
+        return FilterOpBuilderMixin(
+            name=self.name,
+            operators=self.operators,
+        )
+
+    def __set_name__(self, owner: Any, name: str) -> None:
+        self.name = name
+
     def __post_init__(self) -> None:
         if self.operators is None and self.type is not None:
             self.operators = [*get_filter_operators(self.type)]
@@ -48,5 +64,5 @@ class FieldFilter(Generic[T]):
 
 
 __all__ = [
-    "FieldFilter",
+    "FilterField",
 ]
