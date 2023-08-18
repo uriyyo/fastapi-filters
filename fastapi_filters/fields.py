@@ -12,12 +12,12 @@ if TYPE_CHECKING:
 
 @dataclass
 class FieldFilter:
-    type: Type[Any]
+    type: Optional[Type[Any]] = None
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
 
     def __post_init__(self) -> None:
-        if self.operators is None:
+        if self.operators is None and self.type is not None:
             self.operators = [*get_filter_operators(self.type)]
 
         if self.default_op is None:

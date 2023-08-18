@@ -1,6 +1,6 @@
 import operator
 from contextlib import suppress
-from typing import TypeVar, Mapping, Any, Callable, cast, Optional, Container, List, Iterator, Tuple
+from typing import TypeVar, Mapping, Any, Callable, cast, Optional, Container, List, Iterator, Tuple, Union
 
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.sql.selectable import Select
@@ -8,6 +8,7 @@ from sqlalchemy import inspect, ARRAY, asc, desc, nulls_last, nulls_first, Colum
 from typing_extensions import TypeAlias
 
 from fastapi_filters import create_filters
+from fastapi_filters.filters_decl import FiltersDecl
 from fastapi_filters.config import ConfigVar
 from fastapi_filters.operators import FilterOperator
 from fastapi_filters.sorters import create_sorting
@@ -119,11 +120,14 @@ def _apply_filter(
 
 def apply_filters(
     stmt: TSelectable,
-    filters: FilterValues,
+    filters: Union[FilterValues, FiltersDecl],
     *,
     remapping: Optional[Mapping[str, str]] = None,
     additional: Optional[EntityNamespace] = None,
 ) -> TSelectable:
+    if isinstance(filters, FiltersDecl):
+        filters = filters.filter_values
+
     remapping = remapping or {}
     ns = {**_get_entity_namespace(stmt), **(additional or {})}
 
@@ -164,7 +168,7 @@ def apply_sorting(
 
 def apply_filters_and_sorting(
     stmt: TSelectable,
-    filters: FilterValues,
+    filters: Union[FilterValues, FiltersDecl],
     sorting: SortingValues,
     *,
     remapping: Optional[Mapping[str, str]] = None,
