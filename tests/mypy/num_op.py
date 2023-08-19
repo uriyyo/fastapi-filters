@@ -1,7 +1,7 @@
 from typing_extensions import reveal_type
 from fastapi_filters import FilterField
 
-field: FilterField[int] = FilterField(int)
+field: FilterField[int] = FilterField()
 
 reveal_type(field == 1)
 reveal_type(field != 1)

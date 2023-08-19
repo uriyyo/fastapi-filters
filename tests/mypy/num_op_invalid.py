@@ -2,7 +2,7 @@ from fastapi_filters import FilterField, FilterSet
 
 
 class _FilterSet(FilterSet):
-    field: FilterField[int] = FilterField(int)
+    field: FilterField[int] = FilterField()
 
 
 _FilterSet.from_ops(
