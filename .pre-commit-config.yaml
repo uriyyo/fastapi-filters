@@ -6,7 +6,7 @@ repos:
         name: black
         pass_filenames: false
         language_version: python3.8
-        entry: poetry run black fastapi_filters tests
+        entry: poetry run black fastapi_filters tests examples
 
   - repo: local
     hooks:
@@ -15,7 +15,7 @@ repos:
         name: ruff
         pass_filenames: false
         language_version: python3.8
-        entry: poetry run ruff --fix --exit-non-zero-on-fix --show-fixes fastapi_filters tests
+        entry: poetry run ruff --fix --exit-non-zero-on-fix --show-fixes fastapi_filters tests examples
 
   - repo: local
     hooks:
@@ -23,4 +23,4 @@ repos:
         language: python
         name: mypy
         pass_filenames: false
-        entry: poetry run mypy fastapi_filters --show-error-codes
+        entry: poetry run mypy fastapi_filters examples --show-error-codes

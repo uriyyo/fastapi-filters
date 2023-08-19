@@ -37,6 +37,8 @@ black = ">=22.12,<24.0"
 pre-commit = ">=2.21,<4.0"
 uvicorn = ">=0.20,<0.24"
 dirty-equals = "^0.6.0"
+faker = "^19.3.0"
+asyncpg = "^0.28.0"
 
 [tool.poetry.extras]
 sqlalchemy = ["sqlalchemy"]
