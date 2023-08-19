@@ -29,7 +29,7 @@ from .types import (
     AbstractFilterOperator,
 )
 from .utils import async_safe, is_seq, unwrap_seq_type, fields_include_exclude
-from .fields import FieldFilter
+from .fields import FilterField
 
 
 def default_alias_generator(name: str, op: AbstractFilterOperator) -> str:
@@ -57,7 +57,7 @@ def adapt_type(tp: Type[Any], op: AbstractFilterOperator) -> Any:
 
 def field_filter_to_raw_fields(
     name: str,
-    field: FieldFilter,
+    field: FilterField[Any],
     alias_generator: Optional[FilterAliasGenerator] = None,
 ) -> Iterator[Tuple[str, Any, AbstractFilterOperator, Optional[str]]]:
     if alias_generator is None:
@@ -105,8 +105,8 @@ def create_filters(
     if in_ is None:
         in_ = Query
 
-    fields: Dict[str, FieldFilter] = {
-        name: f_def if isinstance(f_def, FieldFilter) else FieldFilter(f_def) for name, f_def in kwargs.items()
+    fields: Dict[str, FilterField[Any]] = {
+        name: f_def if isinstance(f_def, FilterField) else FilterField(f_def) for name, f_def in kwargs.items()
     }
 
     fields_defs = [
@@ -141,6 +141,7 @@ def create_filters(
 
     _get_filters.__model__ = filter_model  # type: ignore[attr-defined]
     _get_filters.__defs__ = defs  # type: ignore[attr-defined]
+    _get_filters.__filters__ = fields  # type: ignore[attr-defined]
 
     return cast(FiltersResolver, _get_filters)
 

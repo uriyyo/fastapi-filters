@@ -2,18 +2,19 @@ from enum import Enum
 from typing import Dict, Any, Protocol, Tuple, Type, Callable, Union, Literal, List, Optional
 from typing_extensions import TypeAlias
 
-from .fields import FieldFilter
+from .fields import FilterField
 
 AbstractFilterOperator: TypeAlias = Enum
 FilterAliasGenerator: TypeAlias = Callable[[str, AbstractFilterOperator], str]
 FilterPlace: TypeAlias = Callable[..., Any]
-FilterFieldDef: TypeAlias = Union[Type[Any], FieldFilter]
+FilterFieldDef: TypeAlias = Union[Type[Any], FilterField]
 FilterValues: TypeAlias = Dict[str, Dict[AbstractFilterOperator, Any]]
 
 
 class FiltersResolver(Protocol):
     __model__: Type[Any]
     __defs__: Dict[str, Tuple[str, AbstractFilterOperator]]
+    __filters__: Dict[str, FilterField[Any]]
 
     async def __call__(self, _: Any, /) -> FilterValues:  # pragma: no cover
         pass

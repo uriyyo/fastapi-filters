@@ -1,23 +1,49 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Type, Any, Optional, List, TYPE_CHECKING
+from typing import Type, Optional, List, TYPE_CHECKING, Generic, Any, TypeVar, overload, Union, Mapping, Sequence
 
+from .op import FilterOpBuilder
 from .operators import FilterOperator, get_filter_operators
 from .utils import is_seq
+
 
 if TYPE_CHECKING:
     from .types import AbstractFilterOperator
 
 
-@dataclass
-class FieldFilter:
-    type: Type[Any]
+T = TypeVar("T", covariant=True)
+
+
+@dataclass(eq=False, order=False)
+class FilterField(FilterOpBuilder[T], Generic[T]):
+    type: Optional[Type[T]] = None
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
+    name: Optional[str] = None
+
+    if TYPE_CHECKING:
+
+        @overload
+        def __get__(self, instance: None, owner: Any) -> FilterField[T]:
+            pass
+
+        @overload
+        def __get__(
+            self,
+            instance: object,
+            owner: Any,
+        ) -> Mapping[AbstractFilterOperator, Union[T, Sequence[T], bool]]:
+            pass
+
+        def __get__(self, instance: Optional[object], owner: Any) -> Any:
+            pass
+
+    def __set_name__(self, owner: Any, name: str) -> None:
+        self.name = name
 
     def __post_init__(self) -> None:
-        if self.operators is None:
+        if self.operators is None and self.type is not None:
             self.operators = [*get_filter_operators(self.type)]
 
         if self.default_op is None:
@@ -28,5 +54,5 @@ class FieldFilter:
 
 
 __all__ = [
-    "FieldFilter",
+    "FilterField",
 ]

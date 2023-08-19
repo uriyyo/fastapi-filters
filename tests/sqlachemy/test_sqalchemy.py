@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 
+from fastapi_filters import FilterSet, FilterField
 from fastapi_filters.ext.sqlalchemy import (
     apply_filters,
     create_filters_from_orm,
@@ -136,6 +137,30 @@ def test_apply_filters_with_join():
             "user.name": {FilterOperator.ne: "John"},
         },
     )
+
+    assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
+
+
+def test_apply_filters_filter_set():
+    class _FilterSet(FilterSet):
+        name: FilterField[str]
+        age: FilterField[int]
+
+    stmt = select(User)
+
+    _filter_set = _FilterSet(
+        name={
+            FilterOperator.eq: "John",
+            FilterOperator.ne: "Doe",
+        },
+        age={
+            FilterOperator.gt: 10,
+            FilterOperator.lt: 20,
+        },
+    )
+    filtered_stmt = apply_filters(stmt, _filter_set)
+
+    expected = (User.name == "John") & (User.name != "Doe") & (User.age > 10) & (User.age < 20)
 
     assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
 
