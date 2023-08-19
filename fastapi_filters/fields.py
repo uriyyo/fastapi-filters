@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Type, Optional, List, TYPE_CHECKING, Generic, Any, TypeVar, overload, Union, Mapping
 
-from .op import FilterOpBuilderMixin
+from .op import FilterOpBuilder
 from .operators import FilterOperator, get_filter_operators
 from .utils import is_seq
 
@@ -16,7 +16,7 @@ T = TypeVar("T", covariant=True)
 
 
 @dataclass(eq=False, order=False)
-class FilterField(FilterOpBuilderMixin[T], Generic[T]):
+class FilterField(FilterOpBuilder[T], Generic[T]):
     type: Optional[Type[T]] = None
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
