@@ -49,7 +49,11 @@ class FilterSetMeta(type):
             filter_field.__set_name__(cls, key)
             cls.__filters__[key] = filter_field
 
+        for key in cls.__filters__:  # used to add default value for dataclass
+            setattr(cls, key, None)
+
         d_cls = dataclass(cls)  # type: ignore
+
         for key, value in cls.__filters__.items():
             setattr(d_cls, key, value)
 
@@ -62,10 +66,8 @@ class FilterSet(metaclass=FilterSetMeta):
 
     def __post_init__(self) -> None:
         for key in asdict(self):  # type: ignore[call-overload]
-            val = getattr(self, key)
-
             # auto replace uninitialized fields with empty dict
-            if val is None or isinstance(val, FilterField):
+            if getattr(self, key) is None:
                 setattr(self, key, {})
 
     @classmethod
