@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Type, Optional, List, TYPE_CHECKING, Generic, Any, TypeVar, overload, Union, Mapping
+from typing import Type, Optional, List, TYPE_CHECKING, Generic, Any, TypeVar, overload, Union, Mapping, Sequence
 
 from .op import FilterOpBuilder
 from .operators import FilterOperator, get_filter_operators
@@ -33,7 +33,7 @@ class FilterField(FilterOpBuilder[T], Generic[T]):
             self,
             instance: object,
             owner: Any,
-        ) -> Optional[Mapping[AbstractFilterOperator, Union[T, List[T], bool]]]:
+        ) -> Mapping[AbstractFilterOperator, Union[T, Sequence[T], bool]]:
             pass
 
         def __get__(self, instance: Optional[object], owner: Any) -> Any:

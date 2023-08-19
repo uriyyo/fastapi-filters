@@ -32,9 +32,9 @@ class FilterSetMeta(type):
         hints = get_type_hints(cls)
         specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FilterField}
 
-        cls.__filter_specs__: Dict[str, FilterField[Any]] = {}
+        cls.__filters__: Dict[str, FilterField[Any]] = {}
         for base in bases:
-            cls.__filter_specs__.update(getattr(base, "__filter_specs__", {}))
+            cls.__filters__.update(getattr(base, "__filters__", {}))
 
         for key, value in specs.items():
             try:
@@ -47,10 +47,10 @@ class FilterSetMeta(type):
                 filter_field = replace(filter_field, type=value)
 
             filter_field.__set_name__(cls, key)
-            cls.__filter_specs__[key] = filter_field
+            cls.__filters__[key] = filter_field
 
         d_cls = dataclass(cls)  # type: ignore
-        for key, value in cls.__filter_specs__.items():
+        for key, value in cls.__filters__.items():
             setattr(d_cls, key, value)
 
 
@@ -58,15 +58,19 @@ class FilterSetMeta(type):
     field_specifiers=(FilterField,),
 )
 class FilterSet(metaclass=FilterSetMeta):
-    __filter_specs__: ClassVar[Dict[str, FilterField[Any]]]
+    __filters__: ClassVar[Dict[str, FilterField[Any]]]
 
     def __post_init__(self) -> None:
-        if any(isinstance(val, FilterField) for val in asdict(self).values()):  # type: ignore
-            raise TypeError("Filter values incorrectly initialized")
+        for key in asdict(self):  # type: ignore[call-overload]
+            val = getattr(self, key)
+
+            # auto replace uninitialized fields with empty dict
+            if val is None or isinstance(val, FilterField):
+                setattr(self, key, {})
 
     @classmethod
     def from_ops(cls, *ops: FilterOp[Any]) -> Self:
-        values: FilterValues = {k: {} for k in cls.__filter_specs__}
+        values: FilterValues = {k: {} for k in cls.__filters__}
         for op in ops:
             if op.operator in values[op.name]:
                 raise ValueError(f"Duplicate operator {op.operator} for {op.name}")
@@ -88,7 +92,7 @@ class FilterSet(metaclass=FilterSetMeta):
 
     @property
     def filter_values(self) -> FilterValues:
-        return {key: val for key in self.__filter_specs__ if (val := getattr(self, key))}
+        return {key: val for key in self.__filters__ if (val := getattr(self, key))}
 
     def remove_op(self, field: str, operators: Optional[List[AbstractFilterOperator]] = None) -> Self:
         if not operators:
@@ -103,18 +107,15 @@ class FilterSet(metaclass=FilterSetMeta):
 
         return self
 
-    def has_op(self, field: str, operator: AbstractFilterOperator) -> bool:
-        return operator in (getattr(self, field, None) or {})
-
 
 TFiltersSet = TypeVar("TFiltersSet", bound=FilterSet)
 
 
 def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awaitable[TFiltersSet]]:
-    filters_dep = create_filters(**filters_set.__filter_specs__)  # type: ignore
+    filters_dep = create_filters(**filters_set.__filters__)  # type: ignore
 
     async def resolver(values: FilterValues = Depends(filters_dep)) -> TFiltersSet:
-        return filters_set(**{**dict.fromkeys(filters_set.__filter_specs__, None), **values})
+        return filters_set(**{**dict.fromkeys(filters_set.__filters__, None), **values})
 
     return resolver
 

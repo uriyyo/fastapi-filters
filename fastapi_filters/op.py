@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Callable, Protocol, Generic, TypeVar, Sequence, Optional, overload
 
@@ -32,6 +33,7 @@ class _HasNameAndOperatorsProtocol(Protocol):
     name: str | None
     operators: list[AbstractFilterOperator] | None
 
+    @abstractmethod
     def _check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
         pass
 
@@ -42,8 +44,8 @@ TArg = TypeVar("TArg")
 
 class FilterOpBuilder(Generic[T]):
     def _check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
-        assert self.operators is not None, "FilterField must be assigned to a class attribute"
-        assert self.name is not None, "FilterField must be assigned to a class attribute"
+        assert self.operators is not None, "FilterField has no operators"
+        assert self.name is not None, "FilterField has no name"
 
         assert operator in self.operators, f"Operator {operator} is not allowed for field {self.name!r}"
 
@@ -173,6 +175,7 @@ class FilterOpBuilder(Generic[T]):
 
         not_like = like
         ilike = like
+        not_ilike = like
 
         ov = __non_scalar_method_non_scalar_arg__
         not_ov = __non_scalar_method_non_scalar_arg__
@@ -206,13 +209,16 @@ class FilterOpBuilder(Generic[T]):
         like = _simple_op(FilterOperator.like)
         not_like = _simple_op(FilterOperator.not_like)
         ilike = _simple_op(FilterOperator.ilike)
-
-        is_null = _simple_op(FilterOperator.is_null)
+        not_ilike = _simple_op(FilterOperator.not_ilike)
 
         ov = _simple_op(FilterOperator.ov)
         not_ov = _simple_op(FilterOperator.not_ov)
         contains = _simple_op(FilterOperator.contains)
         not_contains = _simple_op(FilterOperator.not_contains)
+
+        def is_null(self: _HasNameAndOperatorsProtocol, val: bool = True, /) -> FilterOp[bool]:
+            self._check_op(FilterOperator.is_null)
+            return FilterOp(self.name, FilterOperator.is_null, val)
 
 
 __all__ = [
