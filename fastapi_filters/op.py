@@ -91,7 +91,7 @@ class FilterOpBuilder(Generic[T]):
             self: FilterOpBuilder[TArg],
             value: Sequence[TArg],
             /,
-        ) -> FilterOp[TArg]:
+        ) -> FilterOp[Sequence[TArg]]:
             pass
 
         def __scalar_method_non_scalar_arg__(self, value: Any, /) -> Any:
@@ -110,7 +110,7 @@ class FilterOpBuilder(Generic[T]):
             pass
 
         @overload
-        def __non_scalar_method_non_scalar_arg__(self: FilterOpBuilder[TArg], value: TArg, /) -> None:
+        def __non_scalar_method_non_scalar_arg__(self: FilterOpBuilder[TArg], value: Any, /) -> None:
             pass
 
         def __non_scalar_method_non_scalar_arg__(self, value: Any, /) -> Any:
@@ -183,7 +183,7 @@ class FilterOpBuilder(Generic[T]):
         contains = __non_scalar_method_scalar_arg__
         not_contains = __non_scalar_method_scalar_arg__
 
-        def is_null(self: FilterOpBuilder[Optional[TArg]], value: bool, /) -> FilterOp[bool]:
+        def is_null(self: FilterOpBuilder[Optional[TArg]], value: bool = ..., /) -> FilterOp[bool]:
             pass
 
     else:
