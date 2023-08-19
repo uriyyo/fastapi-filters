@@ -75,7 +75,7 @@ class FilterSet(metaclass=FilterSetMeta):
         values: FilterValues = {k: {} for k in cls.__filters__}
         for op in ops:
             if op.operator in values[op.name]:
-                raise ValueError(f"Duplicate operator {op.operator} for {op.name}")
+                raise ValueError(f"Duplicate operator {op.operator.name} for {op.name}")
 
             values[op.name][op.operator] = op.value
 
