@@ -9,7 +9,7 @@ from fastapi_filters.operators import (
     SEQ_OPERATORS,
     FilterOperator,
     DEFAULT_OPERATORS,
-    NUMERIC_OPERATORS,
+    NUM_OPERATORS,
 )
 
 
@@ -24,7 +24,7 @@ if sys.version_info >= (3, 9):
 
 if sys.version_info >= (3, 10):
     ADDITIONAL_CASES += [
-        (eval("int | None"), [FilterOperator.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),  # noqa
+        (eval("int | None"), [FilterOperator.is_null] + DEFAULT_OPERATORS + NUM_OPERATORS),  # noqa
     ]
 
 
@@ -32,9 +32,9 @@ if sys.version_info >= (3, 10):
     "tp,operators",
     [
         *[(tp, SEQ_OPERATORS) for tp in (List[int], Tuple[float, ...])],
-        (bool, [FilterOperator.eq]),
-        *[(tp, DEFAULT_OPERATORS + NUMERIC_OPERATORS) for tp in (int, float, date, datetime, timedelta)],
-        (Optional[int], [FilterOperator.is_null] + DEFAULT_OPERATORS + NUMERIC_OPERATORS),
+        (bool, [FilterOperator.eq, FilterOperator.ne]),
+        *[(tp, DEFAULT_OPERATORS + NUM_OPERATORS) for tp in (int, float, date, datetime, timedelta)],
+        (Optional[int], [FilterOperator.is_null] + DEFAULT_OPERATORS + NUM_OPERATORS),
         *ADDITIONAL_CASES,
     ],
     ids=str,

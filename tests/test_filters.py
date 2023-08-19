@@ -92,6 +92,7 @@ async def test_filters_from_model(app):
         "id__not_in": ("id", FilterOperator.not_in),
         "is_active": ("is_active", FilterOperator.eq),
         "is_active__eq": ("is_active", FilterOperator.eq),
+        "is_active__ne": ("is_active", FilterOperator.ne),
         "name": ("name", FilterOperator.eq),
         "name__eq": ("name", FilterOperator.eq),
         "name__in_": ("name", FilterOperator.in_),
@@ -116,6 +117,7 @@ async def test_filters_from_model(app):
     assert create_filters_from_model(UserModel, exclude={"id"}).__defs__ == {
         "is_active": ("is_active", FilterOperator.eq),
         "is_active__eq": ("is_active", FilterOperator.eq),
+        "is_active__ne": ("is_active", FilterOperator.ne),
         "name": ("name", FilterOperator.eq),
         "name__eq": ("name", FilterOperator.eq),
         "name__in_": ("name", FilterOperator.in_),

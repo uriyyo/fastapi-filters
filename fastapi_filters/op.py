@@ -75,29 +75,6 @@ class FilterOpBuilder(Generic[T]):
             pass
 
         @overload
-        def __scalar_method_non_scalar_arg__(  # type: ignore[misc]
-            self: FilterOpBuilder[str], value: Sequence[str], /
-        ) -> FilterOp[Sequence[str]]:
-            pass
-
-        @overload
-        def __scalar_method_non_scalar_arg__(  # type: ignore[misc]
-            self: FilterOpBuilder[Sequence[TArg]], value: Any, /
-        ) -> None:
-            pass
-
-        @overload
-        def __scalar_method_non_scalar_arg__(
-            self: FilterOpBuilder[TArg],
-            value: Sequence[TArg],
-            /,
-        ) -> FilterOp[Sequence[TArg]]:
-            pass
-
-        def __scalar_method_non_scalar_arg__(self, value: Any, /) -> Any:
-            pass
-
-        @overload
         def __non_scalar_method_non_scalar_arg__(  # type: ignore[misc]
             self: FilterOpBuilder[str], value: Any, /
         ) -> None:
@@ -155,6 +132,10 @@ class FilterOpBuilder(Generic[T]):
         __ne__ = __eq__
 
         @overload
+        def __lt__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[misc]
+            pass
+
+        @overload
         def __lt__(self: FilterOpBuilder[Sequence[TArg]], other: Any, /) -> None:  # type: ignore[misc]
             pass
 
@@ -177,10 +158,24 @@ class FilterOpBuilder(Generic[T]):
         gt = __lt__
         ge = __lt__
 
-        in_ = __scalar_method_non_scalar_arg__
-        not_in = __scalar_method_non_scalar_arg__
+        @overload
+        def __rshift__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[misc]
+            pass
 
-        __rshift__ = __scalar_method_non_scalar_arg__  # >> as in operator
+        @overload
+        def __rshift__(self: FilterOpBuilder[Sequence[TArg]], other: Any, /) -> None:  # type: ignore[misc]
+            pass
+
+        @overload
+        def __rshift__(self: FilterOpBuilder[TArg], other: Sequence[TArg], /) -> FilterOp[Sequence[TArg]]:
+            pass
+
+        # >> as in operator
+        def __rshift__(self, other: Any) -> Any:
+            pass
+
+        in_ = __rshift__
+        not_in = __rshift__
 
         def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:
             pass

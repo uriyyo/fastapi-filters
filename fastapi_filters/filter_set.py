@@ -12,6 +12,9 @@ from typing import (
     Dict,
     ClassVar,
     Type,
+    Mapping,
+    Union,
+    Sequence,
 )
 
 from fastapi import Depends
@@ -63,6 +66,13 @@ class FilterSetMeta(type):
 )
 class FilterSet(metaclass=FilterSetMeta):
     __filters__: ClassVar[Dict[str, FilterField[Any]]]
+
+    @classmethod
+    def create(
+        cls,
+        **kwargs: Mapping[AbstractFilterOperator, Union[Sequence[Any], bool, Any]],
+    ) -> Self:
+        return cls(**kwargs)
 
     def __post_init__(self) -> None:
         for key in asdict(self):  # type: ignore[call-overload]
@@ -117,7 +127,7 @@ def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awa
     filters_dep = create_filters(**filters_set.__filters__)  # type: ignore
 
     async def resolver(values: FilterValues = Depends(filters_dep)) -> TFiltersSet:
-        return filters_set(**{**dict.fromkeys(filters_set.__filters__, None), **values})
+        return filters_set.create(**values)
 
     return resolver
 

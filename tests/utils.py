@@ -16,7 +16,9 @@ def parse_obj_as(tp: Any, obj: Any) -> Any:
 
 
 def _normalize_str(s: str) -> str:
-    return LINE_START_REGEX.sub("", dedent(s).strip())
+    s = dedent(s).strip()
+    return s
+    # return LINE_START_REGEX.sub("", s)
 
 
 def _run_mypy_process(path: Path, params: str = "") -> str:
@@ -35,5 +37,14 @@ def run_mypy(path: Path, expected: str) -> Tuple[bool, str]:
     if actual == expected:
         return True, ""
 
-    out = f"Actual:\n{actual}\nExpected:\n{expected}"
+    out = "\n".join(
+        [
+            f"Path: {path.name}",
+            "Actual:",
+            f"{actual}",
+            "Expected:",
+            f"{expected}",
+        ]
+    )
+
     return False, out
