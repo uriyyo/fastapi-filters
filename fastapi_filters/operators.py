@@ -40,14 +40,19 @@ DEFAULT_OPERATORS = [
     FilterOperator.not_in,
 ]
 
-NUMERIC_OPERATORS = [
+NUM_OPERATORS = [
     FilterOperator.gt,
     FilterOperator.ge,
     FilterOperator.lt,
     FilterOperator.le,
 ]
 
-STRING_OPERATORS = [
+BOOL_OPERATORS = [
+    FilterOperator.eq,
+    FilterOperator.ne,
+]
+
+STR_OPERATORS = [
     FilterOperator.like,
     FilterOperator.ilike,
     FilterOperator.not_like,
@@ -76,16 +81,16 @@ def default_filter_operators_generator(t: type) -> Iterator[AbstractFilterOperat
     tp = unwrap_type(t)
 
     if lenient_issubclass(tp, bool):
-        yield FilterOperator.eq
+        yield from BOOL_OPERATORS
         return
 
     yield from DEFAULT_OPERATORS
 
     if lenient_issubclass(tp, str):
-        yield from STRING_OPERATORS
+        yield from STR_OPERATORS
 
     if lenient_issubclass(tp, (int, float, date, datetime, timedelta)):
-        yield from NUMERIC_OPERATORS
+        yield from NUM_OPERATORS
 
 
 disabled_filters_config: ConfigVar[Container[AbstractFilterOperator]] = ConfigVar(
@@ -110,8 +115,8 @@ def get_filter_operators(t: type) -> Iterator[AbstractFilterOperator]:
 __all__ = [
     "SEQ_OPERATORS",
     "DEFAULT_OPERATORS",
-    "NUMERIC_OPERATORS",
-    "STRING_OPERATORS",
+    "NUM_OPERATORS",
+    "STR_OPERATORS",
     "FilterOperator",
     "default_filter_operators_generator",
     "get_filter_operators",
