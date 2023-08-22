@@ -39,8 +39,8 @@ reveal_type(field.ilike("1"))
 reveal_type(field.not_ilike("1"))
 
 # array operators
-reveal_type(field.overlaps([val]))
-reveal_type(field.not_overlaps([val]))
+reveal_type(field.overlaps(val))
+reveal_type(field.not_overlaps(val))
 reveal_type(field.contains(val))
 reveal_type(field.not_contains(val))
 
@@ -64,17 +64,13 @@ tests/mypy/num_op.py:28:13: note: Revealed type is "fastapi_filters.op.FilterOp[
 tests/mypy/num_op.py:31:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.bool]"
 tests/mypy/num_op.py:32:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.bool]"
 tests/mypy/num_op.py:33:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.bool]"
-tests/mypy/num_op.py:36:13: error: Invalid self argument "FilterField[int]" to attribute function "like" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/num_op.py:36:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/num_op.py:37:13: error: Invalid self argument "FilterField[int]" to attribute function "not_like" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/num_op.py:37:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/num_op.py:38:13: error: Invalid self argument "FilterField[int]" to attribute function "ilike" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/num_op.py:38:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/num_op.py:39:13: error: Invalid self argument "FilterField[int]" to attribute function "not_ilike" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/num_op.py:39:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
+tests/mypy/num_op.py:36:13: note: Revealed type is "None"
+tests/mypy/num_op.py:37:13: note: Revealed type is "None"
+tests/mypy/num_op.py:38:13: note: Revealed type is "None"
+tests/mypy/num_op.py:39:13: note: Revealed type is "None"
 tests/mypy/num_op.py:42:13: note: Revealed type is "None"
 tests/mypy/num_op.py:43:13: note: Revealed type is "None"
 tests/mypy/num_op.py:44:13: note: Revealed type is "None"
 tests/mypy/num_op.py:45:13: note: Revealed type is "None"
-Found 4 errors in 1 file (checked 1 source file)
+Success: no issues found in 1 source file
 """

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Protocol, Generic, TypeVar, Sequence, Optional, overload
+from typing import TYPE_CHECKING, Any, Callable, Protocol, Generic, TypeVar, Sequence, overload
 
 from .operators import FilterOperator
 
@@ -38,18 +38,22 @@ class _HasNameAndOperatorsProtocol(Protocol):
         pass
 
 
-T = TypeVar("T", covariant=True)
-TArg = TypeVar("TArg")
+T_co = TypeVar("T_co", covariant=True)
+TArg_co = TypeVar("TArg_co", covariant=True)
 
 
-class FilterOpBuilder(Generic[T]):
+class FilterOpBuilder(Generic[T_co]):
     def _check_op(self: _HasNameAndOperatorsProtocol, operator: AbstractFilterOperator) -> None:
         assert self.operators is not None, "FilterField has no operators"
         assert self.name is not None, "FilterField has no name"
 
         assert operator in self.operators, f"Operator {operator} is not allowed for field {self.name!r}"
 
-    def __call__(self: _HasNameAndOperatorsProtocol, op: AbstractFilterOperator, value: TArg) -> FilterOp[TArg]:
+    def __call__(
+        self: _HasNameAndOperatorsProtocol,
+        op: AbstractFilterOperator,
+        value: T_co,  # type: ignore[misc]
+    ) -> FilterOp[T_co]:
         self._check_op(op)
         return FilterOp(self.name, op, value)  # type: ignore
 
@@ -63,12 +67,16 @@ class FilterOpBuilder(Generic[T]):
 
         @overload
         def __scalar_method_scalar_arg__(  # type: ignore[misc]
-            self: FilterOpBuilder[Sequence[TArg]], value: Any, /
+            self: FilterOpBuilder[Sequence[TArg_co]], value: Any, /
         ) -> None:
             pass
 
         @overload
-        def __scalar_method_scalar_arg__(self: FilterOpBuilder[TArg], value: TArg, /) -> FilterOp[TArg]:
+        def __scalar_method_scalar_arg__(
+            self: FilterOpBuilder[TArg_co],
+            value: TArg_co,  # type: ignore[misc]
+            /,
+        ) -> FilterOp[TArg_co]:
             pass
 
         def __scalar_method_scalar_arg__(self, value: Any, /) -> Any:
@@ -82,32 +90,15 @@ class FilterOpBuilder(Generic[T]):
 
         @overload
         def __non_scalar_method_non_scalar_arg__(  # type: ignore[misc]
-            self: FilterOpBuilder[Sequence[TArg]], value: Sequence[TArg], /
-        ) -> FilterOp[Sequence[TArg]]:
+            self: FilterOpBuilder[Sequence[TArg_co]], value: Sequence[TArg_co], /
+        ) -> FilterOp[Sequence[TArg_co]]:
             pass
 
         @overload
-        def __non_scalar_method_non_scalar_arg__(self: FilterOpBuilder[TArg], value: Any, /) -> None:
+        def __non_scalar_method_non_scalar_arg__(self: FilterOpBuilder[TArg_co], value: Any, /) -> None:
             pass
 
         def __non_scalar_method_non_scalar_arg__(self, value: Any, /) -> Any:
-            pass
-
-        @overload
-        def __non_scalar_method_scalar_arg__(self: FilterOpBuilder[str], value: str, /) -> None:  # type: ignore[misc]
-            pass
-
-        @overload
-        def __non_scalar_method_scalar_arg__(  # type: ignore[misc]
-            self: FilterOpBuilder[Sequence[TArg]], value: TArg, /
-        ) -> FilterOp[TArg]:
-            pass
-
-        @overload
-        def __non_scalar_method_scalar_arg__(self: FilterOpBuilder[TArg], value: TArg, /) -> None:
-            pass
-
-        def __non_scalar_method_scalar_arg__(self, value: Any, /) -> Any:
             pass
 
         @overload
@@ -115,11 +106,11 @@ class FilterOpBuilder(Generic[T]):
             pass
 
         @overload
-        def __eq__(self: FilterOpBuilder[Sequence[TArg]], value: Any, /) -> None:  # type: ignore[misc]
+        def __eq__(self: FilterOpBuilder[Sequence[TArg_co]], value: Any, /) -> None:  # type: ignore[misc]
             pass
 
         @overload
-        def __eq__(self: FilterOpBuilder[TArg], value: TArg, /) -> FilterOp[TArg]:  # type: ignore[misc]
+        def __eq__(self: FilterOpBuilder[TArg_co], value: TArg_co, /) -> FilterOp[TArg_co]:  # type: ignore[misc]
             pass
 
         @overload
@@ -136,11 +127,15 @@ class FilterOpBuilder(Generic[T]):
             pass
 
         @overload
-        def __lt__(self: FilterOpBuilder[Sequence[TArg]], other: Any, /) -> None:  # type: ignore[misc]
+        def __lt__(  # type: ignore[misc]
+            self: FilterOpBuilder[Sequence[TArg_co]],
+            other: Any,
+            /,
+        ) -> None:
             pass
 
         @overload
-        def __lt__(self: FilterOpBuilder[TArg], other: TArg, /) -> FilterOp[TArg]:
+        def __lt__(self: FilterOpBuilder[TArg_co], other: TArg_co, /) -> FilterOp[TArg_co]:  # type: ignore[misc]
             pass
 
         def __lt__(self, other: Any) -> Any:
@@ -163,11 +158,11 @@ class FilterOpBuilder(Generic[T]):
             pass
 
         @overload
-        def __rshift__(self: FilterOpBuilder[Sequence[TArg]], other: Any, /) -> None:  # type: ignore[misc]
+        def __rshift__(self: FilterOpBuilder[Sequence[TArg_co]], other: Any, /) -> None:  # type: ignore[misc]
             pass
 
         @overload
-        def __rshift__(self: FilterOpBuilder[TArg], other: Sequence[TArg], /) -> FilterOp[Sequence[TArg]]:
+        def __rshift__(self: FilterOpBuilder[TArg_co], other: Sequence[TArg_co], /) -> FilterOp[Sequence[TArg_co]]:
             pass
 
         # >> as in operator
@@ -177,7 +172,15 @@ class FilterOpBuilder(Generic[T]):
         in_ = __rshift__
         not_in = __rshift__
 
-        def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:
+        @overload
+        def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[misc]
+            pass
+
+        @overload
+        def like(self: FilterOpBuilder[Any], value: Any, /) -> None:
+            pass
+
+        def like(self, value: Any, /) -> Any:
             pass
 
         not_like = like
@@ -187,10 +190,10 @@ class FilterOpBuilder(Generic[T]):
         overlaps = __non_scalar_method_non_scalar_arg__
         not_overlaps = __non_scalar_method_non_scalar_arg__
 
-        contains = __non_scalar_method_scalar_arg__
-        not_contains = __non_scalar_method_scalar_arg__
+        contains = __non_scalar_method_non_scalar_arg__
+        not_contains = __non_scalar_method_non_scalar_arg__
 
-        def is_null(self: FilterOpBuilder[Optional[TArg]], value: bool = ..., /) -> FilterOp[bool]:
+        def is_null(self, value: bool = ..., /) -> FilterOp[bool]:
             pass
 
     else:

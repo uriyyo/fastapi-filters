@@ -41,8 +41,8 @@ reveal_type(field.ilike("1"))
 reveal_type(field.not_ilike("1"))
 
 # array operators
-reveal_type(field.overlaps([val]))
-reveal_type(field.not_overlaps([val]))
+reveal_type(field.overlaps(val))
+reveal_type(field.not_overlaps(val))
 reveal_type(field.contains(val))
 reveal_type(field.not_contains(val))
 
@@ -66,17 +66,13 @@ tests/mypy/arr_op.py:30:13: note: Revealed type is "None"
 tests/mypy/arr_op.py:33:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.bool]"
 tests/mypy/arr_op.py:34:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.bool]"
 tests/mypy/arr_op.py:35:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.bool]"
-tests/mypy/arr_op.py:38:13: error: Invalid self argument "FilterField[List[int]]" to attribute function "like" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/arr_op.py:38:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/arr_op.py:39:13: error: Invalid self argument "FilterField[List[int]]" to attribute function "not_like" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/arr_op.py:39:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/arr_op.py:40:13: error: Invalid self argument "FilterField[List[int]]" to attribute function "ilike" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/arr_op.py:40:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/arr_op.py:41:13: error: Invalid self argument "FilterField[List[int]]" to attribute function "not_ilike" with type "Callable[[FilterOpBuilder[str], str], FilterOp[str]]"  [misc]
-tests/mypy/arr_op.py:41:13: note: Revealed type is "fastapi_filters.op.FilterOp[builtins.str]"
-tests/mypy/arr_op.py:44:13: note: Revealed type is "None"
-tests/mypy/arr_op.py:45:13: note: Revealed type is "None"
-tests/mypy/arr_op.py:46:13: note: Revealed type is "None"
-tests/mypy/arr_op.py:47:13: note: Revealed type is "None"
-Found 4 errors in 1 file (checked 1 source file)
+tests/mypy/arr_op.py:38:13: note: Revealed type is "None"
+tests/mypy/arr_op.py:39:13: note: Revealed type is "None"
+tests/mypy/arr_op.py:40:13: note: Revealed type is "None"
+tests/mypy/arr_op.py:41:13: note: Revealed type is "None"
+tests/mypy/arr_op.py:44:13: note: Revealed type is "fastapi_filters.op.FilterOp[typing.Sequence[builtins.int]]"
+tests/mypy/arr_op.py:45:13: note: Revealed type is "fastapi_filters.op.FilterOp[typing.Sequence[builtins.int]]"
+tests/mypy/arr_op.py:46:13: note: Revealed type is "fastapi_filters.op.FilterOp[typing.Sequence[builtins.int]]"
+tests/mypy/arr_op.py:47:13: note: Revealed type is "fastapi_filters.op.FilterOp[typing.Sequence[builtins.int]]"
+Success: no issues found in 1 source file
 """

@@ -39,8 +39,8 @@ reveal_type(field.ilike("1"))
 reveal_type(field.not_ilike("1"))
 
 # array operators
-reveal_type(field.overlaps([val]))
-reveal_type(field.not_overlaps([val]))
+reveal_type(field.overlaps(val))
+reveal_type(field.not_overlaps(val))
 reveal_type(field.contains(val))
 reveal_type(field.not_contains(val))
 
