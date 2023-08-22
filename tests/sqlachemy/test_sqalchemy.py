@@ -101,8 +101,8 @@ def test_apply_filters_string(op, val, expected):
 @mark.parametrize(
     "op, val, expected",
     [
-        (FilterOperator.ov, ["en", "ua"], User.languages.overlap(["en", "ua"])),
-        (FilterOperator.not_ov, ["en", "ua"], ~User.languages.overlap(["en", "ua"])),
+        (FilterOperator.overlap, ["en", "ua"], User.languages.overlap(["en", "ua"])),
+        (FilterOperator.not_overlap, ["en", "ua"], ~User.languages.overlap(["en", "ua"])),
         (FilterOperator.contains, "en", User.languages.contains("en")),
         (FilterOperator.not_contains, "en", ~User.languages.contains("en")),
     ],
@@ -240,8 +240,8 @@ def test_create_filters_from_orm():
     assert resolver.__defs__ == {
         "languages": ("languages", FilterOperator.eq),
         "languages__is_null": ("languages", FilterOperator.is_null),
-        "languages__ov": ("languages", FilterOperator.ov),
-        "languages__not_ov": ("languages", FilterOperator.not_ov),
+        "languages__overlap": ("languages", FilterOperator.overlap),
+        "languages__not_overlap": ("languages", FilterOperator.not_overlap),
         "languages__contains": ("languages", FilterOperator.contains),
         "languages__not_contains": ("languages", FilterOperator.not_contains),
     }

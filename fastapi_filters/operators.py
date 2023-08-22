@@ -24,8 +24,8 @@ class FilterOperator(str, Enum):
     in_ = "in"
     not_in = "not_in"
     is_null = "is_null"
-    ov = "ov"
-    not_ov = "not_ov"
+    overlap = "overlap"
+    not_overlap = "not_overlap"
     contains = "contains"
     not_contains = "not_contains"
 
@@ -60,8 +60,8 @@ STR_OPERATORS = [
 ]
 
 SEQ_OPERATORS = [
-    FilterOperator.ov,
-    FilterOperator.not_ov,
+    FilterOperator.overlap,
+    FilterOperator.not_overlap,
     FilterOperator.contains,
     FilterOperator.not_contains,
 ]

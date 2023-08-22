@@ -26,7 +26,7 @@ async def test_filters_as_dep(app, client):
     assert res.json() == {
         "a": {"eq": 1},
         "b": {"eq": True},
-        "c": {"ov": ["a", "b", "c"]},
+        "c": {"overlap": ["a", "b", "c"]},
     }
 
     res = await client.get("/", params={"a[eq]": 1, "a[gt]": 2, "a[lt]": 3})

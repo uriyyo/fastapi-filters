@@ -48,7 +48,7 @@ class FilterField(FilterOpBuilder[T], Generic[T]):
 
         if self.default_op is None:
             if is_seq(self.type):
-                self.default_op = FilterOperator.ov
+                self.default_op = FilterOperator.overlap
             else:
                 self.default_op = FilterOperator.eq
 

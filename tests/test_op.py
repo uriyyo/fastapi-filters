@@ -49,8 +49,8 @@ _field_arr = FilterField(
         (_field_int_b.is_null(True), FilterOp("b", FilterOperator.is_null, True)),
         (_field_int_b.is_null(False), FilterOp("b", FilterOperator.is_null, False)),
         # ov, not_ov, contains, not_contains
-        (_field_arr.ov([1, 2]), FilterOp("arr", FilterOperator.ov, [1, 2])),
-        (_field_arr.not_ov([1, 2]), FilterOp("arr", FilterOperator.not_ov, [1, 2])),
+        (_field_arr.overlaps([1, 2]), FilterOp("arr", FilterOperator.overlap, [1, 2])),
+        (_field_arr.not_overlaps([1, 2]), FilterOp("arr", FilterOperator.not_overlap, [1, 2])),
         (_field_arr.contains(1), FilterOp("arr", FilterOperator.contains, 1)),
         (_field_arr.not_contains(1), FilterOp("arr", FilterOperator.not_contains, 1)),
         # (eq, 1)

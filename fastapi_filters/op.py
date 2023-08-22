@@ -184,8 +184,8 @@ class FilterOpBuilder(Generic[T]):
         ilike = like
         not_ilike = like
 
-        ov = __non_scalar_method_non_scalar_arg__
-        not_ov = __non_scalar_method_non_scalar_arg__
+        overlaps = __non_scalar_method_non_scalar_arg__
+        not_overlaps = __non_scalar_method_non_scalar_arg__
 
         contains = __non_scalar_method_scalar_arg__
         not_contains = __non_scalar_method_scalar_arg__
@@ -218,8 +218,8 @@ class FilterOpBuilder(Generic[T]):
         ilike = _simple_op(FilterOperator.ilike)
         not_ilike = _simple_op(FilterOperator.not_ilike)
 
-        ov = _simple_op(FilterOperator.ov)
-        not_ov = _simple_op(FilterOperator.not_ov)
+        overlaps = _simple_op(FilterOperator.overlap)
+        not_overlaps = _simple_op(FilterOperator.not_overlap)
         contains = _simple_op(FilterOperator.contains)
         not_contains = _simple_op(FilterOperator.not_contains)
 
