@@ -46,6 +46,9 @@ def adapt_type(tp: Type[Any], op: AbstractFilterOperator) -> Any:
     if is_seq(tp):
         return CSVList[unwrap_seq_type(tp)]  # type: ignore
 
+    if op in {FilterOperator.like, FilterOperator.ilike, FilterOperator.not_like, FilterOperator.not_ilike}:
+        return str
+
     if op == FilterOperator.is_null:
         return bool
 
