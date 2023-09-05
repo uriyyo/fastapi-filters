@@ -80,6 +80,11 @@ class FilterSet(metaclass=FilterSetMeta):
             if getattr(self, key) is None:
                 setattr(self, key, {})
 
+        self.init_filter_set()
+
+    def init_filter_set(self) -> None:
+        pass
+
     @classmethod
     def from_ops(cls, *ops: FilterOp[Any]) -> Self:
         values: FilterValues = {k: {} for k in cls.__filters__}
