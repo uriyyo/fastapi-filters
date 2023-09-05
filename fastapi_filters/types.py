@@ -5,7 +5,7 @@ from typing_extensions import TypeAlias
 from .fields import FilterField
 
 AbstractFilterOperator: TypeAlias = Enum
-FilterAliasGenerator: TypeAlias = Callable[[str, AbstractFilterOperator], str]
+FilterAliasGenerator: TypeAlias = Callable[[str, AbstractFilterOperator, Optional[str]], str]
 FilterPlace: TypeAlias = Callable[..., Any]
 FilterFieldDef: TypeAlias = Union[Type[Any], FilterField]
 FilterValues: TypeAlias = Dict[str, Dict[AbstractFilterOperator, Any]]

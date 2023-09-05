@@ -32,7 +32,8 @@ from .utils import async_safe, is_seq, unwrap_seq_type, fields_include_exclude
 from .fields import FilterField
 
 
-def default_alias_generator(name: str, op: AbstractFilterOperator) -> str:
+def default_alias_generator(name: str, op: AbstractFilterOperator, alias: Optional[str] = None) -> str:
+    name = alias or name
     return f"{name}[{op.name.rstrip('_')}]"
 
 
@@ -66,10 +67,10 @@ def field_filter_to_raw_fields(
     if alias_generator is None:
         alias_generator = alias_generator_config.get()
 
-    yield name, field.type, cast(AbstractFilterOperator, field.default_op), None
+    yield name, field.type, cast(AbstractFilterOperator, field.default_op), field.alias
 
     for op in field.operators or ():
-        yield f"{name}__{op.name}", field.type, op, alias_generator(name, op)
+        yield f"{name}__{op.name}", field.type, op, alias_generator(name, op, field.alias)
 
 
 def create_filters_from_model(

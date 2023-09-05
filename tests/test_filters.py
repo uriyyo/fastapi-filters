@@ -15,18 +15,25 @@ async def test_filters_as_dep(app, client):
                 a=int,
                 b=bool,
                 c=List[str],
+                d=FilterField(
+                    bytes,
+                    default_op=FilterOperator.eq,
+                    operators=[FilterOperator.eq, FilterOperator.ne],
+                    alias="d_alias",
+                ),
             )
         )
     ) -> FilterValues:
         return filters
 
-    res = await client.get("/", params={"a": 1, "b": "true", "c": "a,b,c"})
+    res = await client.get("/", params={"a": 1, "b": "true", "c": "a,b,c", "d_alias": "123"})
 
     assert res.status_code == status.HTTP_200_OK
     assert res.json() == {
         "a": {"eq": 1},
         "b": {"eq": True},
         "c": {"overlap": ["a", "b", "c"]},
+        "d": {"eq": "123"},
     }
 
     res = await client.get("/", params={"a[eq]": 1, "a[gt]": 2, "a[lt]": 3})

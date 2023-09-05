@@ -21,6 +21,7 @@ class FilterField(FilterOpBuilder[T_co]):
     operators: Optional[List[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
     name: Optional[str] = None
+    alias: Optional[str] = None
 
     if TYPE_CHECKING:
 
