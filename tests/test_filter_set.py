@@ -171,3 +171,21 @@ async def test_create_filters_from_set(app, client):
         },
     )
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_subset():
+    class _FilterSet(FilterSet):
+        a: FilterField[int]
+        b: FilterField[str]
+        c: FilterField[bool]
+
+    _filters = _FilterSet(
+        a={FilterOperator.eq: 1, FilterOperator.ne: 2},
+        c={FilterOperator.eq: True, FilterOperator.ne: False},
+    )
+
+    assert _filters.subset("a").filter_values == {"a": {FilterOperator.eq: 1, FilterOperator.ne: 2}}
+    assert _filters.subset("b").filter_values == {}
+    assert _filters.subset(_FilterSet.a, _FilterSet.b).filter_values == {
+        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2}
+    }

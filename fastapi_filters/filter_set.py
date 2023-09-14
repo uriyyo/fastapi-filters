@@ -111,6 +111,10 @@ class FilterSet(metaclass=FilterSetMeta):
     def filter_values(self) -> FilterValues:
         return {key: val for key in self.__filters__ if (val := getattr(self, key))}
 
+    def subset(self, *fields: FilterField[Any] | str) -> Self:
+        names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
+        return type(self)(**{k: v for k, v in self.filter_values.items() if k in names})
+
     def remove_op(self, field: str, operators: Optional[List[AbstractFilterOperator]] = None) -> Self:
         if not operators:
             setattr(self, field, None)
