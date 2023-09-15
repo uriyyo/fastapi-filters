@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-filters"
-version = "0.2.3"
+version = "0.2.4"
 description = "fastapi-filters"
 authors = ["Yurii Karabas <1998uriyyo@gmail.com>"]
 readme = "README.md"
