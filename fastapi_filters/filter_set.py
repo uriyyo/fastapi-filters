@@ -133,7 +133,9 @@ TFiltersSet = TypeVar("TFiltersSet", bound=FilterSet)
 
 
 def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awaitable[TFiltersSet]]:
-    filters_dep = create_filters(**filters_set.__filters__)  # type: ignore
+    filters_dep = create_filters(
+        **{k: v for k, v in filters_set.__filters__.items() if not v.internal},  # type: ignore
+    )
 
     async def resolver(values: FilterValues = Depends(filters_dep)) -> TFiltersSet:
         return filters_set.create(**values)

@@ -22,6 +22,7 @@ class FilterField(FilterOpBuilder[T_co]):
     default_op: Optional[AbstractFilterOperator] = None
     name: Optional[str] = None
     alias: Optional[str] = None
+    internal: bool = False
 
     if TYPE_CHECKING:
 
