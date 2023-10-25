@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Protocol, Generic, TypeVar, Sequence, overload
 
 from .operators import FilterOperator
@@ -59,6 +60,14 @@ class FilterOpBuilder(Generic[T_co]):
 
     if TYPE_CHECKING:
 
+        @overload
+        def __scalar_method_scalar_arg__(
+            self: FilterOpBuilder[Enum],
+            value: Enum,
+            /,
+        ) -> FilterOp[Enum]:
+            pass
+
         @overload  # we need special overload case for str because it is a Sequence of strings
         def __scalar_method_scalar_arg__(  # type: ignore[misc]
             self: FilterOpBuilder[str], value: str, /
@@ -102,6 +111,10 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
+        def __eq__(self: FilterOpBuilder[Enum], value: Enum, /) -> FilterOp[Enum]:  # type: ignore[misc]
+            pass
+
+        @overload
         def __eq__(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[misc]
             pass
 
@@ -124,6 +137,10 @@ class FilterOpBuilder(Generic[T_co]):
 
         @overload
         def __lt__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[misc]
+            pass
+
+        @overload
+        def __lt__(self: FilterOpBuilder[Enum], other: Any, /) -> None:  # type: ignore[misc]
             pass
 
         @overload
@@ -154,6 +171,10 @@ class FilterOpBuilder(Generic[T_co]):
         ge = __lt__
 
         @overload
+        def __rshift__(self: FilterOpBuilder[Enum], other: Any, /) -> FilterOp[Sequence[Enum]]:
+            pass
+
+        @overload
         def __rshift__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[misc]
             pass
 
@@ -171,6 +192,10 @@ class FilterOpBuilder(Generic[T_co]):
 
         in_ = __rshift__
         not_in = __rshift__
+
+        @overload
+        def like(self: FilterOpBuilder[Enum], value: str, /) -> Any:
+            pass
 
         @overload
         def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[misc]
