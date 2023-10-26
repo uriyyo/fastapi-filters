@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install -E sqlalchemy
+          poetry install -E all
 
       - name: Unit tests
         run: |
