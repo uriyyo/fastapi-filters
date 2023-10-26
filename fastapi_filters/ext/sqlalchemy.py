@@ -195,8 +195,20 @@ def apply_filters_and_sorting(
     apply_filter: Optional[ApplyFilterFunc[TSelectable]] = None,
     add_condition: Optional[AddFilterConditionFunc[TSelectable]] = None,
 ) -> TSelectable:
-    stmt = apply_filters(stmt, filters, remapping=remapping, additional=additional, apply_filter=apply_filter)
-    stmt = apply_sorting(stmt, sorting, remapping=remapping, additional=additional)
+    stmt = apply_filters(
+        stmt,
+        filters,
+        remapping=remapping,
+        additional=additional,
+        apply_filter=apply_filter,
+        add_condition=add_condition,
+    )
+    stmt = apply_sorting(
+        stmt,
+        sorting,
+        remapping=remapping,
+        additional=additional,
+    )
 
     return stmt
 
