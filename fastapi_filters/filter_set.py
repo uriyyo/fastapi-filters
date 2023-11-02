@@ -117,14 +117,17 @@ class FilterSet(metaclass=FilterSetMeta):
         names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
         return self.create(**{k: v for k, v in self.filter_values.items() if k in names})
 
-    def extract(self, *fields: FilterField[Any] | str) -> Self:
+    def extract(self, *fields: FilterField[Any] | str, strict: bool = False) -> Self:
         names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
+
+        if not strict:
+            names &= self.filter_values.keys()
 
         attrs = {}
         for name in names:
-            val = getattr(self, name)
-            attrs[name] = {**val}
-            val.clear()
+            if val := getattr(self, name):
+                attrs[name] = {**val}
+                val.clear()
 
         return self.create(**attrs)
 

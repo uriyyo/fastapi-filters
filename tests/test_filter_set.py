@@ -185,6 +185,8 @@ def test_extract():
         "c": {FilterOperator.eq: True, FilterOperator.ne: False},
     }
 
+    assert _filters.extract("d").filter_values == {}
+
 
 def test_bool():
     class _FilterSet(FilterSet):
