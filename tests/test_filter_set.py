@@ -67,34 +67,6 @@ def test_filter_field_filter_values():
     assert _filter_set.filter_values == {"a": {FilterOperator.eq: 1, FilterOperator.ne: 2}}
 
 
-def test_filter_field_remove_op():
-    class _FilterSet(FilterSet):
-        a: FilterField[int]
-        b: FilterField[str]
-
-    _filter_set = _FilterSet(
-        a={FilterOperator.eq: 1, FilterOperator.ne: 2},
-        b={FilterOperator.eq: "a", FilterOperator.ne: "b"},
-    )
-
-    _filter_set.remove_op("a", [FilterOperator.eq])
-
-    assert _filter_set.filter_values == {
-        "a": {FilterOperator.ne: 2},
-        "b": {FilterOperator.eq: "a", FilterOperator.ne: "b"},
-    }
-
-    _filter_set.remove_op("a", [FilterOperator.ne])
-
-    assert _filter_set.filter_values == {
-        "b": {FilterOperator.eq: "a", FilterOperator.ne: "b"},
-    }
-
-    _filter_set.remove_op("b")
-
-    assert _filter_set.filter_values == {}
-
-
 def test_missed_field():
     class _FilterSet(FilterSet):
         a: FilterField[int]
@@ -189,3 +161,38 @@ def test_subset():
     assert _filters.subset(_FilterSet.a, _FilterSet.b).filter_values == {
         "a": {FilterOperator.eq: 1, FilterOperator.ne: 2}
     }
+
+
+def test_extract():
+    class _FilterSet(FilterSet):
+        a: FilterField[int]
+        b: FilterField[str]
+        c: FilterField[bool]
+
+    _filters = _FilterSet(
+        a={FilterOperator.eq: 1, FilterOperator.ne: 2},
+        b={FilterOperator.eq: "a", FilterOperator.ne: "b"},
+        c={FilterOperator.eq: True, FilterOperator.ne: False},
+    )
+
+    extracted = _filters.extract(_FilterSet.a)
+
+    assert extracted.filter_values == {
+        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2},
+    }
+    assert _filters.filter_values == {
+        "b": {FilterOperator.eq: "a", FilterOperator.ne: "b"},
+        "c": {FilterOperator.eq: True, FilterOperator.ne: False},
+    }
+
+
+def test_bool():
+    class _FilterSet(FilterSet):
+        a: FilterField[int]
+        b: FilterField[str]
+        c: FilterField[bool]
+
+    assert not _FilterSet.create()
+    assert _FilterSet.create(a={FilterOperator.eq: 1})
+    assert _FilterSet.create(b={FilterOperator.eq: "a"})
+    assert _FilterSet.create(c={FilterOperator.eq: True})

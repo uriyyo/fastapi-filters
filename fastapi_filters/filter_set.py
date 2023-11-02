@@ -4,7 +4,6 @@ from dataclasses import dataclass, asdict, replace
 from typing import (
     TypeVar,
     Any,
-    List,
     Optional,
     Callable,
     Awaitable,
@@ -82,6 +81,9 @@ class FilterSet(metaclass=FilterSetMeta):
 
         self.init_filter_set()
 
+    def __bool__(self) -> bool:
+        return bool(self.filter_values)
+
     def init_filter_set(self) -> None:
         pass
 
@@ -113,20 +115,18 @@ class FilterSet(metaclass=FilterSetMeta):
 
     def subset(self, *fields: FilterField[Any] | str) -> Self:
         names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
-        return type(self)(**{k: v for k, v in self.filter_values.items() if k in names})
+        return self.create(**{k: v for k, v in self.filter_values.items() if k in names})
 
-    def remove_op(self, field: str, operators: Optional[List[AbstractFilterOperator]] = None) -> Self:
-        if not operators:
-            setattr(self, field, None)
-            return self
+    def extract(self, *fields: FilterField[Any] | str) -> Self:
+        names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
 
-        for operator in operators:
-            del getattr(self, field)[operator]
+        attrs = {}
+        for name in names:
+            val = getattr(self, name)
+            attrs[name] = {**val}
+            val.clear()
 
-        if not getattr(self, field):
-            setattr(self, field, None)
-
-        return self
+        return self.create(**attrs)
 
 
 TFiltersSet = TypeVar("TFiltersSet", bound=FilterSet)

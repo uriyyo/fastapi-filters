@@ -86,7 +86,7 @@ def _get_entity_namespace(stmt: TSelectable) -> EntityNamespace:
     return ns
 
 
-def _default_apply_filter(*_: Any) -> Any:
+def _default_hook(*_: Any) -> Any:
     raise NotImplementedError
 
 
@@ -95,8 +95,16 @@ AddFilterConditionFunc: TypeAlias = Callable[[TSelectable, str, Any], TSelectabl
 
 custom_apply_filter: ConfigVar[ApplyFilterFunc[Any]] = ConfigVar(
     "apply_filter",
-    default=_default_apply_filter,
+    default=_default_hook,
 )
+custom_add_condition: ConfigVar[AddFilterConditionFunc[Any]] = ConfigVar(
+    "add_condition",
+    default=_default_hook,
+)
+
+
+def generic_condition(left: Any, right: Any, op: AbstractFilterOperator) -> Any:
+    return DEFAULT_FILTERS[op](left, right)
 
 
 def _apply_filter(
@@ -115,14 +123,19 @@ def _apply_filter(
         if apply_filter:
             try:
                 cond = apply_filter(stmt, ns, field, op, val)
-            except NotImplementedError:
+                assert cond is not None
+            except (NotImplementedError, AssertionError):
                 pass
 
         if cond is None:
             cond = custom_apply_filter_impl(stmt, ns, field, op, val)
-    except NotImplementedError:
+            assert cond is not None
+    except (NotImplementedError, AssertionError):
+        if field not in ns:
+            raise ValueError(f"Unknown field {field}")
+
         try:
-            cond = DEFAULT_FILTERS[op](ns[field], val)
+            cond = generic_condition(ns[field], val, op)
         except KeyError:
             raise NotImplementedError(f"Operator {op} is not implemented") from None
 
@@ -131,6 +144,16 @@ def _apply_filter(
             return add_condition(stmt, field, cond)
         except NotImplementedError:
             pass
+
+    global_add_condition = custom_add_condition.get()
+
+    try:
+        res = global_add_condition(stmt, field, cond)
+        assert res is not None
+
+        return cast(TSelectable, res)
+    except (NotImplementedError, AssertionError):
+        pass
 
     return stmt.where(cond)  # type: ignore[arg-type]
 
@@ -321,4 +344,6 @@ __all__ = [
     "adapt_sqlalchemy_column_type",
     "create_filters_from_orm",
     "create_sorting_from_orm",
+    "generic_condition",
+    "custom_add_condition",
 ]

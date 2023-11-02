@@ -1,4 +1,4 @@
-from typing import Literal, Optional, cast, Type, Container, Union, Tuple
+from typing import Literal, Optional, cast, Type, Container, Union, Tuple, List
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -28,7 +28,7 @@ def create_sorting_from_model(
 def create_sorting(
     *fields: Union[str, Tuple[str, SortingNulls]],
     in_: Optional[FilterPlace] = None,
-    default: Optional[str] = None,
+    default: Optional[Union[str, List[str]]] = None,
 ) -> SortingResolver:
     if in_ is None:
         in_ = Query
@@ -38,8 +38,10 @@ def create_sorting(
     defs = {f"{d}{f}": (f, v, n) for (v, d) in (("asc", "+"), ("desc", "-")) for f, n in normalized_fields}
     tp = Literal[tuple(defs)]  # type: ignore
 
-    if default and default not in defs:
-        raise ValueError(f"Default sort field {default} is not in {','.join(f for f, _ in normalized_fields)}")
+    default = [default] if isinstance(default, str) else default
+
+    if default and (diff := {*default} - {*defs}):
+        raise ValueError(f"Default sort field {','.join(diff)} is not in {','.join(f for f, _ in normalized_fields)}")
 
     async def _get_sorters(sort: CSVList[tp] = in_(default, annotation=CSVList[tp])) -> SortingValues:  # type: ignore
         return cast(SortingValues, [defs[f] for f in sort or ()])
