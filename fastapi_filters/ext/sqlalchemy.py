@@ -7,7 +7,7 @@ from sqlalchemy.sql.selectable import Select
 from sqlalchemy import inspect, ARRAY, asc, desc, nulls_last, nulls_first, ColumnExpressionArgument
 from typing_extensions import TypeAlias
 
-from fastapi_filters import create_filters
+from fastapi_filters import create_filters, FilterField
 from fastapi_filters.filter_set import FilterSet
 from fastapi_filters.config import ConfigVar
 from fastapi_filters.operators import FilterOperator
@@ -66,6 +66,7 @@ SORT_NULLS_FUNCS: Mapping[
 }
 
 EntityNamespace: TypeAlias = Mapping[str, Any]
+AdditionalNamespace: TypeAlias = Mapping[Union[str, FilterField[Any]], Any]
 
 
 def _get_entity_namespace(stmt: TSelectable) -> EntityNamespace:
@@ -82,6 +83,17 @@ def _get_entity_namespace(stmt: TSelectable) -> EntityNamespace:
 
                 if table_name.endswith("s"):
                     ns[f"{table_name[:-1]}.{clause.name}"] = clause
+
+    return ns
+
+
+def _normalize_additional_namespace(additional: AdditionalNamespace) -> EntityNamespace:
+    ns = {}
+    for key, value in additional.items():
+        k = key.name if isinstance(key, FilterField) else key
+        assert k, "Additional namespace key cannot be empty"
+
+        ns[k] = value
 
     return ns
 
@@ -163,7 +175,7 @@ def apply_filters(
     filters: Union[FilterValues, FilterSet],
     *,
     remapping: Optional[Mapping[str, str]] = None,
-    additional: Optional[EntityNamespace] = None,
+    additional: Optional[AdditionalNamespace] = None,
     apply_filter: Optional[ApplyFilterFunc[TSelectable]] = None,
     add_condition: Optional[AddFilterConditionFunc[TSelectable]] = None,
 ) -> TSelectable:
@@ -171,7 +183,7 @@ def apply_filters(
         filters = filters.filter_values
 
     remapping = remapping or {}
-    ns = {**_get_entity_namespace(stmt), **(additional or {})}
+    ns = {**_get_entity_namespace(stmt), **_normalize_additional_namespace(additional or {})}
 
     for field, field_filters in filters.items():
         field = remapping.get(field, field)
@@ -187,10 +199,10 @@ def apply_sorting(
     sorting: SortingValues,
     *,
     remapping: Optional[Mapping[str, str]] = None,
-    additional: Optional[EntityNamespace] = None,
+    additional: Optional[AdditionalNamespace] = None,
 ) -> TSelectable:
     remapping = remapping or {}
-    ns = {**_get_entity_namespace(stmt), **(additional or {})}
+    ns = {**_get_entity_namespace(stmt), **_normalize_additional_namespace(additional or {})}
 
     for field, direction, nulls in sorting:
         field = remapping.get(field, field)
@@ -214,7 +226,7 @@ def apply_filters_and_sorting(
     sorting: SortingValues,
     *,
     remapping: Optional[Mapping[str, str]] = None,
-    additional: Optional[EntityNamespace] = None,
+    additional: Optional[AdditionalNamespace] = None,
     apply_filter: Optional[ApplyFilterFunc[TSelectable]] = None,
     add_condition: Optional[AddFilterConditionFunc[TSelectable]] = None,
 ) -> TSelectable:

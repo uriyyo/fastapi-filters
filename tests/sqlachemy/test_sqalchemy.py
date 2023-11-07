@@ -1,7 +1,7 @@
 from typing import Any
 
 from pytest import mark, raises
-from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey, true
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 
@@ -145,6 +145,7 @@ def test_apply_filters_filter_set():
     class _FilterSet(FilterSet):
         name: FilterField[str]
         age: FilterField[int]
+        is_adult: FilterField[bool]
 
     stmt = select(User)
 
@@ -157,10 +158,21 @@ def test_apply_filters_filter_set():
             FilterOperator.gt: 10,
             FilterOperator.lt: 20,
         },
+        is_adult={
+            FilterOperator.eq: True,
+        },
     )
-    filtered_stmt = apply_filters(stmt, _filter_set)
+    filtered_stmt = apply_filters(
+        stmt,
+        _filter_set,
+        additional={
+            _FilterSet.is_adult: User.age >= 18,
+        },
+    )
 
-    expected = (User.name == "John") & (User.name != "Doe") & (User.age > 10) & (User.age < 20)
+    expected = (
+        (User.name == "John") & (User.name != "Doe") & (User.age > 10) & (User.age < 20) & ((User.age >= 18) == true())
+    )
 
     assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
 

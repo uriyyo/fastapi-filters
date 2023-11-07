@@ -42,6 +42,9 @@ class FilterField(FilterOpBuilder[T_co]):
         def __get__(self, instance: Optional[object], owner: Any) -> Any:
             pass
 
+    def __hash__(self) -> int:
+        return hash((self.name, self.alias, self.type))
+
     def __set_name__(self, owner: Any, name: str) -> None:
         self.name = name
 
