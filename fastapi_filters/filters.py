@@ -43,7 +43,10 @@ alias_generator_config: ConfigVar[FilterAliasGenerator] = ConfigVar(
 )
 
 
-def adapt_type(tp: Type[Any], op: AbstractFilterOperator) -> Any:
+def adapt_type(field: FilterField[Any], tp: Type[Any], op: AbstractFilterOperator) -> Any:
+    if field.op_types and op in field.op_types:
+        return field.op_types[op]
+
     if is_seq(tp):
         return CSVList[unwrap_seq_type(tp)]  # type: ignore
 
@@ -114,22 +117,22 @@ def create_filters(
     }
 
     fields_defs = [
-        (name, fname, tp, alias, op)
+        (name, fname, field, tp, alias, op)
         for name, field in fields.items()
         for fname, tp, op, alias in field_filter_to_raw_fields(name, field, alias_generator)
     ]
 
-    defs = {fname: (name, op) for name, fname, _, _, op in fields_defs}
+    defs = {fname: (name, op) for name, fname, *_, op in fields_defs}
 
     filter_model = make_dataclass(
         "Filters",
         [
             (
                 fname,
-                new_tp := adapt_type(tp, op),
+                new_tp := adapt_type(field, tp, op),
                 dataclass_field(default=in_(None, alias=alias, annotation=new_tp)),
             )
-            for _, fname, tp, alias, op in fields_defs
+            for _, fname, field, tp, alias, op in fields_defs
         ],
     )
 

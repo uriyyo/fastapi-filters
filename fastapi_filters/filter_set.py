@@ -117,8 +117,16 @@ class FilterSet(metaclass=FilterSetMeta):
         names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
         return self.create(**{k: v for k, v in self.filter_values.items() if k in names})
 
-    def extract(self, *fields: FilterField[Any] | str, strict: bool = False) -> Self:
-        names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
+    def extract(self, *fields: FilterField[Any] | str | type[FilterSet], strict: bool = False) -> Self:
+        names = set()
+        for f in fields:
+            if isinstance(f, FilterField):
+                assert f.name is not None, "FilterField name is not set"
+                names.add(f.name)
+            elif isinstance(f, type) and issubclass(f, FilterSet):
+                names |= f.__filters__.keys()
+            else:
+                names.add(f)
 
         if not strict:
             names &= self.filter_values.keys()
@@ -142,6 +150,9 @@ def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awa
 
     async def resolver(values: FilterValues = Depends(filters_dep)) -> TFiltersSet:
         return filters_set.create(**values)
+
+    for attr in ("__filters__", "__model__", "__defs__"):
+        setattr(resolver, attr, getattr(filters_dep, attr))
 
     return resolver
 

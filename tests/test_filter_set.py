@@ -1,5 +1,5 @@
 from dataclasses import dataclass, fields
-from typing import Any
+from typing import Any, List
 
 from fastapi import Depends, status
 from pytest import raises
@@ -164,9 +164,11 @@ def test_subset():
 
 
 def test_extract():
-    class _FilterSet(FilterSet):
+    class _BaseFilterSet(FilterSet):
         a: FilterField[int]
         b: FilterField[str]
+
+    class _FilterSet(_BaseFilterSet):
         c: FilterField[bool]
 
     _filters = _FilterSet(
@@ -187,6 +189,17 @@ def test_extract():
 
     assert _filters.extract("d").filter_values == {}
 
+    _filters = _FilterSet(
+        a={FilterOperator.eq: 1, FilterOperator.ne: 2},
+        b={FilterOperator.eq: "a", FilterOperator.ne: "b"},
+        c={FilterOperator.eq: True, FilterOperator.ne: False},
+    )
+
+    assert _filters.extract(_BaseFilterSet).filter_values == {
+        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2},
+        "b": {FilterOperator.eq: "a", FilterOperator.ne: "b"},
+    }
+
 
 def test_bool():
     class _FilterSet(FilterSet):
@@ -198,3 +211,28 @@ def test_bool():
     assert _FilterSet.create(a={FilterOperator.eq: 1})
     assert _FilterSet.create(b={FilterOperator.eq: "a"})
     assert _FilterSet.create(c={FilterOperator.eq: True})
+
+
+def test_op_types():
+    class _FilterSet(FilterSet):
+        a: FilterField[int] = FilterField(
+            op_types={
+                FilterOperator.eq: float,
+                FilterOperator.ne: float,
+            },
+        )
+
+    resolver = create_filters_from_set(_FilterSet)
+    attrs = {f.name: f.default.annotation for f in fields(resolver.__model__)}
+
+    assert attrs == {
+        "a": float,
+        "a__eq": float,
+        "a__ne": float,
+        "a__in_": List[int],
+        "a__not_in": List[int],
+        "a__gt": int,
+        "a__ge": int,
+        "a__lt": int,
+        "a__le": int,
+    }

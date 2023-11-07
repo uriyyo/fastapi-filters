@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Type, Optional, List, TYPE_CHECKING, Any, TypeVar, overload, Union, Sequence
+from typing import Type, Optional, List, TYPE_CHECKING, Any, TypeVar, overload, Union, Sequence, Dict
 
 from .op import FilterOpBuilder
 from .operators import FilterOperator, get_filter_operators
@@ -23,6 +23,7 @@ class FilterField(FilterOpBuilder[T_co]):
     name: Optional[str] = None
     alias: Optional[str] = None
     internal: bool = False
+    op_types: Optional[Dict[AbstractFilterOperator, Any]] = None
 
     if TYPE_CHECKING:
 
