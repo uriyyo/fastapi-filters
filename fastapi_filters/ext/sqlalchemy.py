@@ -29,6 +29,13 @@ from fastapi_filters.utils import fields_include_exclude
 TSelectable = TypeVar("TSelectable", bound=Select[Any])
 
 
+def _overlap(a: Any, b: Any) -> Any:
+    try:
+        return a.overlap(b)
+    except AttributeError:
+        return a.overlaps(b)
+
+
 DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
     FilterOperator.eq: operator.eq,
     FilterOperator.ne: operator.ne,
@@ -43,8 +50,8 @@ DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
     FilterOperator.in_: lambda a, b: a.in_(b),
     FilterOperator.not_in: lambda a, b: a.not_in(b),
     FilterOperator.is_null: lambda a, b: a.is_(None) if b else a.isnot(None),
-    FilterOperator.overlap: lambda a, b: a.overlap(b),
-    FilterOperator.not_overlap: lambda a, b: ~a.overlap(b),
+    FilterOperator.overlap: lambda a, b: _overlap(a, b),
+    FilterOperator.not_overlap: lambda a, b: ~_overlap(a, b),
     FilterOperator.contains: lambda a, b: a.contains(b),
     FilterOperator.not_contains: lambda a, b: ~a.contains(b),
 }
