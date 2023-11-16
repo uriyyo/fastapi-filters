@@ -289,13 +289,13 @@ toml = ["tomli"]
 
 [[package]]
 name = "dirty-equals"
-version = "0.7.1"
+version = "0.7.1.post0"
 description = "Doing dirty (but extremely useful) things with equals."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "dirty_equals-0.7.1-py3-none-any.whl", hash = "sha256:66243dc58e23afd396284720d03589e72c05e628798a16ac43285843347a4bf4"},
-    {file = "dirty_equals-0.7.1.tar.gz", hash = "sha256:a580513f3285e93656a770a04e428f8bfc513848877bf278282dbfbb907fdbb4"},
+    {file = "dirty_equals-0.7.1.post0-py3-none-any.whl", hash = "sha256:7fb9217ea7cd04c0e95ace3bc717e2ee5532b8990518533483e53b5a43903c88"},
+    {file = "dirty_equals-0.7.1.post0.tar.gz", hash = "sha256:78ff80578a46163831ecb3255cf30d03d1dc2fbca8e67f820105691a1bc556dc"},
 ]
 
 [package.dependencies]
