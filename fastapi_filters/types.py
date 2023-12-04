@@ -7,7 +7,7 @@ from .fields import FilterField
 AbstractFilterOperator: TypeAlias = Enum
 FilterAliasGenerator: TypeAlias = Callable[[str, AbstractFilterOperator, Optional[str]], str]
 FilterPlace: TypeAlias = Callable[..., Any]
-FilterFieldDef: TypeAlias = Union[Type[Any], FilterField]
+FilterFieldDef: TypeAlias = Union[Type[Any], FilterField[Any]]
 FilterValues: TypeAlias = Dict[str, Dict[AbstractFilterOperator, Any]]
 
 

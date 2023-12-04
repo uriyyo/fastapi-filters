@@ -69,13 +69,13 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload  # we need special overload case for str because it is a Sequence of strings
-        def __scalar_method_scalar_arg__(  # type: ignore[misc]
+        def __scalar_method_scalar_arg__(  # type: ignore[overload-overlap]
             self: FilterOpBuilder[str], value: str, /
         ) -> FilterOp[str]:
             pass
 
         @overload
-        def __scalar_method_scalar_arg__(  # type: ignore[misc]
+        def __scalar_method_scalar_arg__(  # type: ignore[overload-overlap]
             self: FilterOpBuilder[Sequence[TArg_co]], value: Any, /
         ) -> None:
             pass
@@ -92,13 +92,13 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def __non_scalar_method_non_scalar_arg__(  # type: ignore[misc]
+        def __non_scalar_method_non_scalar_arg__(  # type: ignore[overload-overlap]
             self: FilterOpBuilder[str], value: Any, /
         ) -> None:
             pass
 
         @overload
-        def __non_scalar_method_non_scalar_arg__(  # type: ignore[misc]
+        def __non_scalar_method_non_scalar_arg__(  # type: ignore[overload-overlap]
             self: FilterOpBuilder[Sequence[TArg_co]], value: Sequence[TArg_co], /
         ) -> FilterOp[Sequence[TArg_co]]:
             pass
@@ -111,15 +111,15 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def __eq__(self: FilterOpBuilder[Enum], value: Enum, /) -> FilterOp[Enum]:  # type: ignore[misc]
+        def __eq__(self: FilterOpBuilder[Enum], value: Enum, /) -> FilterOp[Enum]:  # type: ignore[overload-overlap]
             pass
 
         @overload
-        def __eq__(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[misc]
+        def __eq__(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[overload-overlap]
             pass
 
         @overload
-        def __eq__(self: FilterOpBuilder[Sequence[TArg_co]], value: Any, /) -> None:  # type: ignore[misc]
+        def __eq__(self: FilterOpBuilder[Sequence[TArg_co]], value: Any, /) -> None:  # type: ignore[overload-overlap]
             pass
 
         @overload
@@ -136,15 +136,15 @@ class FilterOpBuilder(Generic[T_co]):
         __ne__ = __eq__
 
         @overload
-        def __lt__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[misc]
+        def __lt__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[overload-overlap]
             pass
 
         @overload
-        def __lt__(self: FilterOpBuilder[Enum], other: Any, /) -> None:  # type: ignore[misc]
+        def __lt__(self: FilterOpBuilder[Enum], other: Any, /) -> None:  # type: ignore[overload-overlap]
             pass
 
         @overload
-        def __lt__(  # type: ignore[misc]
+        def __lt__(  # type: ignore[overload-overlap]
             self: FilterOpBuilder[Sequence[TArg_co]],
             other: Any,
             /,
@@ -175,11 +175,11 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def __rshift__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[misc]
+        def __rshift__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[overload-overlap]
             pass
 
         @overload
-        def __rshift__(self: FilterOpBuilder[Sequence[TArg_co]], other: Any, /) -> None:  # type: ignore[misc]
+        def __rshift__(self: FilterOpBuilder[Sequence[TArg_co]], other: Any, /) -> None:  # type: ignore[overload-overlap]
             pass
 
         @overload
@@ -198,7 +198,7 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[misc]
+        def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[overload-overlap]
             pass
 
         @overload
