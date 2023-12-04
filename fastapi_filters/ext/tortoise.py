@@ -60,7 +60,7 @@ def apply_sorting(
     for field, direction, _ in sorting:
         field = remapping.get(field, field)
         field = field.replace(".", "__")
-        ordering.append(f"{field}{'-' if direction == 'desc' else ''}")
+        ordering.append(f"{'-' if direction == 'desc' else ''}{field}")
 
     if ordering:
         stmt = stmt.order_by(*ordering)  # type: ignore
