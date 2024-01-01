@@ -38,7 +38,7 @@ black = ">=22.12,<24.0"
 pre-commit = ">=2.21,<4.0"
 uvicorn = ">=0.20,<0.26"
 dirty-equals = ">=0.6,<0.8"
-faker = ">=19.3,<22.0"
+faker = ">=19.3,<23.0"
 asyncpg = ">=0.28,<0.30"
 
 [tool.poetry.extras]
