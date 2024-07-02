@@ -15,7 +15,7 @@ repos:
         name: ruff
         pass_filenames: false
         language_version: python3.8
-        entry: poetry run ruff --fix --exit-non-zero-on-fix --show-fixes fastapi_filters tests examples
+        entry: poetry run ruff check --fix --exit-non-zero-on-fix --show-fixes fastapi_filters tests examples
 
   - repo: local
     hooks:
