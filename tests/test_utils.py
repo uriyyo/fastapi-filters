@@ -55,32 +55,32 @@ def test_is_optional_union_operator():
 
 
 def test_unwrap_type():
-    assert unwrap_type(Optional[int]) == int
+    assert unwrap_type(Optional[int]) is int
     assert unwrap_type(Union[int, float, None]) == Union[int, float]
-    assert unwrap_type(List[int]) == int
-    assert unwrap_type(Tuple[int, ...]) == int
+    assert unwrap_type(List[int]) is int
+    assert unwrap_type(Tuple[int, ...]) is int
     assert unwrap_type(Tuple[int, float]) == Union[int, float]
-    assert unwrap_type(Sequence[int]) == int
-    assert unwrap_type(int) == int
+    assert unwrap_type(Sequence[int]) is int
+    assert unwrap_type(int) is int
     assert unwrap_type(None) is None
 
 
 @mark.skipif(sys.version_info < (3, 9), reason="Python 3.9+ required")
 def test_unwrap_type_generic_aliases():
-    assert unwrap_type(list[int]) == int  # noqa
-    assert unwrap_type(tuple[int, ...]) == int  # noqa
+    assert unwrap_type(list[int]) is int  # noqa
+    assert unwrap_type(tuple[int, ...]) is int  # noqa
     assert unwrap_type(tuple[int, float]) == Union[int, float]  # noqa
 
 
 @mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
 def test_unwrap_type_union_operator():
-    assert unwrap_type(eval("int | None")) == int
+    assert unwrap_type(eval("int | None")) is int
     assert unwrap_type(eval("int | float | None")) == Union[int, float]
     assert unwrap_type(eval("int | float")) == Union[int, float]
 
 
 def test_unwrap_optional_type():
-    assert unwrap_optional_type(Optional[int]) == int
+    assert unwrap_optional_type(Optional[int]) is int
     assert unwrap_optional_type(Optional[List[int]]) == List[int]
     assert unwrap_optional_type(Union[int, float, None]) == Union[int, float]
 
@@ -88,16 +88,16 @@ def test_unwrap_optional_type():
         assert unwrap_optional_type(None) is None
 
     with raises(TypeError):
-        assert unwrap_optional_type(int) == int
+        assert unwrap_optional_type(int) is int
 
 
 def test_unwrap_seq_type():
-    assert unwrap_seq_type(List[int]) == int
-    assert unwrap_seq_type(Tuple[int, ...]) == int
-    assert unwrap_seq_type(Sequence[int]) == int
+    assert unwrap_seq_type(List[int]) is int
+    assert unwrap_seq_type(Tuple[int, ...]) is int
+    assert unwrap_seq_type(Sequence[int]) is int
 
     with raises(TypeError):
         assert unwrap_seq_type(None) is None
 
     with raises(TypeError):
-        assert unwrap_seq_type(int) == int
+        assert unwrap_seq_type(int) is int
