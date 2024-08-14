@@ -293,17 +293,17 @@ toml = ["tomli"]
 
 [[package]]
 name = "dirty-equals"
-version = "0.7.1.post0"
+version = "0.8.0"
 description = "Doing dirty (but extremely useful) things with equals."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "dirty_equals-0.7.1.post0-py3-none-any.whl", hash = "sha256:7fb9217ea7cd04c0e95ace3bc717e2ee5532b8990518533483e53b5a43903c88"},
-    {file = "dirty_equals-0.7.1.post0.tar.gz", hash = "sha256:78ff80578a46163831ecb3255cf30d03d1dc2fbca8e67f820105691a1bc556dc"},
+    {file = "dirty_equals-0.8.0-py3-none-any.whl", hash = "sha256:0ef998ba3c395e03cf5eb3cd1c13c26a9a992efa18c0d59c22ba27344519cee1"},
+    {file = "dirty_equals-0.8.0.tar.gz", hash = "sha256:798db3b9481b9a5024c0e520946507676ed2f0c65317d3e95bdce1a01657cf60"},
 ]
 
 [package.dependencies]
-pytz = ">=2021.3"
+pytz = {version = ">=2021.3", markers = "python_version < \"3.9\""}
 
 [package.extras]
 pydantic = ["pydantic (>=2.4.2)"]
@@ -1240,4 +1240,4 @@ tortoise-orm = ["tortoise-orm"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "737026a6f6c478d47f6b8ccb062045e8f9887fc55d60944959b1bac2daec86e7"
+content-hash = "1a5fb028d7065fc94e1f85e0c91f95c80f9717b224595dc4a7d7a9fc91546d6e"
