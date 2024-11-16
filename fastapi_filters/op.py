@@ -69,9 +69,7 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload  # we need special overload case for str because it is a Sequence of strings
-        def __scalar_method_scalar_arg__(  # type: ignore[overload-overlap]
-            self: FilterOpBuilder[str], value: str, /
-        ) -> FilterOp[str]:
+        def __scalar_method_scalar_arg__(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:
             pass
 
         @overload
@@ -92,13 +90,11 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def __non_scalar_method_non_scalar_arg__(  # type: ignore[overload-overlap]
-            self: FilterOpBuilder[str], value: Any, /
-        ) -> None:
+        def __non_scalar_method_non_scalar_arg__(self: FilterOpBuilder[str], value: Any, /) -> None:
             pass
 
         @overload
-        def __non_scalar_method_non_scalar_arg__(  # type: ignore[overload-overlap]
+        def __non_scalar_method_non_scalar_arg__(
             self: FilterOpBuilder[Sequence[TArg_co]], value: Sequence[TArg_co], /
         ) -> FilterOp[Sequence[TArg_co]]:
             pass
@@ -175,11 +171,11 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def __rshift__(self: FilterOpBuilder[bool], other: Any, /) -> None:  # type: ignore[overload-overlap]
+        def __rshift__(self: FilterOpBuilder[bool], other: Any, /) -> None:
             pass
 
         @overload
-        def __rshift__(self: FilterOpBuilder[Sequence[TArg_co]], other: Any, /) -> None:  # type: ignore[overload-overlap]
+        def __rshift__(self: FilterOpBuilder[Sequence[TArg_co]], other: Any, /) -> None:
             pass
 
         @overload
@@ -198,7 +194,7 @@ class FilterOpBuilder(Generic[T_co]):
             pass
 
         @overload
-        def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:  # type: ignore[overload-overlap]
+        def like(self: FilterOpBuilder[str], value: str, /) -> FilterOp[str]:
             pass
 
         @overload
