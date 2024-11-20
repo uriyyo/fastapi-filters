@@ -841,13 +841,13 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pypika-tortoise"
-version = "0.2.1"
+version = "0.2.2"
 description = "Forked from pypika and streamline just for tortoise-orm"
 optional = true
-python-versions = "<4.0,>=3.7"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "pypika_tortoise-0.2.1-py3-none-any.whl", hash = "sha256:e91a1c5a78c6753ead1a9ba1aa169a1f1282c5035170e5462f0073564bc18886"},
-    {file = "pypika_tortoise-0.2.1.tar.gz", hash = "sha256:979bbb9d60fe9f6e4129a25c44ee008aab4a4e97b296350be9983dcaa2766354"},
+    {file = "pypika_tortoise-0.2.2-py3-none-any.whl", hash = "sha256:e93190aedd95acb08b69636bc2328cc053b2c9971307b6d44405bc6d9f9b71a5"},
+    {file = "pypika_tortoise-0.2.2.tar.gz", hash = "sha256:f0fbc9e0c3ddc33118a5be69907428863849df60788e125edef1f46a6261d63b"},
 ]
 
 [[package]]
@@ -1184,20 +1184,20 @@ files = [
 
 [[package]]
 name = "tortoise-orm"
-version = "0.21.7"
+version = "0.22.0"
 description = "Easy async ORM for python, built with relations in mind"
 optional = true
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "tortoise_orm-0.21.7-py3-none-any.whl", hash = "sha256:2229925885461f424673223ea1875bd5e6961384c766833af55a1ea11a9b25eb"},
-    {file = "tortoise_orm-0.21.7.tar.gz", hash = "sha256:8a790a931828aa37ac364b344c561e603422aced2af5e403f6790575da0f19c5"},
+    {file = "tortoise_orm-0.22.0-py3-none-any.whl", hash = "sha256:e2c4eb7c7d2162fb2255c5688c54c5785cff0112279d3aa669d2e656906f8a35"},
+    {file = "tortoise_orm-0.22.0.tar.gz", hash = "sha256:feaae36507d36db8188ea05e07d7a6f5d2a367181e4349416fc09b40655199a4"},
 ]
 
 [package.dependencies]
 aiosqlite = ">=0.16.0,<0.21.0"
 iso8601 = ">=2.1.0,<3.0.0"
 pydantic = ">=2.0,<2.7.0 || >2.7.0,<3.0"
-pypika-tortoise = ">=0.2.1,<0.3.0"
+pypika-tortoise = ">=0.2.2,<0.3.0"
 pytz = "*"
 
 [package.extras]
@@ -1266,4 +1266,4 @@ tortoise-orm = ["tortoise-orm"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "7f15d609165be0d5552e9d61400aa9a9fb8b1725cccf216764dc030ffecdd203"
+content-hash = "826d9275c41244d1124b2356ba6742ff62cca4fc366a3a15167b328d76b2ddb9"
