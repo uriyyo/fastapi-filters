@@ -1,9 +1,9 @@
+import pytest
+from dirty_equals import IsPartialDict
 from fastapi import Query, status
 from pydantic import ValidationError
-from pytest import raises
 
 from fastapi_filters.schemas import CSVList
-from dirty_equals import IsPartialDict
 
 from .utils import parse_obj_as
 
@@ -15,7 +15,7 @@ def test_csv_list():
 
 
 def test_csv_list_errors():
-    with raises(ValidationError) as exc:
+    with pytest.raises(ValidationError) as exc:
         parse_obj_as(CSVList[int], "abc")
 
     assert exc.value.errors() == [
@@ -25,11 +25,12 @@ def test_csv_list_errors():
                 "loc": (0,),
                 "msg": "Input should be a valid integer, unable to parse string as an integer",
                 "type": "int_parsing",
-            }
-        )
+            },
+        ),
     ]
 
 
+@pytest.mark.asyncio
 async def test_csv_list_as_query_param(app, client):
     @app.get("/")
     def index(q: CSVList[int] = Query(...)):
@@ -51,7 +52,7 @@ async def test_csv_list_as_query_param(app, client):
                     "loc": ["query", "q", 0],
                     "msg": "Input should be a valid integer, unable to parse string as an integer",
                     "type": "int_parsing",
-                }
+                },
             ),
-        ]
+        ],
     }

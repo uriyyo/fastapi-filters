@@ -1,12 +1,19 @@
-from typing import Optional, List
+from typing import Annotated, Optional
 
+import pytest
 from fastapi import Depends, status
 from pydantic import BaseModel, BeforeValidator
-from typing_extensions import Annotated
 
-from fastapi_filters import create_filters, FilterField, create_filters_from_model, FilterValues, FilterOperator
+from fastapi_filters import (
+    FilterField,
+    FilterOperator,
+    FilterValues,
+    create_filters,
+    create_filters_from_model,
+)
 
 
+@pytest.mark.asyncio
 async def test_filters_as_dep(app, client):
     @app.get("/")
     async def route(
@@ -14,19 +21,22 @@ async def test_filters_as_dep(app, client):
             create_filters(
                 a=int,
                 b=bool,
-                c=List[str],
+                c=list[str],
                 d=FilterField(
                     bytes,
                     default_op=FilterOperator.eq,
                     operators=[FilterOperator.eq, FilterOperator.ne],
                     alias="d_alias",
                 ),
-            )
-        )
+            ),
+        ),
     ) -> FilterValues:
         return filters
 
-    res = await client.get("/", params={"a": 1, "b": "true", "c": "a,b,c", "d_alias": "123"})
+    res = await client.get(
+        "/",
+        params={"a": 1, "b": "true", "c": "a,b,c", "d_alias": "123"},
+    )
 
     assert res.status_code == status.HTTP_200_OK
     assert res.json() == {
@@ -44,6 +54,7 @@ async def test_filters_as_dep(app, client):
     }
 
 
+@pytest.mark.asyncio
 async def test_filters(app):
     resolver = create_filters(
         a=FilterField(
@@ -81,6 +92,7 @@ async def test_filters(app):
     }
 
 
+@pytest.mark.asyncio
 async def test_filters_from_model(app):
     class UserModel(BaseModel):
         id: int

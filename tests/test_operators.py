@@ -1,40 +1,41 @@
 import sys
-from datetime import timedelta, datetime, date
-from typing import List, Tuple, Optional, Any
+from datetime import date, datetime, timedelta
+from typing import Any, Optional
 
-from pytest import mark
+import pytest
 
 from fastapi_filters.operators import (
-    get_filter_operators,
-    SEQ_OPERATORS,
-    FilterOperator,
     DEFAULT_OPERATORS,
     NUM_OPERATORS,
+    SEQ_OPERATORS,
+    FilterOperator,
+    get_filter_operators,
 )
 
+ADDITIONAL_CASES: list[tuple[Any, Any]] = []
 
-ADDITIONAL_CASES: List[Tuple[Any, Any]] = []
-
-if sys.version_info >= (3, 9):
-    ADDITIONAL_CASES += [
-        (list[int], SEQ_OPERATORS),  # noqa
-        (tuple[float, ...], SEQ_OPERATORS),  # noqa
-    ]
+ADDITIONAL_CASES += [
+    (list[int], SEQ_OPERATORS),
+    (tuple[float, ...], SEQ_OPERATORS),
+]
 
 
 if sys.version_info >= (3, 10):
     ADDITIONAL_CASES += [
-        (eval("int | None"), [FilterOperator.is_null] + DEFAULT_OPERATORS + NUM_OPERATORS),  # noqa
+        (
+            eval("int | None"),
+            [FilterOperator.is_null, *DEFAULT_OPERATORS, *NUM_OPERATORS],
+        ),
     ]
 
 
-@mark.parametrize(
-    "tp,operators",
+@pytest.mark.parametrize(
+    ("tp", "operators"),
     [
-        *[(tp, SEQ_OPERATORS) for tp in (List[int], Tuple[float, ...])],
+        *[(tp, SEQ_OPERATORS) for tp in (list[int], tuple[float, ...])],
         (bool, [FilterOperator.eq, FilterOperator.ne]),
         *[(tp, DEFAULT_OPERATORS + NUM_OPERATORS) for tp in (int, float, date, datetime, timedelta)],
-        (Optional[int], [FilterOperator.is_null] + DEFAULT_OPERATORS + NUM_OPERATORS),
+        (Optional[int], [FilterOperator.is_null, *DEFAULT_OPERATORS, *NUM_OPERATORS]),
         *ADDITIONAL_CASES,
     ],
     ids=str,

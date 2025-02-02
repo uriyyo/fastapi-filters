@@ -1,10 +1,16 @@
 from dataclasses import dataclass, fields
-from typing import Any, List
+from typing import Any
 
+import pytest
 from fastapi import Depends, status
-from pytest import raises
 
-from fastapi_filters import FilterSet, FilterField, FilterOperator, create_filters, create_filters_from_set
+from fastapi_filters import (
+    FilterField,
+    FilterOperator,
+    FilterSet,
+    create_filters,
+    create_filters_from_set,
+)
 
 
 @dataclass
@@ -64,7 +70,9 @@ def test_filter_field_filter_values():
 
     _filter_set = _FilterSet(a={FilterOperator.eq: 1, FilterOperator.ne: 2}, b=None)
 
-    assert _filter_set.filter_values == {"a": {FilterOperator.eq: 1, FilterOperator.ne: 2}}
+    assert _filter_set.filter_values == {
+        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2},
+    }
 
 
 def test_missed_field():
@@ -94,7 +102,7 @@ def test_from_ops_duplicates():
     class _FilterSet(FilterSet):
         a: FilterField[int]
 
-    with raises(
+    with pytest.raises(
         ValueError,
         match=r"^Duplicate operator eq for a$",
     ):
@@ -116,6 +124,7 @@ def test_from_resolver():
     assert _filter_set.__filters__ == {k: _CmpFilterField(v) for k, v in _fields.items()}
 
 
+@pytest.mark.asyncio
 async def test_create_filters_from_set(app, client):
     class _FilterSet(FilterSet):
         a: FilterField[int]
@@ -156,10 +165,12 @@ def test_subset():
         c={FilterOperator.eq: True, FilterOperator.ne: False},
     )
 
-    assert _filters.subset("a").filter_values == {"a": {FilterOperator.eq: 1, FilterOperator.ne: 2}}
+    assert _filters.subset("a").filter_values == {
+        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2},
+    }
     assert _filters.subset("b").filter_values == {}
     assert _filters.subset(_FilterSet.a, _FilterSet.b).filter_values == {
-        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2}
+        "a": {FilterOperator.eq: 1, FilterOperator.ne: 2},
     }
 
 
@@ -229,8 +240,8 @@ def test_op_types():
         "a": float,
         "a__eq": float,
         "a__ne": float,
-        "a__in_": List[int],
-        "a__not_in": List[int],
+        "a__in_": list[int],
+        "a__not_in": list[int],
         "a__gt": int,
         "a__ge": int,
         "a__lt": int,

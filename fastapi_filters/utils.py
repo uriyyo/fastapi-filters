@@ -1,11 +1,19 @@
+from collections.abc import Awaitable, Container, Iterable, Sequence
 from functools import wraps
-from typing import Awaitable, Callable, TypeVar, Sequence, Any, Union, Iterable, Optional, Container
+from typing import (
+    Annotated,
+    Any,
+    Callable,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from fastapi._compat import field_annotation_is_complex
 from pydantic.fields import FieldInfo
+from pydantic.v1.typing import get_args, get_origin, is_none_type, is_union
 from pydantic.v1.utils import lenient_issubclass
-from pydantic.v1.typing import is_union, get_args, is_none_type, get_origin
-from typing_extensions import ParamSpec, Annotated
+from typing_extensions import ParamSpec
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -61,7 +69,7 @@ def unwrap_type(tp: Any) -> Any:
 
 
 def unwrap_annotated(tp: Any) -> Any:
-    if get_origin(tp) is Annotated:  # type: ignore
+    if get_origin(tp) is Annotated:  # type: ignore[comparison-overlap]
         return tp.__origin__
 
     return tp
@@ -89,13 +97,13 @@ def is_complex_field(field: FieldInfo) -> bool:
 
 __all__ = [
     "async_safe",
-    "is_seq",
-    "is_optional",
+    "fields_include_exclude",
     "is_complex_field",
+    "is_optional",
+    "is_seq",
     "lenient_issubclass",
-    "unwrap_type",
     "unwrap_annotated",
     "unwrap_optional_type",
     "unwrap_seq_type",
-    "fields_include_exclude",
+    "unwrap_type",
 ]

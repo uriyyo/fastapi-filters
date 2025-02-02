@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import Optional
 
-from pytest import mark, raises
+import pytest
+
 from fastapi_filters import FilterField, FilterOperator
 from fastapi_filters.op import FilterOp
 
@@ -14,12 +15,12 @@ _field_int_b = FilterField(
 )
 _field_arr = FilterField(
     name="arr",
-    type=List[int],
+    type=list[int],
 )
 
 
-@mark.parametrize(
-    "expr, expected",
+@pytest.mark.parametrize(
+    ("expr", "expected"),
     [
         # ==, !=, <, <=, >, >=
         (_field_int_a == 1, FilterOp("a", FilterOperator.eq, 1)),
@@ -50,7 +51,10 @@ _field_arr = FilterField(
         (_field_int_b.is_null(False), FilterOp("b", FilterOperator.is_null, False)),
         # ov, not_ov, contains, not_contains
         (_field_arr.overlaps([1, 2]), FilterOp("arr", FilterOperator.overlap, [1, 2])),
-        (_field_arr.not_overlaps([1, 2]), FilterOp("arr", FilterOperator.not_overlap, [1, 2])),
+        (
+            _field_arr.not_overlaps([1, 2]),
+            FilterOp("arr", FilterOperator.not_overlap, [1, 2]),
+        ),
         (_field_arr.contains(1), FilterOp("arr", FilterOperator.contains, 1)),
         (_field_arr.not_contains(1), FilterOp("arr", FilterOperator.not_contains, 1)),
         # (eq, 1)
@@ -93,7 +97,7 @@ def test_op_constructor(expr, expected):
 def test_missed_fields():
     _field_no_name = FilterField(type=int)
 
-    with raises(
+    with pytest.raises(
         AssertionError,
         match="^FilterField has no name$",
     ):
@@ -101,7 +105,7 @@ def test_missed_fields():
 
     _field_no_type = FilterField(name="a")
 
-    with raises(
+    with pytest.raises(
         AssertionError,
         match="^FilterField has no operators$",
     ):

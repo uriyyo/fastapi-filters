@@ -1,38 +1,38 @@
 from collections import defaultdict
+from collections.abc import Container, Iterator
 from dataclasses import asdict, make_dataclass
 from dataclasses import field as dataclass_field
 from typing import (
+    Annotated,
     Any,
-    Iterator,
-    cast,
-    Dict,
-    Tuple,
     Optional,
-    Type,
-    Container,
+    cast,
 )
 
-from fastapi import Query, Depends
+from fastapi import Depends, Query
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
-from typing_extensions import Annotated
 
 from .config import ConfigVar
-from .schemas import CSVList
+from .fields import FilterField
 from .operators import FilterOperator
+from .schemas import CSVList
 from .types import (
-    FilterValues,
-    FiltersResolver,
+    AbstractFilterOperator,
     FilterAliasGenerator,
     FilterFieldDef,
     FilterPlace,
-    AbstractFilterOperator,
+    FiltersResolver,
+    FilterValues,
 )
-from .utils import async_safe, is_seq, unwrap_seq_type, fields_include_exclude
-from .fields import FilterField
+from .utils import async_safe, fields_include_exclude, is_seq, unwrap_seq_type
 
 
-def default_alias_generator(name: str, op: AbstractFilterOperator, alias: Optional[str] = None) -> str:
+def default_alias_generator(
+    name: str,
+    op: AbstractFilterOperator,
+    alias: Optional[str] = None,
+) -> str:
     name = alias or name
     return f"{name}[{op.name.rstrip('_')}]"
 
@@ -43,21 +43,30 @@ alias_generator_config: ConfigVar[FilterAliasGenerator] = ConfigVar(
 )
 
 
-def adapt_type(field: FilterField[Any], tp: Type[Any], op: AbstractFilterOperator) -> Any:
+def adapt_type(
+    field: FilterField[Any],
+    tp: type[Any],
+    op: AbstractFilterOperator,
+) -> Any:
     if field.op_types and op in field.op_types:
         return field.op_types[op]
 
     if is_seq(tp):
-        return CSVList[unwrap_seq_type(tp)]  # type: ignore
+        return CSVList[unwrap_seq_type(tp)]  # type: ignore[misc]
 
-    if op in {FilterOperator.like, FilterOperator.ilike, FilterOperator.not_like, FilterOperator.not_ilike}:
+    if op in {
+        FilterOperator.like,
+        FilterOperator.ilike,
+        FilterOperator.not_like,
+        FilterOperator.not_ilike,
+    }:
         return str
 
     if op == FilterOperator.is_null:
         return bool
 
     if op in {FilterOperator.in_, FilterOperator.not_in}:
-        return CSVList[tp]  # type: ignore
+        return CSVList[tp]  # type: ignore[valid-type]
 
     return tp
 
@@ -66,18 +75,27 @@ def field_filter_to_raw_fields(
     name: str,
     field: FilterField[Any],
     alias_generator: Optional[FilterAliasGenerator] = None,
-) -> Iterator[Tuple[str, Any, AbstractFilterOperator, Optional[str]]]:
+) -> Iterator[tuple[str, Any, AbstractFilterOperator, Optional[str]]]:
     if alias_generator is None:
         alias_generator = alias_generator_config.get()
 
     yield name, field.type, cast(AbstractFilterOperator, field.default_op), field.alias
 
     for op in field.operators or ():
-        yield f"{name}__{op.name}", field.type, op, alias_generator(name, op, field.alias)
+        yield (
+            f"{name}__{op.name}",
+            field.type,
+            op,
+            alias_generator(
+                name,
+                op,
+                field.alias,
+            ),
+        )
 
 
 def create_filters_from_model(
-    model: Type[BaseModel],
+    model: type[BaseModel],
     *,
     in_: Optional[FilterPlace] = None,
     alias_generator: Optional[FilterAliasGenerator] = None,
@@ -112,14 +130,18 @@ def create_filters(
     if in_ is None:
         in_ = Query
 
-    fields: Dict[str, FilterField[Any]] = {
+    fields: dict[str, FilterField[Any]] = {
         name: f_def if isinstance(f_def, FilterField) else FilterField(f_def) for name, f_def in kwargs.items()
     }
 
     fields_defs = [
         (name, fname, field, tp, alias, op)
         for name, field in fields.items()
-        for fname, tp, op, alias in field_filter_to_raw_fields(name, field, alias_generator)
+        for fname, tp, op, alias in field_filter_to_raw_fields(
+            name,
+            field,
+            alias_generator,
+        )
     ]
 
     defs = {fname: (name, op) for name, fname, *_, op in fields_defs}

@@ -1,15 +1,16 @@
-from typing import Literal, Optional, cast, Type, Container, Union, Tuple, List
+from collections.abc import Container
+from typing import Literal, Optional, Union, cast
 
 from fastapi import Query
 from pydantic import BaseModel
 
 from .schemas import CSVList
-from .types import FilterPlace, SortingResolver, SortingValues, SortingNulls
+from .types import FilterPlace, SortingNulls, SortingResolver, SortingValues
 from .utils import fields_include_exclude, is_complex_field
 
 
 def create_sorting_from_model(
-    model: Type[BaseModel],
+    model: type[BaseModel],
     *,
     default: Optional[str] = None,
     in_: Optional[FilterPlace] = None,
@@ -26,9 +27,9 @@ def create_sorting_from_model(
 
 
 def create_sorting(
-    *fields: Union[str, Tuple[str, SortingNulls]],
+    *fields: Union[str, tuple[str, SortingNulls]],
     in_: Optional[FilterPlace] = None,
-    default: Optional[Union[str, List[str]]] = None,
+    default: Optional[Union[str, list[str]]] = None,
 ) -> SortingResolver:
     if in_ is None:
         in_ = Query
@@ -36,18 +37,22 @@ def create_sorting(
     normalized_fields = [(f, None) if isinstance(f, str) else f for f in fields]
 
     defs = {f"{d}{f}": (f, v, n) for (v, d) in (("asc", "+"), ("desc", "-")) for f, n in normalized_fields}
-    tp = Literal[tuple(defs)]  # type: ignore
+    tp = Literal[tuple(defs)]  # type: ignore[valid-type]
 
     default = [default] if isinstance(default, str) else default
 
     if default and (diff := {*default} - {*defs}):
-        raise ValueError(f"Default sort field {','.join(diff)} is not in {','.join(f for f, _ in normalized_fields)}")
+        raise ValueError(
+            f"Default sort field {','.join(diff)} is not in {','.join(f for f, _ in normalized_fields)}",
+        )
 
-    async def _get_sorters(sort: CSVList[tp] = in_(default, annotation=CSVList[tp])) -> SortingValues:  # type: ignore
+    async def _get_sorters(
+        sort: CSVList[tp] = in_(default, annotation=CSVList[tp]),  # type: ignore[valid-type,misc]
+    ) -> SortingValues:
         return cast(SortingValues, [defs[f] for f in sort or ()])
 
-    _get_sorters.__tp__ = tp  # type: ignore
-    _get_sorters.__defs__ = defs  # type: ignore
+    _get_sorters.__tp__ = tp  # type: ignore[attr-defined]
+    _get_sorters.__defs__ = defs  # type: ignore[attr-defined]
 
     return cast(SortingResolver, _get_sorters)
 

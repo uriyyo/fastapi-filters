@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Type, Optional, List, TYPE_CHECKING, Any, TypeVar, overload, Union, Sequence, Dict
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Optional,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from .op import FilterOpBuilder
 from .operators import FilterOperator, get_filter_operators
 from .utils import is_seq
-
 
 if TYPE_CHECKING:
     from .types import AbstractFilterOperator
@@ -17,13 +24,13 @@ T_co = TypeVar("T_co", covariant=True)
 
 @dataclass(eq=False, order=False)
 class FilterField(FilterOpBuilder[T_co]):
-    type: Optional[Type[T_co]] = None
-    operators: Optional[List[AbstractFilterOperator]] = None
+    type: Optional[type[T_co]] = None
+    operators: Optional[list[AbstractFilterOperator]] = None
     default_op: Optional[AbstractFilterOperator] = None
     name: Optional[str] = None
     alias: Optional[str] = None
     internal: bool = False
-    op_types: Optional[Dict[AbstractFilterOperator, Any]] = None
+    op_types: Optional[dict[AbstractFilterOperator, Any]] = None
 
     if TYPE_CHECKING:
 

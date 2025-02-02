@@ -1,6 +1,6 @@
 from typing_extensions import reveal_type
 
-from fastapi_filters import FilterSet, FilterField
+from fastapi_filters import FilterField, FilterSet
 
 
 class MyFilterSet(FilterSet):

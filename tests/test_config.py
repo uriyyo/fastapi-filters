@@ -1,5 +1,5 @@
+import pytest
 from fastapi import Depends, status
-from pytest import raises
 
 from fastapi_filters.config import ConfigVar
 
@@ -26,10 +26,11 @@ def test_config_var_double_reset():
     reset = var.set(2)
     reset.reset()
 
-    with raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         reset.reset()
 
 
+@pytest.mark.asyncio
 async def test_config_var_dependency(app, client):
     var = ConfigVar("test", default=1)
 
