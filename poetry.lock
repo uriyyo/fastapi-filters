@@ -268,13 +268,13 @@ toml = ["tomli"]
 
 [[package]]
 name = "dirty-equals"
-version = "0.8.0"
+version = "0.9.0"
 description = "Doing dirty (but extremely useful) things with equals."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "dirty_equals-0.8.0-py3-none-any.whl", hash = "sha256:0ef998ba3c395e03cf5eb3cd1c13c26a9a992efa18c0d59c22ba27344519cee1"},
-    {file = "dirty_equals-0.8.0.tar.gz", hash = "sha256:798db3b9481b9a5024c0e520946507676ed2f0c65317d3e95bdce1a01657cf60"},
+    {file = "dirty_equals-0.9.0-py3-none-any.whl", hash = "sha256:ff4d027f5cfa1b69573af00f7ba9043ea652dbdce3fe5cbe828e478c7346db9c"},
+    {file = "dirty_equals-0.9.0.tar.gz", hash = "sha256:17f515970b04ed7900b733c95fd8091f4f85e52f1fb5f268757f25c858eb1f7b"},
 ]
 
 [package.extras]
@@ -1263,4 +1263,4 @@ tortoise-orm = ["tortoise-orm"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "81d524ed1faca309ab62d631c24aea106e8261320693ba805518169dfa5babd2"
+content-hash = "46e0bd473c8e72c8efc068857c3d0241620a42148bcfeec698bbe7e325d8aaca"
