@@ -1,17 +1,17 @@
 from typing import Any
 
-from pytest import mark, raises
-from sqlalchemy import Column, Integer, DateTime, String, select, ForeignKey, true
-from sqlalchemy.orm import declarative_base, relationship
+import pytest
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, select, true
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import declarative_base, relationship
 
-from fastapi_filters import FilterSet, FilterField
+from fastapi_filters import FilterField, FilterSet
 from fastapi_filters.ext.sqlalchemy import (
     apply_filters,
-    create_filters_from_orm,
-    apply_sorting,
-    create_sorting_from_orm,
     apply_filters_and_sorting,
+    apply_sorting,
+    create_filters_from_orm,
+    create_sorting_from_orm,
 )
 from fastapi_filters.operators import FilterOperator
 
@@ -46,8 +46,8 @@ def _compile_expr(expr: Any) -> str:
     return str(expr.compile(compile_kwargs={"literal_binds": True}))
 
 
-@mark.parametrize(
-    "op, val, expected",
+@pytest.mark.parametrize(
+    ("op", "val", "expected"),
     [
         (FilterOperator.eq, 10, User.age == 10),
         (FilterOperator.ne, 10, User.age != 10),
@@ -81,8 +81,8 @@ def test_apply_filters(op, val, expected):
     assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
 
 
-@mark.parametrize(
-    "op, val, expected",
+@pytest.mark.parametrize(
+    ("op", "val", "expected"),
     [
         (FilterOperator.like, "%test%", User.name.like("%test%")),
         (FilterOperator.ilike, "%test%", User.name.ilike("%test%")),
@@ -98,11 +98,15 @@ def test_apply_filters_string(op, val, expected):
     assert _compile_expr(filtered_stmt.whereclause) == _compile_expr(expected)
 
 
-@mark.parametrize(
-    "op, val, expected",
+@pytest.mark.parametrize(
+    ("op", "val", "expected"),
     [
         (FilterOperator.overlap, ["en", "ua"], User.languages.overlap(["en", "ua"])),
-        (FilterOperator.not_overlap, ["en", "ua"], ~User.languages.overlap(["en", "ua"])),
+        (
+            FilterOperator.not_overlap,
+            ["en", "ua"],
+            ~User.languages.overlap(["en", "ua"]),
+        ),
         (FilterOperator.contains, "en", User.languages.contains("en")),
         (FilterOperator.not_contains, "en", ~User.languages.contains("en")),
     ],
@@ -180,23 +184,28 @@ def test_apply_filters_filter_set():
 def test_unknown_operator():
     stmt = select(User)
 
-    with raises(NotImplementedError, match=r"Operator unknown is not implemented"):
-        apply_filters(stmt, {"name": {"unknown": "test"}})  # type: ignore
+    with pytest.raises(NotImplementedError, match=r"Operator unknown is not implemented"):
+        apply_filters(stmt, {"name": {"unknown": "test"}})
 
 
 def test_apply_sorting():
     stmt = select(User)
 
-    sorted_stmt = apply_sorting(stmt, [("name", "asc", None), ("age", "desc", "bigger")])
+    sorted_stmt = apply_sorting(
+        stmt,
+        [("name", "asc", None), ("age", "desc", "bigger")],
+    )
 
-    assert _compile_expr(sorted_stmt) == _compile_expr(stmt.order_by(User.name.asc(), User.age.desc().nulls_first()))
+    assert _compile_expr(sorted_stmt) == _compile_expr(
+        stmt.order_by(User.name.asc(), User.age.desc().nulls_first()),
+    )
 
 
 def test_apply_sorting_invalid_direction():
     stmt = select(User)
 
-    with raises(ValueError, match=r"^Unknown sorting direction .*$"):
-        apply_sorting(stmt, [("name", "invalid", None)])  # type: ignore
+    with pytest.raises(ValueError, match=r"^Unknown sorting direction .*$"):
+        apply_sorting(stmt, [("name", "invalid", None)])
 
 
 def test_apply_filtering_sorting():
@@ -212,7 +221,7 @@ def test_apply_filtering_sorting():
     )
 
     assert _compile_expr(result_stmt) == _compile_expr(
-        stmt.where(User.name == "test").where(User.age > 10).order_by(User.name.asc(), User.age.desc())
+        stmt.where(User.name == "test").where(User.age > 10).order_by(User.name.asc(), User.age.desc()),
     )
 
 
@@ -232,7 +241,10 @@ def test_create_filters_from_orm():
         "age__not_in": ("age", FilterOperator.not_in),
     }
 
-    resolver = create_filters_from_orm(User, exclude={"id", "name", "languages", "created_at"})
+    resolver = create_filters_from_orm(
+        User,
+        exclude={"id", "name", "languages", "created_at"},
+    )
 
     assert resolver.__defs__ == {
         "age": ("age", FilterOperator.eq),

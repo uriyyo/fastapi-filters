@@ -1,11 +1,19 @@
 import sys
 import threading
-from typing import List, Tuple, Sequence, Awaitable, Optional, Union
+from collections.abc import Awaitable, Sequence
+from typing import Optional, Union
 
+import pytest
 from fastapi import Depends
-from pytest import mark, raises
 
-from fastapi_filters.utils import async_safe, is_seq, is_optional, unwrap_type, unwrap_optional_type, unwrap_seq_type
+from fastapi_filters.utils import (
+    async_safe,
+    is_optional,
+    is_seq,
+    unwrap_optional_type,
+    unwrap_seq_type,
+    unwrap_type,
+)
 
 
 async def test_async_safe(app, client):
@@ -24,9 +32,9 @@ async def test_async_safe(app, client):
 
 
 def test_is_seq():
-    assert is_seq(List)
-    assert is_seq(List[int])
-    assert is_seq(Tuple[int, ...])
+    assert is_seq(list)
+    assert is_seq(list[int])
+    assert is_seq(tuple[int, ...])
     assert is_seq(Sequence[int])
 
     assert not is_seq(None)
@@ -36,8 +44,8 @@ def test_is_seq():
 
 def test_is_optional():
     assert is_optional(Optional[int])
-    assert is_optional(Optional[List[int]])
-    assert is_optional(Optional[Tuple[int, ...]])
+    assert is_optional(Optional[list[int]])
+    assert is_optional(Optional[tuple[int, ...]])
     assert is_optional(Optional[Sequence[int]])
     assert is_optional(Union[float, int, None])
 
@@ -46,7 +54,7 @@ def test_is_optional():
     assert not is_optional(Awaitable[int])
 
 
-@mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
 def test_is_optional_union_operator():
     assert is_optional(eval("int | None"))
     assert is_optional(eval("int | float | None"))
@@ -57,22 +65,22 @@ def test_is_optional_union_operator():
 def test_unwrap_type():
     assert unwrap_type(Optional[int]) is int
     assert unwrap_type(Union[int, float, None]) == Union[int, float]
-    assert unwrap_type(List[int]) is int
-    assert unwrap_type(Tuple[int, ...]) is int
-    assert unwrap_type(Tuple[int, float]) == Union[int, float]
+    assert unwrap_type(list[int]) is int
+    assert unwrap_type(tuple[int, ...]) is int
+    assert unwrap_type(tuple[int, float]) == Union[int, float]
     assert unwrap_type(Sequence[int]) is int
     assert unwrap_type(int) is int
     assert unwrap_type(None) is None
 
 
-@mark.skipif(sys.version_info < (3, 9), reason="Python 3.9+ required")
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="Python 3.9+ required")
 def test_unwrap_type_generic_aliases():
-    assert unwrap_type(list[int]) is int  # noqa
-    assert unwrap_type(tuple[int, ...]) is int  # noqa
-    assert unwrap_type(tuple[int, float]) == Union[int, float]  # noqa
+    assert unwrap_type(list[int]) is int
+    assert unwrap_type(tuple[int, ...]) is int
+    assert unwrap_type(tuple[int, float]) == Union[int, float]
 
 
-@mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
 def test_unwrap_type_union_operator():
     assert unwrap_type(eval("int | None")) is int
     assert unwrap_type(eval("int | float | None")) == Union[int, float]
@@ -81,23 +89,23 @@ def test_unwrap_type_union_operator():
 
 def test_unwrap_optional_type():
     assert unwrap_optional_type(Optional[int]) is int
-    assert unwrap_optional_type(Optional[List[int]]) == List[int]
+    assert unwrap_optional_type(Optional[list[int]]) == list[int]
     assert unwrap_optional_type(Union[int, float, None]) == Union[int, float]
 
-    with raises(TypeError):
+    with pytest.raises(TypeError):
         assert unwrap_optional_type(None) is None
 
-    with raises(TypeError):
+    with pytest.raises(TypeError):
         assert unwrap_optional_type(int) is int
 
 
 def test_unwrap_seq_type():
-    assert unwrap_seq_type(List[int]) is int
-    assert unwrap_seq_type(Tuple[int, ...]) is int
+    assert unwrap_seq_type(list[int]) is int
+    assert unwrap_seq_type(tuple[int, ...]) is int
     assert unwrap_seq_type(Sequence[int]) is int
 
-    with raises(TypeError):
+    with pytest.raises(TypeError):
         assert unwrap_seq_type(None) is None
 
-    with raises(TypeError):
+    with pytest.raises(TypeError):
         assert unwrap_seq_type(int) is int

@@ -1,4 +1,5 @@
-from typing_extensions import reveal_type, TypeAlias
+from typing_extensions import TypeAlias, reveal_type
+
 from fastapi_filters import FilterField
 
 _T: TypeAlias = bool

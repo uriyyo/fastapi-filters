@@ -1,28 +1,44 @@
 import operator
+from collections.abc import Container, Iterator, Mapping
 from contextlib import suppress
-from typing import TypeVar, Mapping, Any, Callable, cast, Optional, Container, List, Iterator, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+)
 
+from sqlalchemy import (
+    ARRAY,
+    ColumnExpressionArgument,
+    asc,
+    desc,
+    inspect,
+    nulls_first,
+    nulls_last,
+)
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.sql.selectable import Select
-from sqlalchemy import inspect, ARRAY, asc, desc, nulls_last, nulls_first, ColumnExpressionArgument
 from typing_extensions import TypeAlias
 
-from fastapi_filters import create_filters, FilterField
-from fastapi_filters.filter_set import FilterSet
+from fastapi_filters import FilterField, create_filters
 from fastapi_filters.config import ConfigVar
+from fastapi_filters.filter_set import FilterSet
 from fastapi_filters.operators import FilterOperator
 from fastapi_filters.sorters import create_sorting
 from fastapi_filters.types import (
-    FilterValues,
+    AbstractFilterOperator,
     FilterAliasGenerator,
     FilterFieldDef,
-    FiltersResolver,
     FilterPlace,
-    AbstractFilterOperator,
-    SortingValues,
+    FiltersResolver,
+    FilterValues,
     SortingDirection,
-    SortingResolver,
     SortingNulls,
+    SortingResolver,
+    SortingValues,
 )
 from fastapi_filters.utils import fields_include_exclude
 
@@ -63,7 +79,7 @@ SORT_FUNCS: Mapping[
     "desc": desc,
 }
 SORT_NULLS_FUNCS: Mapping[
-    Tuple[SortingDirection, SortingNulls],
+    tuple[SortingDirection, SortingNulls],
     Callable[[ColumnExpressionArgument[Any]], ColumnExpressionArgument[Any]],
 ] = {
     ("asc", "bigger"): nulls_last,
@@ -109,7 +125,10 @@ def _default_hook(*_: Any) -> Any:
     raise NotImplementedError
 
 
-ApplyFilterFunc: TypeAlias = Callable[[TSelectable, EntityNamespace, str, AbstractFilterOperator, Any], TSelectable]
+ApplyFilterFunc: TypeAlias = Callable[
+    [TSelectable, EntityNamespace, str, AbstractFilterOperator, Any],
+    TSelectable,
+]
 AddFilterConditionFunc: TypeAlias = Callable[[TSelectable, str, Any], TSelectable]
 
 custom_apply_filter: ConfigVar[ApplyFilterFunc[Any]] = ConfigVar(
@@ -151,7 +170,7 @@ def _apply_filter(
             assert cond is not None
     except (NotImplementedError, AssertionError):
         if field not in ns:
-            raise ValueError(f"Unknown field {field}")
+            raise ValueError(f"Unknown field {field}") from None
 
         try:
             cond = generic_condition(ns[field], val, op)
@@ -190,7 +209,10 @@ def apply_filters(
         filters = filters.filter_values
 
     remapping = remapping or {}
-    ns = {**_get_entity_namespace(stmt), **_normalize_additional_namespace(additional or {})}
+    ns = {
+        **_get_entity_namespace(stmt),
+        **_normalize_additional_namespace(additional or {}),
+    }
 
     for field, field_filters in filters.items():
         field = remapping.get(field, field)
@@ -209,7 +231,10 @@ def apply_sorting(
     additional: Optional[AdditionalNamespace] = None,
 ) -> TSelectable:
     remapping = remapping or {}
-    ns = {**_get_entity_namespace(stmt), **_normalize_additional_namespace(additional or {})}
+    ns = {
+        **_get_entity_namespace(stmt),
+        **_normalize_additional_namespace(additional or {}),
+    }
 
     for field, direction, nulls in sorting:
         field = remapping.get(field, field)
@@ -245,24 +270,19 @@ def apply_filters_and_sorting(
         apply_filter=apply_filter,
         add_condition=add_condition,
     )
-    stmt = apply_sorting(
+    return apply_sorting(
         stmt,
         sorting,
         remapping=remapping,
         additional=additional,
     )
 
-    return stmt
-
 
 def adapt_sqlalchemy_column_type(column: ColumnProperty[Any]) -> FilterFieldDef:
     expr: Any = column.expression
 
     type_: Any
-    if isinstance(expr.type, ARRAY):
-        type_ = List[expr.type.item_type.python_type]
-    else:
-        type_ = expr.type.python_type
+    type_ = list[expr.type.item_type.python_type] if isinstance(expr.type, ARRAY) else expr.type.python_type
 
     if expr.nullable:
         type_ = Optional[type_]
@@ -277,7 +297,7 @@ def _iter_over_orm_columns(
     include: Optional[Container[str]] = None,
     exclude: Optional[Container[str]] = None,
     remapping: Optional[Mapping[str, str]] = None,
-) -> Iterator[Tuple[str, ColumnProperty[Any]]]:
+) -> Iterator[tuple[str, ColumnProperty[Any]]]:
     inspected = inspect(obj, raiseerr=True)
 
     remapping = remapping or {}
@@ -356,13 +376,13 @@ def create_sorting_from_orm(
 
 
 __all__ = [
-    "custom_apply_filter",
-    "apply_filters",
-    "apply_sorting",
-    "apply_filters_and_sorting",
     "adapt_sqlalchemy_column_type",
+    "apply_filters",
+    "apply_filters_and_sorting",
+    "apply_sorting",
     "create_filters_from_orm",
     "create_sorting_from_orm",
-    "generic_condition",
     "custom_add_condition",
+    "custom_apply_filter",
+    "generic_condition",
 ]

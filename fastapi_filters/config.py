@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterable
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
-from typing import TypeVar, Generic, Any, Callable, AsyncIterable
+from typing import Callable, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -17,9 +18,8 @@ class _ContextVarReset(Generic[T]):
     def __enter__(self) -> _ContextVarReset[T]:
         return self
 
-    def __exit__(self, *_: Any) -> None:
+    def __exit__(self, *_: object) -> None:
         self.reset(required=False)
-        return None
 
     def reset(self, required: bool = True) -> None:
         if required and self.resetted:

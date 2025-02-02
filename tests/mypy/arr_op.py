@@ -1,9 +1,8 @@
-from typing import List
+from typing_extensions import TypeAlias, reveal_type
 
-from typing_extensions import reveal_type, TypeAlias
 from fastapi_filters import FilterField
 
-_T: TypeAlias = List[int]
+_T: TypeAlias = list[int]
 val: _T = [1]
 
 field: FilterField[_T] = FilterField()

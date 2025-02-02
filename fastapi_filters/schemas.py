@@ -1,7 +1,7 @@
-from typing import List, TypeVar, Any
+from typing import Annotated, Any, TypeVar
 
 from pydantic import BeforeValidator, GetPydanticSchema
-from typing_extensions import TypeAlias, Annotated
+from typing_extensions import TypeAlias
 
 T = TypeVar("T")
 
@@ -16,13 +16,13 @@ def csv_list_validator(v: Any) -> Any:
 
 
 CSVList: TypeAlias = Annotated[
-    List[T],
+    list[T],
     BeforeValidator(csv_list_validator),
     GetPydanticSchema(
         get_pydantic_json_schema=lambda core_schema, handler: {
             **handler.resolve_ref_schema(handler(core_schema)),
             "explode": False,
-        }
+        },
     ),
 ]
 

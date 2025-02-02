@@ -1,18 +1,19 @@
-from typing import List
-
+import pytest
 from fastapi import Query
 
 from fastapi_filters.docs import fix_docs
 from fastapi_filters.schemas import CSVList
-from pytest import fixture
 
 
-@fixture
+@pytest.fixture
 def app(app):
     @app.get("/")
     def route(
-        q1: CSVList[int] = Query(None, annotation=CSVList[int]),  # FIXME: looks like FastAPI bug
-        q2: List[int] = Query(None),
+        q1: CSVList[int] = Query(
+            None,
+            annotation=CSVList[int],
+        ),  # FIXME: looks like FastAPI bug
+        q2: list[int] = Query(None),
     ):
         return []
 

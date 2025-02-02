@@ -1,6 +1,4 @@
-from typing import List
-from pytest import raises
-
+import pytest
 from fastapi import Depends, status
 
 from fastapi_filters.sorters import create_sorting, create_sorting_from_model
@@ -9,7 +7,9 @@ from fastapi_filters.types import SortingValues
 
 async def test_filters_as_dep(app, client):
     @app.get("/")
-    async def route(sorting: SortingValues = Depends(create_sorting("name", "age", "created_at"))) -> SortingValues:
+    async def route(
+        sorting: SortingValues = Depends(create_sorting("name", "age", "created_at")),
+    ) -> SortingValues:
         return sorting
 
     res = await client.get("/")
@@ -47,7 +47,7 @@ def test_create_sorting_from_model():
         age: int
         created_at: str
         group: Group
-        languages: List[str]
+        languages: list[str]
 
     model = create_sorting_from_model(User)
 
@@ -62,5 +62,5 @@ def test_create_sorting_from_model():
 
 
 def test_create_sorting_invalid_default():
-    with raises(ValueError, match=r"^Default sort field invalid is not in .*$"):
+    with pytest.raises(ValueError, match=r"^Default sort field invalid is not in .*$"):
         create_sorting("name", "age", "created_at", default="invalid")

@@ -1,23 +1,24 @@
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Any
+from typing import Any
 
-from pytest import Collector, File, Item, ExceptionInfo
+import pytest
 
-from ..utils import run_mypy
+from tests.utils import run_mypy
 
 
 class _MypyFailure(Exception):
     pass
 
 
-class _MypyItem(Item):
+class _MypyItem(pytest.Item):
     def get_expected_result(self) -> str:
         code, _, expected = self.path.read_text().partition("# output:")
         return expected.strip().strip('"')
 
     def repr_failure(
         self,
-        excinfo: ExceptionInfo[BaseException],
+        excinfo: pytest.ExceptionInfo[BaseException],
         style: Any = None,
     ) -> Any:
         if excinfo.errisinstance(_MypyFailure):
@@ -33,8 +34,8 @@ class _MypyItem(Item):
             raise _MypyFailure(out)
 
 
-class _MypyTest(File):
-    def collect(self) -> Iterable[Item]:
+class _MypyTest(pytest.File):
+    def collect(self) -> Iterable[pytest.Item]:
         yield _MypyItem.from_parent(
             self,
             name=f"tests/mypy/{self.name}",
@@ -43,11 +44,11 @@ class _MypyTest(File):
         )
 
 
-def pytest_collect_file(file_path: Path, parent: Collector):
+def pytest_collect_file(file_path: Path, parent: pytest.Collector):
     name = file_path.name
 
     if name in {"__init__.py", "conftest.py"}:
-        return
+        return None
 
     return _MypyTest.from_parent(
         parent,

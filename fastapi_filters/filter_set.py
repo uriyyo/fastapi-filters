@@ -1,40 +1,44 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict, replace
+from collections.abc import Awaitable, Mapping, Sequence
+from dataclasses import asdict, dataclass, replace
 from typing import (
-    TypeVar,
     Any,
-    Optional,
     Callable,
-    Awaitable,
-    get_args,
-    Dict,
     ClassVar,
-    Type,
-    Mapping,
+    Optional,
+    TypeVar,
     Union,
-    Sequence,
+    cast,
+    get_args,
+    get_type_hints,
 )
 
 from fastapi import Depends
-from typing_extensions import dataclass_transform, Self, get_type_hints, get_origin
+from typing_extensions import Self, dataclass_transform, get_origin
 
 from .fields import FilterField
 from .filters import create_filters
 from .op import FilterOp
-from .types import AbstractFilterOperator, FilterValues, FiltersResolver
+from .types import AbstractFilterOperator, FiltersResolver, FilterValues
 
-T = TypeVar("T", covariant=True)
+T_co = TypeVar("T_co", covariant=True)
 
 
 class FilterSetMeta(type):
-    def __init__(cls, name: str, bases: Any, namespace: Dict[str, Any], **kwargs: Any) -> None:
+    def __init__(
+        cls,
+        name: str,
+        bases: Any,
+        namespace: dict[str, Any],
+        **kwargs: Any,
+    ) -> None:
         super().__init__(name, bases, namespace, **kwargs)
 
         hints = get_type_hints(cls)
         specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FilterField}
 
-        cls.__filters__: Dict[str, FilterField[Any]] = {}
+        cls.__filters__: dict[str, FilterField[Any]] = {}
         for base in bases:
             cls.__filters__.update(getattr(base, "__filters__", {}))
 
@@ -54,7 +58,7 @@ class FilterSetMeta(type):
         for key in cls.__filters__:  # used to add default value for dataclass
             setattr(cls, key, None)
 
-        d_cls = dataclass(cls)  # type: ignore
+        d_cls = dataclass(cast(type[Any], cls))
 
         for key, value in cls.__filters__.items():
             setattr(d_cls, key, value)
@@ -64,7 +68,7 @@ class FilterSetMeta(type):
     field_specifiers=(FilterField,),
 )
 class FilterSet(metaclass=FilterSetMeta):
-    __filters__: ClassVar[Dict[str, FilterField[Any]]]
+    __filters__: ClassVar[dict[str, FilterField[Any]]]
 
     @classmethod
     def create(
@@ -104,10 +108,14 @@ class FilterSet(metaclass=FilterSetMeta):
         resolver: FiltersResolver,
         *,
         name: Optional[str] = None,
-    ) -> Type[Self]:
+    ) -> type[Self]:
         anns = {k: FilterField[f.type] for k, f in resolver.__filters__.items()}  # type: ignore[name-defined]
 
-        return type(name or "FilterSet", (cls,), {**resolver.__filters__, "__annotations__": anns})
+        return type(
+            name or "FilterSet",
+            (cls,),
+            {**resolver.__filters__, "__annotations__": anns},
+        )
 
     @property
     def filter_values(self) -> FilterValues:
@@ -115,9 +123,15 @@ class FilterSet(metaclass=FilterSetMeta):
 
     def subset(self, *fields: FilterField[Any] | str) -> Self:
         names = {name for f in fields if (name := f.name if isinstance(f, FilterField) else f)}
-        return self.create(**{k: v for k, v in self.filter_values.items() if k in names})
+        return self.create(
+            **{k: v for k, v in self.filter_values.items() if k in names},
+        )
 
-    def extract(self, *fields: FilterField[Any] | str | type[FilterSet], strict: bool = False) -> Self:
+    def extract(
+        self,
+        *fields: FilterField[Any] | str | type[FilterSet],
+        strict: bool = False,
+    ) -> Self:
         names = set()
         for f in fields:
             if isinstance(f, FilterField):
@@ -143,9 +157,11 @@ class FilterSet(metaclass=FilterSetMeta):
 TFiltersSet = TypeVar("TFiltersSet", bound=FilterSet)
 
 
-def create_filters_from_set(filters_set: Type[TFiltersSet]) -> Callable[..., Awaitable[TFiltersSet]]:
+def create_filters_from_set(
+    filters_set: type[TFiltersSet],
+) -> Callable[..., Awaitable[TFiltersSet]]:
     filters_dep = create_filters(
-        **{k: v for k, v in filters_set.__filters__.items() if not v.internal},  # type: ignore
+        **{k: v for k, v in filters_set.__filters__.items() if not v.internal},  # type: ignore[arg-type]
     )
 
     async def resolver(values: FilterValues = Depends(filters_dep)) -> TFiltersSet:

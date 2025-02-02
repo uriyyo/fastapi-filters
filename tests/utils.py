@@ -1,10 +1,9 @@
 import re
 from pathlib import Path
-from subprocess import run, PIPE
+from subprocess import run
 from sys import executable
 from textwrap import dedent
 from typing import Any
-from typing import Tuple
 
 from pydantic import TypeAdapter
 
@@ -16,19 +15,18 @@ def parse_obj_as(tp: Any, obj: Any) -> Any:
 
 
 def _normalize_str(s: str) -> str:
-    s = dedent(s).strip()
-    return s
+    return dedent(s).strip()
     # return LINE_START_REGEX.sub("", s)
 
 
 def _run_mypy_process(path: Path, params: str = "") -> str:
     cmd = f"{executable} -m mypy.__main__ --strict {params} {path}"
 
-    process = run(cmd, shell=True, stdout=PIPE, stderr=PIPE, timeout=30)
+    process = run(cmd, shell=True, capture_output=True, timeout=30, check=False)
     return (process.stdout or process.stderr).decode()
 
 
-def run_mypy(path: Path, expected: str) -> Tuple[bool, str]:
+def run_mypy(path: Path, expected: str) -> tuple[bool, str]:
     actual = _run_mypy_process(path)
 
     actual = _normalize_str(actual)
@@ -44,7 +42,7 @@ def run_mypy(path: Path, expected: str) -> Tuple[bool, str]:
             f"{actual}",
             "Expected:",
             f"{expected}",
-        ]
+        ],
     )
 
     return False, out
