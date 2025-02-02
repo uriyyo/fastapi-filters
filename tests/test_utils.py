@@ -16,6 +16,7 @@ from fastapi_filters.utils import (
 )
 
 
+@pytest.mark.asyncio
 async def test_async_safe(app, client):
     def foo() -> int:
         return threading.get_ident()

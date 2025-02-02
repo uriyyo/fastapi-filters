@@ -1,5 +1,6 @@
 from typing import Annotated, Optional
 
+import pytest
 from fastapi import Depends, status
 from pydantic import BaseModel, BeforeValidator
 
@@ -12,6 +13,7 @@ from fastapi_filters import (
 )
 
 
+@pytest.mark.asyncio
 async def test_filters_as_dep(app, client):
     @app.get("/")
     async def route(
@@ -52,6 +54,7 @@ async def test_filters_as_dep(app, client):
     }
 
 
+@pytest.mark.asyncio
 async def test_filters(app):
     resolver = create_filters(
         a=FilterField(
@@ -89,6 +92,7 @@ async def test_filters(app):
     }
 
 
+@pytest.mark.asyncio
 async def test_filters_from_model(app):
     class UserModel(BaseModel):
         id: int

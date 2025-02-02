@@ -1,5 +1,4 @@
 from contextlib import AsyncExitStack
-from inspect import iscoroutinefunction
 
 import pytest
 from asgi_lifespan import LifespanManager
@@ -8,14 +7,6 @@ from httpx import ASGITransport, AsyncClient
 from pytest_asyncio import fixture as async_fixture
 
 import fastapi_filters.configs  # noqa: F401
-
-
-def pytest_collection_modifyitems(items):
-    items.sort(key=lambda it: (it.path, it.name))
-
-    for item in items:
-        if isinstance(item, pytest.Function) and iscoroutinefunction(item.obj):
-            item.add_marker("asyncio")
 
 
 @pytest.fixture

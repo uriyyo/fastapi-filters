@@ -30,6 +30,7 @@ def test_config_var_double_reset():
         reset.reset()
 
 
+@pytest.mark.asyncio
 async def test_config_var_dependency(app, client):
     var = ConfigVar("test", default=1)
 

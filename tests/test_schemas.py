@@ -30,6 +30,7 @@ def test_csv_list_errors():
     ]
 
 
+@pytest.mark.asyncio
 async def test_csv_list_as_query_param(app, client):
     @app.get("/")
     def index(q: CSVList[int] = Query(...)):

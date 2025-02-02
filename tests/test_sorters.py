@@ -5,6 +5,7 @@ from fastapi_filters.sorters import create_sorting, create_sorting_from_model
 from fastapi_filters.types import SortingValues
 
 
+@pytest.mark.asyncio
 async def test_filters_as_dep(app, client):
     @app.get("/")
     async def route(

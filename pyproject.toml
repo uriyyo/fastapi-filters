@@ -30,7 +30,7 @@ tortoise-orm = { version = ">=0.20,<0.24", optional = true }
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.2,<9.0"
 pytest-cov = ">=4,<6"
-pytest-asyncio = ">=0.20.3,<0.25.0"
+pytest-asyncio = ">=0.20.3,<0.25.3"
 httpx = ">=0.23.3,<0.29.0"
 asgi-lifespan = "^2.0.0"
 ruff = ">=0.5.1,<0.9.5"
@@ -51,6 +51,8 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "session"
+
 addopts = """
 """
 

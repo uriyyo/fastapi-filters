@@ -124,6 +124,7 @@ def test_from_resolver():
     assert _filter_set.__filters__ == {k: _CmpFilterField(v) for k, v in _fields.items()}
 
 
+@pytest.mark.asyncio
 async def test_create_filters_from_set(app, client):
     class _FilterSet(FilterSet):
         a: FilterField[int]
