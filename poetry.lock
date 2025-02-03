@@ -823,13 +823,13 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pypika-tortoise"
-version = "0.3.2"
+version = "0.5.0"
 description = "Forked from pypika and streamline just for tortoise-orm"
 optional = true
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "pypika_tortoise-0.3.2-py3-none-any.whl", hash = "sha256:c5c52bc4473fe6f3db36cf659340750246ec5dd0f980d04ae7811430e299c3a2"},
-    {file = "pypika_tortoise-0.3.2.tar.gz", hash = "sha256:f5d508e2ef00255e52ec6ac79ef889e10dbab328f218c55cd134c4d02ff9f6f4"},
+    {file = "pypika_tortoise-0.5.0-py3-none-any.whl", hash = "sha256:dbdc47eb52ce17407b05ce9f8560ce93b856d7b28beb01971d956b017846691f"},
+    {file = "pypika_tortoise-0.5.0.tar.gz", hash = "sha256:ed0f56761868dc222c03e477578638590b972280b03c7c45cd93345b18b61f58"},
 ]
 
 [[package]]
@@ -1182,19 +1182,19 @@ files = [
 
 [[package]]
 name = "tortoise-orm"
-version = "0.23.0"
+version = "0.24.0"
 description = "Easy async ORM for python, built with relations in mind"
 optional = true
-python-versions = "<4.0,>=3.8"
+python-versions = "<4.0,>=3.9"
 files = [
-    {file = "tortoise_orm-0.23.0-py3-none-any.whl", hash = "sha256:deaabed1619ea8aab6213508dff025571a701b7f34ee534473d7bb7661aa9f4f"},
-    {file = "tortoise_orm-0.23.0.tar.gz", hash = "sha256:f25d431ef4fb521a84edad582f4b9c53dccc5abf6cfbc6f228cbece5a13952fa"},
+    {file = "tortoise_orm-0.24.0-py3-none-any.whl", hash = "sha256:ee3b72b226767293b24c5c4906ae5f027d7cc84496cd503352c918564b4fd687"},
+    {file = "tortoise_orm-0.24.0.tar.gz", hash = "sha256:ae0704a93ea27931724fc899e57268c8081afce3b32b110b00037ec206553e7d"},
 ]
 
 [package.dependencies]
 aiosqlite = ">=0.16.0,<0.21.0"
 iso8601 = ">=2.1.0,<3.0.0"
-pypika-tortoise = ">=0.3.2,<0.4.0"
+pypika-tortoise = ">=0.5.0,<0.6.0"
 pytz = "*"
 
 [package.extras]
@@ -1263,4 +1263,4 @@ tortoise-orm = ["tortoise-orm"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "115ab178832b714ee64947db453a986b90d5c2c4859f2ff5a175a73270f4af46"
+content-hash = "33a85f47d71c6ee26911c6d60aaafd4b9370f195f420a812ab00ea7b8def738b"
