@@ -30,7 +30,7 @@ tortoise-orm = { version = ">=0.20,<0.25", optional = true }
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.2,<9.0"
 pytest-cov = ">=4,<7"
-pytest-asyncio = ">=0.20.3,<0.25.4"
+pytest-asyncio = ">=0.20.3,<0.26.1"
 httpx = ">=0.23.3,<0.29.0"
 asgi-lifespan = "^2.0.0"
 ruff = ">=0.5.1,<0.9.11"
