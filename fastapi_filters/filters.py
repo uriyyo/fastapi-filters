@@ -1,7 +1,6 @@
 from collections import defaultdict
 from collections.abc import Container, Iterator
 from dataclasses import asdict, make_dataclass
-from dataclasses import field as dataclass_field
 from typing import (
     Annotated,
     Any,
@@ -151,8 +150,8 @@ def create_filters(
         [
             (
                 fname,
-                new_tp := adapt_type(field, tp, op),
-                dataclass_field(default=in_(None, alias=alias, annotation=new_tp)),
+                Annotated[adapt_type(field, tp, op), in_(alias=alias)],
+                None,
             )
             for _, fname, field, tp, alias, op in fields_defs
         ],

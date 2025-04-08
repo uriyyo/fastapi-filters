@@ -11,6 +11,7 @@ from fastapi_filters import (
     create_filters,
     create_filters_from_set,
 )
+from fastapi_filters.utils import unwrap_annotated
 
 
 @dataclass
@@ -234,7 +235,7 @@ def test_op_types():
         )
 
     resolver = create_filters_from_set(_FilterSet)
-    attrs = {f.name: f.default.annotation for f in fields(resolver.__model__)}
+    attrs = {f.name: unwrap_annotated(f.type) for f in fields(resolver.__model__)}
 
     assert attrs == {
         "a": float,

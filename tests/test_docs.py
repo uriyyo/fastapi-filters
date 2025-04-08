@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import pytest
 from fastapi import Query
 
@@ -9,11 +11,8 @@ from fastapi_filters.schemas import CSVList
 def app(app):
     @app.get("/")
     def route(
-        q1: CSVList[int] = Query(
-            None,
-            annotation=CSVList[int],
-        ),  # FIXME: looks like FastAPI bug
-        q2: list[int] = Query(None),
+        q1: Annotated[CSVList[int], Query()],
+        q2: Annotated[list[int], Query()],
     ):
         return []
 
@@ -26,14 +25,14 @@ def test_fix_docs(app, client):
         {
             "in": "query",
             "name": "q1",
-            "required": False,
+            "required": True,
             "schema": {"items": {"type": "integer"}, "title": "Q1", "type": "array"},
             "explode": False,
         },
         {
             "in": "query",
             "name": "q2",
-            "required": False,
+            "required": True,
             "schema": {"items": {"type": "integer"}, "title": "Q2", "type": "array"},
         },
     ]
