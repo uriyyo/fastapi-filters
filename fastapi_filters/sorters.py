@@ -1,5 +1,5 @@
 from collections.abc import Container
-from typing import Literal, Optional, Union, cast
+from typing import Annotated, Literal, Optional, Union, cast
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -30,6 +30,7 @@ def create_sorting(
     *fields: Union[str, tuple[str, SortingNulls]],
     in_: Optional[FilterPlace] = None,
     default: Optional[Union[str, list[str]]] = None,
+    alias: Optional[str] = None,
 ) -> SortingResolver:
     if in_ is None:
         in_ = Query
@@ -47,7 +48,7 @@ def create_sorting(
         )
 
     async def _get_sorters(
-        sort: CSVList[tp] = in_(default, annotation=CSVList[tp]),  # type: ignore[valid-type,misc]
+        sort: Annotated[CSVList[tp], in_(alias=alias)] = default,  # type: ignore[valid-type,assignment]
     ) -> SortingValues:
         return cast(SortingValues, [defs[f] for f in sort or ()])
 
