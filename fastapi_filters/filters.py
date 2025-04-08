@@ -107,7 +107,7 @@ def create_filters_from_model(
 
     def _get_type(f: FieldInfo) -> Any:
         if f.metadata:
-            return Annotated[tuple([f.annotation, *f.metadata])]
+            return Annotated[(f.annotation, *f.metadata)]
 
         return f.annotation
 
