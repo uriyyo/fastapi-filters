@@ -85,6 +85,7 @@ ignore = [
     "TC001",   # ignore moving things to if TYPE_CHECKING block
     "TC002",   # ignore moving things to if TYPE_CHECKING block
     "TC003",   # ignore moving things to if TYPE_CHECKING block
+    "TC006",   # ignore add quotes to type expression in typing.cast()
     "A005",    # allow module name to shadow a Python standard-library module
     "PLW2901", # ignore loop variable overwrite
     "S602",    # ignore subprocess.popen with shell=True
