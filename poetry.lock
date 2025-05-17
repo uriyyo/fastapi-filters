@@ -7,7 +7,7 @@ description = "asyncio bridge to the standard sqlite3 module"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"tortoise-orm\""
+markers = "extra == \"tortoise-orm\" or extra == \"all\""
 files = [
     {file = "aiosqlite-0.20.0-py3-none-any.whl", hash = "sha256:36a1deaca0cac40ebe32aac9977a6e2bbc7f5189f23f4a54d5908986729e5bd6"},
     {file = "aiosqlite-0.20.0.tar.gz", hash = "sha256:6d35c8c256637f4672f843c31021464090805bf925385ac39473fb16eaaca3d7"},
@@ -383,7 +383,7 @@ description = "Lightweight in-process concurrent programming"
 optional = true
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "python_version < \"3.14\" and (platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\") and (extra == \"all\" or extra == \"sqlalchemy\")"
+markers = "python_version < \"3.14\" and (platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\") and (extra == \"sqlalchemy\" or extra == \"all\")"
 files = [
     {file = "greenlet-3.1.1-cp310-cp310-macosx_11_0_universal2.whl", hash = "sha256:0bbae94a29c9e5c7e4a2b7f0aae5c17e8e90acbfd3bf6270eeba60c39fce3563"},
     {file = "greenlet-3.1.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0fde093fb93f35ca72a556cf72c92ea3ebfda3d79fc35bb19fbe685853869a83"},
@@ -572,7 +572,7 @@ description = "Simple module to parse ISO 8601 dates"
 optional = true
 python-versions = ">=3.7,<4.0"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"tortoise-orm\""
+markers = "extra == \"tortoise-orm\" or extra == \"all\""
 files = [
     {file = "iso8601-2.1.0-py3-none-any.whl", hash = "sha256:aac4145c4dcb66ad8b648a02830f5e2ff6c24af20f4f482689be402db2429242"},
     {file = "iso8601-2.1.0.tar.gz", hash = "sha256:6b1d3829ee8921c4301998c909f7829fa9ed3cbdac0d3b16af2d743aed1ba8df"},
@@ -861,7 +861,7 @@ description = "Forked from pypika and streamline just for tortoise-orm"
 optional = true
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"tortoise-orm\""
+markers = "extra == \"tortoise-orm\" or extra == \"all\""
 files = [
     {file = "pypika_tortoise-0.5.0-py3-none-any.whl", hash = "sha256:dbdc47eb52ce17407b05ce9f8560ce93b856d7b28beb01971d956b017846691f"},
     {file = "pypika_tortoise-0.5.0.tar.gz", hash = "sha256:ed0f56761868dc222c03e477578638590b972280b03c7c45cd93345b18b61f58"},
@@ -904,7 +904,6 @@ files = [
 
 [package.dependencies]
 pytest = ">=8.2,<9"
-typing-extensions = {version = ">=4.12", markers = "python_version < \"3.10\""}
 
 [package.extras]
 docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1)"]
@@ -936,7 +935,7 @@ description = "World timezone definitions, modern and historical"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"tortoise-orm\""
+markers = "extra == \"tortoise-orm\" or extra == \"all\""
 files = [
     {file = "pytz-2025.1-py2.py3-none-any.whl", hash = "sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57"},
     {file = "pytz-2025.1.tar.gz", hash = "sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e"},
@@ -1052,7 +1051,7 @@ description = "Database Abstraction Library"
 optional = true
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"sqlalchemy\""
+markers = "extra == \"sqlalchemy\" or extra == \"all\""
 files = [
     {file = "SQLAlchemy-2.0.41-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:6854175807af57bdb6425e47adbce7d20a4d79bbfd6f6d6519cd10bb7109a7f8"},
     {file = "SQLAlchemy-2.0.41-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:05132c906066142103b83d9c250b60508af556982a385d96c4eaa9fb9720ac2b"},
@@ -1156,7 +1155,6 @@ files = [
 
 [package.dependencies]
 anyio = ">=3.6.2,<5"
-typing-extensions = {version = ">=3.10.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.18)", "pyyaml"]
@@ -1211,7 +1209,7 @@ description = "Easy async ORM for python, built with relations in mind"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"tortoise-orm\""
+markers = "extra == \"tortoise-orm\" or extra == \"all\""
 files = [
     {file = "tortoise_orm-0.25.0-py3-none-any.whl", hash = "sha256:b853acae52bc309800ec2954f3e261746cdac7e6b0e0a96ba20393dcb100a357"},
     {file = "tortoise_orm-0.25.0.tar.gz", hash = "sha256:7d0aaf31c33a25a9efad8f94b44ee50febae15889f4da119cf184ffe98002673"},
@@ -1318,5 +1316,5 @@ tortoise-orm = ["tortoise-orm"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.9"
-content-hash = "e13ddbf3d541db274908435736d2ebf02eea74ea52322b5a33818cc932ea9e20"
+python-versions = "^3.10"
+content-hash = "8c4583bc8079e8c2897d2a85025101e1b91848e6a4436bb694aebd4bc81f8ac8"

@@ -1,12 +1,11 @@
 import operator
-from collections.abc import Container, Iterator, Mapping
+from collections.abc import Callable, Container, Iterator, Mapping
 from contextlib import suppress
 from typing import (
     Any,
-    Callable,
     Optional,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -21,7 +20,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.sql.selectable import Select
-from typing_extensions import TypeAlias
 
 from fastapi_filters import FilterField, create_filters
 from fastapi_filters.config import ConfigVar
@@ -89,7 +87,7 @@ SORT_NULLS_FUNCS: Mapping[
 }
 
 EntityNamespace: TypeAlias = Mapping[str, Any]
-AdditionalNamespace: TypeAlias = Mapping[Union[str, FilterField[Any]], Any]
+AdditionalNamespace: TypeAlias = Mapping[str | FilterField[Any], Any]
 
 
 def _get_entity_namespace(stmt: TSelectable) -> EntityNamespace:
@@ -151,8 +149,8 @@ def _apply_filter(
     field: str,
     op: AbstractFilterOperator,
     val: Any,
-    apply_filter: Optional[ApplyFilterFunc[TSelectable]] = None,
-    add_condition: Optional[AddFilterConditionFunc[TSelectable]] = None,
+    apply_filter: ApplyFilterFunc[TSelectable] | None = None,
+    add_condition: AddFilterConditionFunc[TSelectable] | None = None,
 ) -> TSelectable:
     custom_apply_filter_impl = custom_apply_filter.get()
 
@@ -198,12 +196,12 @@ def _apply_filter(
 
 def apply_filters(
     stmt: TSelectable,
-    filters: Union[FilterValues, FilterSet],
+    filters: FilterValues | FilterSet,
     *,
-    remapping: Optional[Mapping[str, str]] = None,
-    additional: Optional[AdditionalNamespace] = None,
-    apply_filter: Optional[ApplyFilterFunc[TSelectable]] = None,
-    add_condition: Optional[AddFilterConditionFunc[TSelectable]] = None,
+    remapping: Mapping[str, str] | None = None,
+    additional: AdditionalNamespace | None = None,
+    apply_filter: ApplyFilterFunc[TSelectable] | None = None,
+    add_condition: AddFilterConditionFunc[TSelectable] | None = None,
 ) -> TSelectable:
     if isinstance(filters, FilterSet):
         filters = filters.filter_values
@@ -227,8 +225,8 @@ def apply_sorting(
     stmt: TSelectable,
     sorting: SortingValues,
     *,
-    remapping: Optional[Mapping[str, str]] = None,
-    additional: Optional[AdditionalNamespace] = None,
+    remapping: Mapping[str, str] | None = None,
+    additional: AdditionalNamespace | None = None,
 ) -> TSelectable:
     remapping = remapping or {}
     ns = {
@@ -254,13 +252,13 @@ def apply_sorting(
 
 def apply_filters_and_sorting(
     stmt: TSelectable,
-    filters: Union[FilterValues, FilterSet],
+    filters: FilterValues | FilterSet,
     sorting: SortingValues,
     *,
-    remapping: Optional[Mapping[str, str]] = None,
-    additional: Optional[AdditionalNamespace] = None,
-    apply_filter: Optional[ApplyFilterFunc[TSelectable]] = None,
-    add_condition: Optional[AddFilterConditionFunc[TSelectable]] = None,
+    remapping: Mapping[str, str] | None = None,
+    additional: AdditionalNamespace | None = None,
+    apply_filter: ApplyFilterFunc[TSelectable] | None = None,
+    add_condition: AddFilterConditionFunc[TSelectable] | None = None,
 ) -> TSelectable:
     stmt = apply_filters(
         stmt,
@@ -294,9 +292,9 @@ def _iter_over_orm_columns(
     obj: Any,
     *,
     include_fk: bool = False,
-    include: Optional[Container[str]] = None,
-    exclude: Optional[Container[str]] = None,
-    remapping: Optional[Mapping[str, str]] = None,
+    include: Container[str] | None = None,
+    exclude: Container[str] | None = None,
+    remapping: Mapping[str, str] | None = None,
 ) -> Iterator[tuple[str, ColumnProperty[Any]]]:
     inspected = inspect(obj, raiseerr=True)
 
@@ -321,12 +319,12 @@ def _iter_over_orm_columns(
 def create_filters_from_orm(
     obj: Any,
     *,
-    in_: Optional[FilterPlace] = None,
-    alias_generator: Optional[FilterAliasGenerator] = None,
+    in_: FilterPlace | None = None,
+    alias_generator: FilterAliasGenerator | None = None,
     include_fk: bool = False,
-    include: Optional[Container[str]] = None,
-    exclude: Optional[Container[str]] = None,
-    remapping: Optional[Mapping[str, str]] = None,
+    include: Container[str] | None = None,
+    exclude: Container[str] | None = None,
+    remapping: Mapping[str, str] | None = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
     fields = {
@@ -350,12 +348,12 @@ def create_filters_from_orm(
 def create_sorting_from_orm(
     obj: Any,
     *,
-    default: Optional[str] = None,
-    in_: Optional[FilterPlace] = None,
+    default: str | None = None,
+    in_: FilterPlace | None = None,
     include_fk: bool = False,
-    include: Optional[Container[str]] = None,
-    exclude: Optional[Container[str]] = None,
-    remapping: Optional[Mapping[str, str]] = None,
+    include: Container[str] | None = None,
+    exclude: Container[str] | None = None,
+    remapping: Mapping[str, str] | None = None,
 ) -> SortingResolver:
     fields = [
         name

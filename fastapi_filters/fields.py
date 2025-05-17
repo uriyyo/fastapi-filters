@@ -5,9 +5,7 @@ from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
-    Optional,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -24,13 +22,13 @@ T_co = TypeVar("T_co", covariant=True)
 
 @dataclass(eq=False, order=False)
 class FilterField(FilterOpBuilder[T_co]):
-    type: Optional[type[T_co]] = None
-    operators: Optional[list[AbstractFilterOperator]] = None
-    default_op: Optional[AbstractFilterOperator] = None
-    name: Optional[str] = None
-    alias: Optional[str] = None
+    type: type[T_co] | None = None
+    operators: list[AbstractFilterOperator] | None = None
+    default_op: AbstractFilterOperator | None = None
+    name: str | None = None
+    alias: str | None = None
     internal: bool = False
-    op_types: Optional[dict[AbstractFilterOperator, Any]] = None
+    op_types: dict[AbstractFilterOperator, Any] | None = None
 
     if TYPE_CHECKING:
 
@@ -43,10 +41,10 @@ class FilterField(FilterOpBuilder[T_co]):
             self,
             instance: object,
             owner: Any,
-        ) -> dict[AbstractFilterOperator, Union[T_co, Sequence[T_co], bool]]:
+        ) -> dict[AbstractFilterOperator, T_co | Sequence[T_co] | bool]:
             pass
 
-        def __get__(self, instance: Optional[object], owner: Any) -> Any:
+        def __get__(self, instance: object | None, owner: Any) -> Any:
             pass
 
     def __hash__(self) -> int:

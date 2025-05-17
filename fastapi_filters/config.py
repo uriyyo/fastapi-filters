@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterable
+from collections.abc import AsyncIterable, Callable
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
-from typing import Callable, Generic, TypeVar
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 

@@ -4,7 +4,6 @@ from dataclasses import asdict, make_dataclass
 from typing import (
     Annotated,
     Any,
-    Optional,
     cast,
 )
 
@@ -30,7 +29,7 @@ from .utils import async_safe, fields_include_exclude, is_seq, unwrap_seq_type
 def default_alias_generator(
     name: str,
     op: AbstractFilterOperator,
-    alias: Optional[str] = None,
+    alias: str | None = None,
 ) -> str:
     name = alias or name
     return f"{name}[{op.name.rstrip('_')}]"
@@ -73,8 +72,8 @@ def adapt_type(
 def field_filter_to_raw_fields(
     name: str,
     field: FilterField[Any],
-    alias_generator: Optional[FilterAliasGenerator] = None,
-) -> Iterator[tuple[str, Any, AbstractFilterOperator, Optional[str]]]:
+    alias_generator: FilterAliasGenerator | None = None,
+) -> Iterator[tuple[str, Any, AbstractFilterOperator, str | None]]:
     if alias_generator is None:
         alias_generator = alias_generator_config.get()
 
@@ -96,10 +95,10 @@ def field_filter_to_raw_fields(
 def create_filters_from_model(
     model: type[BaseModel],
     *,
-    in_: Optional[FilterPlace] = None,
-    alias_generator: Optional[FilterAliasGenerator] = None,
-    include: Optional[Container[str]] = None,
-    exclude: Optional[Container[str]] = None,
+    in_: FilterPlace | None = None,
+    alias_generator: FilterAliasGenerator | None = None,
+    include: Container[str] | None = None,
+    exclude: Container[str] | None = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
     checker = fields_include_exclude(model.model_fields, include, exclude)
@@ -122,8 +121,8 @@ def create_filters_from_model(
 
 def create_filters(
     *,
-    in_: Optional[FilterPlace] = None,
-    alias_generator: Optional[FilterAliasGenerator] = None,
+    in_: FilterPlace | None = None,
+    alias_generator: FilterAliasGenerator | None = None,
     **kwargs: FilterFieldDef,
 ) -> FiltersResolver:
     if in_ is None:
