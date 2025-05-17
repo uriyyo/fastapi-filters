@@ -1,5 +1,5 @@
 from collections.abc import Container
-from typing import Annotated, Literal, Optional, Union, cast
+from typing import Annotated, Literal, cast
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -12,10 +12,10 @@ from .utils import fields_include_exclude, is_complex_field
 def create_sorting_from_model(
     model: type[BaseModel],
     *,
-    default: Optional[str] = None,
-    in_: Optional[FilterPlace] = None,
-    include: Optional[Container[str]] = None,
-    exclude: Optional[Container[str]] = None,
+    default: str | None = None,
+    in_: FilterPlace | None = None,
+    include: Container[str] | None = None,
+    exclude: Container[str] | None = None,
 ) -> SortingResolver:
     checker = fields_include_exclude(model.model_fields, include, exclude)
 
@@ -27,10 +27,10 @@ def create_sorting_from_model(
 
 
 def create_sorting(
-    *fields: Union[str, tuple[str, SortingNulls]],
-    in_: Optional[FilterPlace] = None,
-    default: Optional[Union[str, list[str]]] = None,
-    alias: Optional[str] = None,
+    *fields: str | tuple[str, SortingNulls],
+    in_: FilterPlace | None = None,
+    default: str | list[str] | None = None,
+    alias: str | None = None,
 ) -> SortingResolver:
     if in_ is None:
         in_ = Query

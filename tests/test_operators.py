@@ -1,4 +1,3 @@
-import sys
 from datetime import date, datetime, timedelta
 from typing import Any, Optional
 
@@ -12,21 +11,14 @@ from fastapi_filters.operators import (
     get_filter_operators,
 )
 
-ADDITIONAL_CASES: list[tuple[Any, Any]] = []
-
-ADDITIONAL_CASES += [
+ADDITIONAL_CASES: list[tuple[Any, Any]] = [
     (list[int], SEQ_OPERATORS),
     (tuple[float, ...], SEQ_OPERATORS),
+    (
+        int | None,
+        [FilterOperator.is_null, *DEFAULT_OPERATORS, *NUM_OPERATORS],
+    ),
 ]
-
-
-if sys.version_info >= (3, 10):
-    ADDITIONAL_CASES += [
-        (
-            eval("int | None"),
-            [FilterOperator.is_null, *DEFAULT_OPERATORS, *NUM_OPERATORS],
-        ),
-    ]
 
 
 @pytest.mark.parametrize(

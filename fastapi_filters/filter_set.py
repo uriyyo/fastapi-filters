@@ -1,21 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Mapping, Sequence
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, replace
 from typing import (
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
-    Union,
     cast,
     get_args,
+    get_origin,
     get_type_hints,
 )
 
 from fastapi import Depends
-from typing_extensions import Self, dataclass_transform, get_origin
+from typing_extensions import Self, dataclass_transform
 
 from .fields import FilterField
 from .filters import create_filters
@@ -73,7 +71,7 @@ class FilterSet(metaclass=FilterSetMeta):
     @classmethod
     def create(
         cls,
-        **kwargs: Mapping[AbstractFilterOperator, Union[Sequence[Any], bool, Any]],
+        **kwargs: Mapping[AbstractFilterOperator, Sequence[Any] | bool | Any],
     ) -> Self:
         return cls(**kwargs)
 
@@ -107,7 +105,7 @@ class FilterSet(metaclass=FilterSetMeta):
         cls,
         resolver: FiltersResolver,
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> type[Self]:
         anns = {k: FilterField[f.type] for k, f in resolver.__filters__.items()}  # type: ignore[name-defined]
 

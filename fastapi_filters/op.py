@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
     Protocol,
     TypeVar,

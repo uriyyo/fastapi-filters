@@ -1,24 +1,21 @@
+from collections.abc import Callable
 from enum import Enum
 from typing import (
     Any,
-    Callable,
     Literal,
-    Optional,
     Protocol,
-    Union,
+    TypeAlias,
 )
-
-from typing_extensions import TypeAlias
 
 from .fields import FilterField
 
 AbstractFilterOperator: TypeAlias = Enum
 FilterAliasGenerator: TypeAlias = Callable[
-    [str, AbstractFilterOperator, Optional[str]],
+    [str, AbstractFilterOperator, str | None],
     str,
 ]
 FilterPlace: TypeAlias = Callable[..., Any]
-FilterFieldDef: TypeAlias = Union[type[Any], FilterField[Any]]
+FilterFieldDef: TypeAlias = type[Any] | FilterField[Any]
 FilterValues: TypeAlias = dict[str, dict[AbstractFilterOperator, Any]]
 
 
@@ -32,7 +29,7 @@ class FiltersResolver(Protocol):
 
 
 SortingDirection: TypeAlias = Literal["asc", "desc"]
-SortingNulls: TypeAlias = Optional[Literal["bigger", "smaller"]]
+SortingNulls: TypeAlias = Literal["bigger", "smaller"] | None
 SortingValues: TypeAlias = list[tuple[str, SortingDirection, SortingNulls]]
 
 

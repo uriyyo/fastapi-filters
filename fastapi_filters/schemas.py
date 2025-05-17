@@ -1,18 +1,18 @@
-from typing import Annotated, Any, TypeVar
+from typing import Annotated, Any, TypeAlias, TypeVar
 
 from pydantic import BeforeValidator, GetPydanticSchema
-from typing_extensions import TypeAlias
 
 T = TypeVar("T")
 
 
 def csv_list_validator(v: Any) -> Any:
-    if isinstance(v, str):
-        return v.split(",")
-    if isinstance(v, list) and len(v) == 1 and isinstance(v[0], str):
-        return v[0].split(",")
-
-    return v
+    match v:
+        case str():
+            return v.split(",")
+        case [str() as s]:
+            return s.split(",")
+        case _:
+            return v
 
 
 CSVList: TypeAlias = Annotated[

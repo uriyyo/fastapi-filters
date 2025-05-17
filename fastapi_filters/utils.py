@@ -1,10 +1,8 @@
-from collections.abc import Awaitable, Container, Iterable, Sequence
+from collections.abc import Awaitable, Callable, Container, Iterable, Sequence
 from functools import wraps
 from typing import (
     Annotated,
     Any,
-    Callable,
-    Optional,
     TypeVar,
     Union,
 )
@@ -77,8 +75,8 @@ def unwrap_annotated(tp: Any) -> Any:
 
 def fields_include_exclude(
     fields: Iterable[str],
-    include: Optional[Container[str]] = None,
-    exclude: Optional[Container[str]] = None,
+    include: Container[str] | None = None,
+    exclude: Container[str] | None = None,
 ) -> Callable[[str], bool]:
     if include is None:
         include = {*fields}
