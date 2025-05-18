@@ -1,8 +1,11 @@
-[tool.poetry]
+[project]
 name = "fastapi-filters"
 version = "0.3.0"
 description = "fastapi-filters"
-authors = ["Yurii Karabas <1998uriyyo@gmail.com>"]
+authors = [
+    {"name" = "Yurii Karabas", "email" = "1998uriyyo@gmail.com"},
+]
+requires-python = ">=3.10,<4.0"
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/uriyyo/fastapi-filters"
@@ -11,44 +14,46 @@ classifiers = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3 :: Only',
 ]
+dependencies = [
+    "fastapi>=0.100.0",
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.4.0",
+    "typing-inspect>=0.4.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pydantic = "^2.0.0"
-fastapi = ">=0.100.0"
-typing-extensions = "^4.4.0"
-sqlalchemy = { version = "^2.0.0", optional = true }
-tortoise-orm = { version = ">=0.20,<0.26", optional = true }
+[project.optional-dependencies]
+sqlalchemy = [
+    "sqlalchemy>=2.0.0",
+]
+tortoise-orm = [
+    "tortoise-orm>=0.20,<0.26",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=7.2,<9.0"
-pytest-cov = ">=4,<7"
-pytest-asyncio = ">=0.20.3,<0.26.1"
-httpx = ">=0.23.3,<0.29.0"
-asgi-lifespan = "^2.0.0"
-ruff = ">=0.5.1,<0.11.11"
-mypy = ">=0.991,<1.16"
-pre-commit = ">=2.21,<5.0"
-uvicorn = ">=0.20,<0.35"
-dirty-equals = ">=0.6,<0.10"
-faker = ">=19.3,<38.0"
-asyncpg = ">=0.28,<0.31"
-
-[tool.poetry.extras]
-sqlalchemy = ["sqlalchemy"]
-tortoise-orm = ["tortoise-orm"]
-all = ["sqlalchemy", "tortoise-orm"]
+[dependency-groups]
+dev = [
+    "pytest>=7.2,<9.0",
+    "pytest-cov>=4,<7",
+    "pytest-asyncio>=0.20.3,<0.26.1",
+    "httpx>=0.23.3,<0.29.0",
+    "asgi-lifespan>=2.0.0",
+    "ruff>=0.5.1,<0.11.11",
+    "mypy>=0.991,<1.16",
+    "pre-commit>=2.21,<5.0",
+    "uvicorn>=0.20,<0.35",
+    "dirty-equals>=0.6,<0.10",
+    "faker>=19.3,<38.0",
+    "asyncpg>=0.28,<0.31",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "session"
