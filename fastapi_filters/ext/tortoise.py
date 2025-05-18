@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, Optional, TypeVar, Union, cast
+from typing import Any, TypeVar, cast
 
 from tortoise.queryset import QuerySet
 
@@ -30,9 +30,9 @@ DEFAULT_FILTERS: Mapping[AbstractFilterOperator, str] = {
 
 def apply_filters(
     stmt: TStmt,
-    filters: Union[FilterValues, FilterSet],
+    filters: FilterValues | FilterSet,
     *,
-    remapping: Optional[Mapping[str, str]] = None,
+    remapping: Mapping[str, str] | None = None,
 ) -> TStmt:
     remapping = remapping or {}
     if isinstance(filters, FilterSet):
@@ -54,7 +54,7 @@ def apply_filters(
 def apply_sorting(
     stmt: TStmt,
     sorting: SortingValues,
-    remapping: Optional[Mapping[str, str]] = None,
+    remapping: Mapping[str, str] | None = None,
 ) -> TStmt:
     remapping = remapping or {}
     ordering = []
@@ -71,10 +71,10 @@ def apply_sorting(
 
 def apply_filters_and_sorting(
     stmt: TStmt,
-    filters: Union[FilterValues, FilterSet],
+    filters: FilterValues | FilterSet,
     sorting: SortingValues,
     *,
-    remapping: Optional[Mapping[str, str]] = None,
+    remapping: Mapping[str, str] | None = None,
 ) -> TStmt:
     stmt = apply_filters(stmt, filters, remapping=remapping)
     return apply_sorting(stmt, sorting, remapping=remapping)

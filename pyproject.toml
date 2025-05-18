@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 pydantic = "^2.0.0"
 fastapi = ">=0.100.0"
 typing-extensions = "^4.4.0"
@@ -58,7 +58,7 @@ addopts = """
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
@@ -79,7 +79,7 @@ ignore = [
     "N805",    # ignore first argument name check
     "N818",    # ignore exception name should ends with Error suffix
     "FAST002", # allow to use non-annotated dependencies
-    "PLR0913",  # allow more than 5 arguments
+    "PLR0913", # allow more than 5 arguments
     "PLR2004", # allow to compare with "magic numbers"
     "UP007",   # ignore X | Y annotation suggestion
     "TC001",   # ignore moving things to if TYPE_CHECKING block
@@ -131,7 +131,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 max-complexity = 10
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 follow_imports = "normal"
 ignore_missing_imports = true

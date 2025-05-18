@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Container, Iterator
+from collections.abc import Callable, Container, Iterator
 from datetime import date, datetime, timedelta
 from enum import Enum
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from .config import ConfigVar
 from .utils import (
