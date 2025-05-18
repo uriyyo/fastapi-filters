@@ -155,6 +155,36 @@ async def test_create_filters_from_set(app, client):
     assert response.status_code == status.HTTP_200_OK
 
 
+@pytest.mark.asyncio
+async def test_filterset_in_decl(app, client):
+    class _FilterSet(FilterSet):
+        a: FilterField[int]
+        b: FilterField[str]
+
+    @app.get("/test")
+    async def route(
+        _filters: _FilterSet = Depends(),
+    ):
+        assert isinstance(_filters, _FilterSet)
+        assert _filters == _FilterSet(
+            a={FilterOperator.eq: 1, FilterOperator.ne: 2},
+            b={FilterOperator.eq: "a", FilterOperator.ne: "b"},
+        )
+
+        return {}
+
+    response = await client.get(
+        "/test",
+        params={
+            "a[eq]": "1",
+            "a[ne]": "2",
+            "b[eq]": "a",
+            "b[ne]": "b",
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+
 def test_subset():
     class _FilterSet(FilterSet):
         a: FilterField[int]
