@@ -34,6 +34,9 @@ sqlalchemy = [
 tortoise-orm = [
     "tortoise-orm>=0.20,<0.26",
 ]
+beanie = [
+    "beanie>=1.29.0",
+]
 
 [dependency-groups]
 dev = [
