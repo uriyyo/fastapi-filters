@@ -49,8 +49,6 @@ def apply_filters(
         field = remapping.get(field, field)
 
         for op, val in field_filters.items():
-            stmt.find()
-
             if (cond := DEFAULT_FILTERS.get(op)) is not None:
                 stmt = cast(TStmt, stmt.find(cond(field, val)))
             else:
