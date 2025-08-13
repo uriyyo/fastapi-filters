@@ -37,6 +37,9 @@ tortoise-orm = [
 beanie = [
     "beanie>=1.29.0",
 ]
+raw-sql = [
+    "sqlalchemy>=2.0.0",
+]
 
 [dependency-groups]
 dev = [

@@ -307,6 +307,9 @@ dependencies = [
 beanie = [
     { name = "beanie" },
 ]
+raw-sql = [
+    { name = "sqlalchemy" },
+]
 sqlalchemy = [
     { name = "sqlalchemy" },
 ]
@@ -335,12 +338,13 @@ requires-dist = [
     { name = "beanie", marker = "extra == 'beanie'", specifier = ">=1.29.0" },
     { name = "fastapi", specifier = ">=0.100.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "sqlalchemy", marker = "extra == 'raw-sql'", specifier = ">=2.0.0" },
     { name = "sqlalchemy", marker = "extra == 'sqlalchemy'", specifier = ">=2.0.0" },
     { name = "tortoise-orm", marker = "extra == 'tortoise-orm'", specifier = ">=0.20,<0.26" },
     { name = "typing-extensions", specifier = ">=4.4.0" },
     { name = "typing-inspect", specifier = ">=0.4.0" },
 ]
-provides-extras = ["sqlalchemy", "tortoise-orm", "beanie"]
+provides-extras = ["sqlalchemy", "tortoise-orm", "beanie", "raw-sql"]
 
 [package.metadata.requires-dev]
 dev = [
