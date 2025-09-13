@@ -10,8 +10,6 @@ from typing import (
 )
 
 from .op import FilterOpBuilder
-from .operators import FilterOperator, get_filter_operators
-from .utils import is_seq
 
 if TYPE_CHECKING:
     from .types import AbstractFilterOperator
@@ -52,16 +50,6 @@ class FilterField(FilterOpBuilder[T_co]):
 
     def __set_name__(self, owner: Any, name: str) -> None:
         self.name = name
-
-    def __post_init__(self) -> None:
-        if self.operators is None and self.type is not None:
-            self.operators = [*get_filter_operators(self.type)]
-
-        if self.default_op is None:
-            if is_seq(self.type):
-                self.default_op = FilterOperator.overlap
-            else:
-                self.default_op = FilterOperator.eq
 
 
 __all__ = [
