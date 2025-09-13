@@ -2,19 +2,21 @@ from typing import Optional
 
 import pytest
 
-from fastapi_filters import FilterField, FilterOperator, FilterSet
+from fastapi_filters import FilterField, FilterOperator
 from fastapi_filters.op import FilterOp
 
-
-class _FilterSet(FilterSet):
-    a: FilterField[int] = FilterField()
-    b: FilterField[Optional[str]] = FilterField()
-    arr: FilterField[list[int]] = FilterField()
-
-
-_field_int_a = _FilterSet.a
-_field_int_b = _FilterSet.b
-_field_arr = _FilterSet.arr
+_field_int_a = FilterField(
+    name="a",
+    type=int,
+)
+_field_int_b = FilterField(
+    name="b",
+    type=Optional[str],
+)
+_field_arr = FilterField(
+    name="arr",
+    type=list[int],
+)
 
 
 @pytest.mark.parametrize(
@@ -93,7 +95,7 @@ def test_op_constructor(expr, expected):
 
 
 def test_missed_fields():
-    _field_no_name = FilterField(type=int, operators=[FilterOperator.eq])
+    _field_no_name = FilterField(type=int)
 
     with pytest.raises(
         AssertionError,

@@ -11,6 +11,7 @@ from fastapi_filters import (
     create_filters,
     create_filters_from_set,
 )
+from fastapi_filters.utils import unwrap_annotated
 
 
 @dataclass
@@ -264,8 +265,16 @@ def test_op_types():
         )
 
     resolver = create_filters_from_set(_FilterSet)
+    attrs = {f.name: unwrap_annotated(f.type) for f in fields(resolver.__model__)}
 
-    assert resolver.__filters__["a"].op_types == {
-        FilterOperator.eq: float,
-        FilterOperator.ne: float,
+    assert attrs == {
+        "a": float,
+        "a__eq": float,
+        "a__ne": float,
+        "a__in_": list[int],
+        "a__not_in": list[int],
+        "a__gt": int,
+        "a__ge": int,
+        "a__lt": int,
+        "a__le": int,
     }

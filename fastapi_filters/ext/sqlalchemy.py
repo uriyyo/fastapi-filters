@@ -22,7 +22,8 @@ from sqlalchemy.orm import ColumnProperty
 from sqlalchemy.sql.selectable import Select
 
 from fastapi_filters import FilterField, create_filters
-from fastapi_filters.filterset import FilterSet
+from fastapi_filters.config import ConfigVar
+from fastapi_filters.filter_set import FilterSet
 from fastapi_filters.operators import FilterOperator
 from fastapi_filters.sorters import create_sorting
 from fastapi_filters.types import (
@@ -128,6 +129,15 @@ ApplyFilterFunc: TypeAlias = Callable[
 ]
 AddFilterConditionFunc: TypeAlias = Callable[[TSelectable, str, Any], TSelectable]
 
+custom_apply_filter: ConfigVar[ApplyFilterFunc[Any]] = ConfigVar(
+    "apply_filter",
+    default=_default_hook,
+)
+custom_add_condition: ConfigVar[AddFilterConditionFunc[Any]] = ConfigVar(
+    "add_condition",
+    default=_default_hook,
+)
+
 
 def generic_condition(left: Any, right: Any, op: AbstractFilterOperator) -> Any:
     return DEFAULT_FILTERS[op](left, right)
@@ -142,7 +152,7 @@ def _apply_filter(
     apply_filter: ApplyFilterFunc[TSelectable] | None = None,
     add_condition: AddFilterConditionFunc[TSelectable] | None = None,
 ) -> TSelectable:
-    custom_apply_filter_impl = _default_hook
+    custom_apply_filter_impl = custom_apply_filter.get()
 
     try:
         cond = None
@@ -171,7 +181,7 @@ def _apply_filter(
         except NotImplementedError:
             pass
 
-    global_add_condition = _default_hook
+    global_add_condition = custom_add_condition.get()
 
     try:
         res = global_add_condition(stmt, field, cond)
@@ -370,5 +380,7 @@ __all__ = [
     "apply_sorting",
     "create_filters_from_orm",
     "create_sorting_from_orm",
+    "custom_add_condition",
+    "custom_apply_filter",
     "generic_condition",
 ]

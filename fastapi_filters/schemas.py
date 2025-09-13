@@ -5,12 +5,12 @@ from pydantic import BeforeValidator, GetPydanticSchema
 T = TypeVar("T")
 
 
-def csv_list_validator(v: Any, delimiter: str = ",") -> Any:
+def csv_list_validator(v: Any) -> Any:
     match v:
         case str():
-            return v.split(delimiter)
+            return v.split(",")
         case [str() as s]:
-            return s.split(delimiter)
+            return s.split(",")
         case _:
             return v
 

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Container, Iterator
 from datetime import date, datetime, timedelta
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from .config import ConfigVar
 from .utils import (
     is_optional,
     is_seq,
@@ -101,6 +102,25 @@ def default_filter_operators_generator(t: type) -> Iterator[AbstractFilterOperat
         yield from NUM_OPERATORS
 
 
+disabled_filters_config: ConfigVar[Container[AbstractFilterOperator]] = ConfigVar(
+    "disabled_filters",
+    default=(),
+)
+filter_operators_generator_config: ConfigVar[Callable[[type], Iterator[AbstractFilterOperator]]] = ConfigVar(
+    "filter_operators_generator",
+    default=default_filter_operators_generator,
+)
+
+
+def get_filter_operators(t: type) -> Iterator[AbstractFilterOperator]:
+    disabled = disabled_filters_config.get()
+    operator_generator = filter_operators_generator_config.get()
+
+    for op in operator_generator(t):
+        if op not in disabled:
+            yield op
+
+
 __all__ = [
     "DEFAULT_OPERATORS",
     "NUM_OPERATORS",
@@ -108,4 +128,7 @@ __all__ = [
     "STR_OPERATORS",
     "FilterOperator",
     "default_filter_operators_generator",
+    "disabled_filters_config",
+    "filter_operators_generator_config",
+    "get_filter_operators",
 ]

@@ -8,7 +8,7 @@ from fastapi_filters.operators import (
     NUM_OPERATORS,
     SEQ_OPERATORS,
     FilterOperator,
-    default_filter_operators_generator,
+    get_filter_operators,
 )
 
 ADDITIONAL_CASES: list[tuple[Any, Any]] = [
@@ -33,4 +33,4 @@ ADDITIONAL_CASES: list[tuple[Any, Any]] = [
     ids=str,
 )
 def test_get_default_operators(tp, operators):
-    assert {*default_filter_operators_generator(tp)} == {*operators}
+    assert {*get_filter_operators(tp)} == {*operators}
