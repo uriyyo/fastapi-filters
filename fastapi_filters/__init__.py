@@ -1,6 +1,6 @@
 from .fields import FilterField
-from .filter_set import FilterSet, create_filters_from_set
 from .filters import create_filters, create_filters_from_model
+from .filterset import FilterSet, create_filters_from_set
 from .operators import FilterOperator
 from .sorters import create_sorting, create_sorting_from_model
 from .types import FiltersResolver, FilterValues, SortingResolver, SortingValues

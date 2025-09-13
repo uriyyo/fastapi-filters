@@ -93,8 +93,19 @@ def is_complex_field(field: FieldInfo) -> bool:
     return field_annotation_is_complex(field.annotation)
 
 
+_TA = TypeVar("_TA", bound=Callable[..., Any])
+_TB = TypeVar("_TB", bound=Callable[..., Any])
+
+
+def copy_filter_resolver_metadata(target: _TA, src: _TB) -> None:
+    for attr in ("__model__", "__filters__", "__defs__"):
+        if (val := getattr(src, attr, None)) is not None:
+            setattr(target, attr, val)
+
+
 __all__ = [
     "async_safe",
+    "copy_filter_resolver_metadata",
     "fields_include_exclude",
     "is_complex_field",
     "is_optional",
