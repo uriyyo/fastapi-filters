@@ -35,7 +35,7 @@ class User(Document):
 
 @asynccontextmanager
 async def lifespan(_: Any) -> AsyncIterator[None]:
-    client = AsyncIOMotorClient()  # type: ignore[var-annotated]
+    client = AsyncIOMotorClient()
     await init_beanie(database=client.test, document_models=[User])
 
     await User.delete_all()
