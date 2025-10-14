@@ -15,7 +15,7 @@ from typing_extensions import ParamSpec
 try:
     from fastapi._compat.shared import field_annotation_is_complex
 except ImportError:
-    from fastapi._compat import field_annotation_is_complex
+    from fastapi._compat import field_annotation_is_complex  # type: ignore[attr-defined,no-redef]
 
 P = ParamSpec("P")
 T = TypeVar("T")
