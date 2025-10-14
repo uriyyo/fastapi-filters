@@ -12,11 +12,10 @@ from pydantic.v1.typing import get_args, get_origin, is_none_type, is_union
 from pydantic.v1.utils import lenient_issubclass
 from typing_extensions import ParamSpec
 
-
 try:
-    from fastapi._compat import field_annotation_is_complex
-except ImportError:
     from fastapi._compat.shared import field_annotation_is_complex
+except ImportError:
+    from fastapi._compat import field_annotation_is_complex
 
 P = ParamSpec("P")
 T = TypeVar("T")
