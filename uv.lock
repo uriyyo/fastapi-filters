@@ -385,7 +385,7 @@ dev = [
     { name = "httpx", specifier = ">=0.23.3,<0.29.0" },
     { name = "mypy", specifier = ">=0.991,<1.16" },
     { name = "pre-commit", specifier = ">=2.21,<5.0" },
-    { name = "pytest", specifier = ">=7.2,<9.0" },
+    { name = "pytest", specifier = ">=7.2,<10.0" },
     { name = "pytest-asyncio", specifier = ">=0.20.3,<0.26.1" },
     { name = "pytest-cov", specifier = ">=4,<7" },
     { name = "ruff", specifier = ">=0.5.1,<0.11.11" },
