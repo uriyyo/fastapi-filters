@@ -54,7 +54,7 @@ dev = [
     "uvicorn>=0.20,<0.39",
     "dirty-equals>=0.6,<0.12",
     "faker>=19.3,<39.0",
-    "asyncpg>=0.28,<0.31",
+    "asyncpg>=0.28,<0.32",
 ]
 
 [build-system]
