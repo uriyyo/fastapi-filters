@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 
 from fastapi_filters import FilterField, FilterOperator
@@ -11,7 +9,7 @@ _field_int_a = FilterField(
 )
 _field_int_b = FilterField(
     name="b",
-    type=Optional[str],
+    type=str | None,
 )
 _field_arr = FilterField(
     name="arr",
@@ -99,7 +97,7 @@ def test_missed_fields():
 
     with pytest.raises(
         AssertionError,
-        match="^FilterField has no name$",
+        match=r"^FilterField has no name$",
     ):
         _ = _field_no_name == 1
 
@@ -107,6 +105,6 @@ def test_missed_fields():
 
     with pytest.raises(
         AssertionError,
-        match="^FilterField has no operators$",
+        match=r"^FilterField has no operators$",
     ):
         _ = _field_no_type == 1

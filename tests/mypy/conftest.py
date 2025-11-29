@@ -13,7 +13,7 @@ class _MypyFailure(Exception):
 
 class _MypyItem(pytest.Item):
     def get_expected_result(self) -> str:
-        code, _, expected = self.path.read_text().partition("# output:")
+        *_, expected = self.path.read_text().partition("# output:")
         return expected.strip().strip('"')
 
     def repr_failure(

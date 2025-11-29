@@ -3,7 +3,6 @@ from collections.abc import Callable, Container, Iterator, Mapping
 from contextlib import suppress
 from typing import (
     Any,
-    Optional,
     TypeAlias,
     TypeVar,
     cast,
@@ -283,7 +282,7 @@ def adapt_sqlalchemy_column_type(column: ColumnProperty[Any]) -> FilterFieldDef:
     type_ = list[expr.type.item_type.python_type] if isinstance(expr.type, ARRAY) else expr.type.python_type
 
     if expr.nullable:
-        type_ = Optional[type_]
+        type_ = type_ | None
 
     return cast(FilterFieldDef, type_)
 

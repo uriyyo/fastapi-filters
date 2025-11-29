@@ -1,5 +1,6 @@
 import pytest
 from fastapi import Depends, status
+from pydantic import BaseModel
 
 from fastapi_filters.sorters import create_sorting, create_sorting_from_model
 from fastapi_filters.types import SortingValues
@@ -38,8 +39,6 @@ def test_create_sorting():
 
 
 def test_create_sorting_from_model():
-    from pydantic import BaseModel
-
     class Group(BaseModel):
         name: str
 

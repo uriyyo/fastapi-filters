@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 import pytest
 from fastapi import Depends, status
@@ -63,7 +63,7 @@ async def test_filters(app):
             operators=[FilterOperator.eq, FilterOperator.ne],
         ),
         b=float,
-        c=Optional[str],
+        c=str | None,
     )
 
     assert resolver.__defs__ == {

@@ -56,7 +56,7 @@ T_co = TypeVar("T_co", covariant=True)
 TArg_co = TypeVar("TArg_co", covariant=True)
 
 
-class FilterOpBuilder(Generic[T_co]):
+class FilterOpBuilder(Generic[T_co]):  # noqa: PLW1641
     def _check_op(
         self: _HasNameAndOperatorsProtocol,
         operator: AbstractFilterOperator,

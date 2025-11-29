@@ -55,7 +55,7 @@ class FilterSetMeta(type):
         for key in cls.__filters__:  # used to add default value for dataclass
             setattr(cls, key, None)
 
-        d_cls = dataclass(  # type: ignore[call-overload]
+        d_cls = dataclass(
             cast(type[Any], cls),
             kw_only=True,
         )

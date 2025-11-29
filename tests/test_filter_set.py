@@ -15,7 +15,7 @@ from fastapi_filters.utils import unwrap_annotated
 
 
 @dataclass
-class _CmpFilterField:
+class _CmpFilterField:  # noqa: PLW1641
     val: FilterField[Any]
 
     def __eq__(self, other: FilterField[Any]) -> bool:

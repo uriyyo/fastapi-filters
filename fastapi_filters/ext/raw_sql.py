@@ -70,7 +70,7 @@ def _adjust_args_pos_in_statement(
 
 
 @dataclass(kw_only=True)
-class CompiledStatement(_BaseCompiledStatement):
+class CompiledStatement(_BaseCompiledStatement):  # type: ignore[misc]
     arg_start: int = 1
     _compiled: StrSQLCompiler
 
@@ -132,7 +132,7 @@ def _compile_sql(
         compile_kwargs=default_compile_kwargs.get() or {},
     )
 
-    return CompiledStatement(
+    return CompiledStatement(  # type: ignore[call-arg]
         arg_start=arg_start,
         _compiled=cast(StrSQLCompiler, compiled),
     )

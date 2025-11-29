@@ -5,7 +5,7 @@ description = "fastapi-filters"
 authors = [
     {"name" = "Yurii Karabas", "email" = "1998uriyyo@gmail.com"},
 ]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.10"
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/uriyyo/fastapi-filters"
@@ -18,6 +18,7 @@ classifiers = [
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'Programming Language :: Python :: 3 :: Only',
 ]
 dependencies = [
@@ -32,7 +33,7 @@ sqlalchemy = [
     "sqlalchemy>=2.0.0",
 ]
 tortoise-orm = [
-    "tortoise-orm>=0.20,<0.26",
+    "tortoise-orm>=0.20",
 ]
 beanie = [
     "beanie>=1.29.0",
@@ -43,18 +44,18 @@ raw-sql = [
 
 [dependency-groups]
 dev = [
-    "pytest>=7.2,<10.0",
-    "pytest-cov>=4,<8",
-    "pytest-asyncio>=0.20.3,<1.3.1",
-    "httpx>=0.23.3,<0.29.0",
+    "pytest>=7.2",
+    "pytest-cov>=4",
+    "pytest-asyncio>=0.20.3",
+    "httpx>=0.23.3",
     "asgi-lifespan>=2.0.0",
-    "ruff>=0.5.1,<0.11.11",
-    "mypy>=0.991,<1.16",
-    "pre-commit>=2.21,<5.0",
-    "uvicorn>=0.20,<0.39",
-    "dirty-equals>=0.6,<0.12",
-    "faker>=19.3,<39.0",
-    "asyncpg>=0.28,<0.32",
+    "ruff>=0.5.1",
+    "mypy>=0.991",
+    "pre-commit>=2.21",
+    "uvicorn>=0.20",
+    "dirty-equals>=0.6",
+    "faker>=19.3",
+    "asyncpg>=0.28",
 ]
 
 [build-system]

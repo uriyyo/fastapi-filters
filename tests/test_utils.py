@@ -1,7 +1,5 @@
-import sys
 import threading
 from collections.abc import Awaitable, Sequence
-from typing import Optional, Union
 
 import pytest
 from fastapi import Depends
@@ -44,54 +42,51 @@ def test_is_seq():
 
 
 def test_is_optional():
-    assert is_optional(Optional[int])
-    assert is_optional(Optional[list[int]])
-    assert is_optional(Optional[tuple[int, ...]])
-    assert is_optional(Optional[Sequence[int]])
-    assert is_optional(Union[float, int, None])
+    assert is_optional(int | None)
+    assert is_optional(list[int] | None)
+    assert is_optional(tuple[int, ...] | None)
+    assert is_optional(Sequence[int] | None)
+    assert is_optional(float | int | None)
 
     assert not is_optional(None)
     assert not is_optional(1)
     assert not is_optional(Awaitable[int])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
 def test_is_optional_union_operator():
-    assert is_optional(eval("int | None"))
-    assert is_optional(eval("int | float | None"))
+    assert is_optional(int | None)
+    assert is_optional(int | float | None)
 
-    assert not is_optional(eval("int | float"))
+    assert not is_optional(int | float)
 
 
 def test_unwrap_type():
-    assert unwrap_type(Optional[int]) is int
-    assert unwrap_type(Union[int, float, None]) == Union[int, float]
+    assert unwrap_type(int | None) is int
+    assert unwrap_type(int | float | None) == int | float
     assert unwrap_type(list[int]) is int
     assert unwrap_type(tuple[int, ...]) is int
-    assert unwrap_type(tuple[int, float]) == Union[int, float]
+    assert unwrap_type(tuple[int, float]) == int | float
     assert unwrap_type(Sequence[int]) is int
     assert unwrap_type(int) is int
     assert unwrap_type(None) is None
 
 
-@pytest.mark.skipif(sys.version_info < (3, 9), reason="Python 3.9+ required")
 def test_unwrap_type_generic_aliases():
     assert unwrap_type(list[int]) is int
     assert unwrap_type(tuple[int, ...]) is int
-    assert unwrap_type(tuple[int, float]) == Union[int, float]
+    assert unwrap_type(tuple[int, float]) == int | float
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="Python 3.10+ required")
 def test_unwrap_type_union_operator():
-    assert unwrap_type(eval("int | None")) is int
-    assert unwrap_type(eval("int | float | None")) == Union[int, float]
-    assert unwrap_type(eval("int | float")) == Union[int, float]
+    assert unwrap_type(int | None) is int
+    assert unwrap_type(int | float | None) == int | float
+    assert unwrap_type(int | float) == int | float
 
 
 def test_unwrap_optional_type():
-    assert unwrap_optional_type(Optional[int]) is int
-    assert unwrap_optional_type(Optional[list[int]]) == list[int]
-    assert unwrap_optional_type(Union[int, float, None]) == Union[int, float]
+    assert unwrap_optional_type(int | None) is int
+    assert unwrap_optional_type(list[int] | None) == list[int]
+    assert unwrap_optional_type(int | float | None) == int | float
 
     with pytest.raises(TypeError):
         assert unwrap_optional_type(None) is None
