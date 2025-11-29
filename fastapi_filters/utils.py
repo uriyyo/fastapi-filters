@@ -1,3 +1,4 @@
+import types
 from collections.abc import Awaitable, Callable, Container, Iterable, Sequence
 from functools import wraps
 from typing import (
@@ -5,11 +6,12 @@ from typing import (
     Any,
     TypeVar,
     Union,
+    get_args,
+    get_origin,
 )
 
+from fastapi.dependencies.utils import lenient_issubclass
 from pydantic.fields import FieldInfo
-from pydantic.v1.typing import get_args, get_origin, is_none_type, is_union
-from pydantic.v1.utils import lenient_issubclass
 from typing_extensions import ParamSpec
 
 try:
@@ -27,6 +29,14 @@ def async_safe(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
         return f(*args, **kwargs)
 
     return wrapper
+
+
+def is_none_type(tp: Any) -> bool:
+    return tp in (type(None), None, None)
+
+
+def is_union(tp: Any) -> bool:
+    return tp in (Union, types.UnionType) or get_origin(tp) in (Union, types.UnionType)
 
 
 def is_optional(tp: Any) -> bool:
@@ -71,7 +81,7 @@ def unwrap_type(tp: Any) -> Any:
 
 
 def unwrap_annotated(tp: Any) -> Any:
-    if get_origin(tp) is Annotated:  # type: ignore[comparison-overlap]
+    if get_origin(tp) is Annotated:
         return tp.__origin__
 
     return tp
