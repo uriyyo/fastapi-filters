@@ -1271,7 +1271,7 @@ wheels = [
 
 [[package]]
 name = "tortoise-orm"
-version = "1.0.0"
+version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiosqlite" },
@@ -1281,9 +1281,9 @@ dependencies = [
     { name = "tomlkit", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/ac/d36638e5fc6d3f98ae5dd4d2aba46bc9510add63cd6c643a58db85b0d55e/tortoise_orm-1.0.0.tar.gz", hash = "sha256:d66188f70c74fd7ea24f294f42f0b16ba9a2b6cdd95d0fcb2fb6cb41759947f4", size = 342975, upload-time = "2026-02-08T22:26:13.721Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/e5/f24ffcfaddbd8e69ce1c41f7c61fed26b09ec683ba9bdfc1d3db28570397/tortoise_orm-1.1.0.tar.gz", hash = "sha256:5e702100cd989acc897ad442ebea6bd8077cdfa1388ce6ad27ea23fd4dca5bef", size = 355197, upload-time = "2026-02-11T20:20:45.57Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/ea/a87942eda8d506b5130cfc33ddd6bc3b937c2e505cfb4e5c91ede2768b5b/tortoise_orm-1.0.0-py3-none-any.whl", hash = "sha256:4f5b609f6e41914a64c9a80233fc5d2e612e7eb1c7b880627d67cd0710ee9bb5", size = 252674, upload-time = "2026-02-08T22:26:12.563Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/86/6620c7b44d38b633e6eac52e9d1aeda3aa6e07ab455029723d43ff417997/tortoise_orm-1.1.0-py3-none-any.whl", hash = "sha256:41ce7c64c042add1b5e5070c72eab399be63b53e0aa7b51ddc8f498d84ba2fb3", size = 257643, upload-time = "2026-02-11T20:20:44.277Z" },
 ]
 
 [[package]]
