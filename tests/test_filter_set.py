@@ -11,6 +11,7 @@ from fastapi_filters import (
     create_filters,
     create_filters_from_set,
 )
+from fastapi_filters.types import AbstractFilterOperator
 from fastapi_filters.utils import unwrap_annotated
 
 
@@ -277,4 +278,42 @@ def test_op_types():
         "a__ge": int,
         "a__lt": int,
         "a__le": int,
+    }
+
+
+def test_filter_set_hooks():
+    class _FilterSet(FilterSet):
+        a: FilterField[int]
+
+        @classmethod
+        def __filter_field_generate_alias__(
+            cls,
+            name: str,
+            op: AbstractFilterOperator,
+            alias: str | None = None,
+        ) -> str:
+            return f"filter-{name}-{op}"
+
+        @classmethod
+        def __filter_field_adapt_type__(
+            cls,
+            field: FilterField[Any],
+            tp: type[Any],
+            op: AbstractFilterOperator,
+        ) -> Any:
+            return str
+
+    resolver = create_filters_from_set(_FilterSet)
+    attrs = {f.name: unwrap_annotated(f.type) for f in fields(resolver.__model__)}
+
+    assert attrs == {
+        "a": str,
+        "a__eq": str,
+        "a__ne": str,
+        "a__in_": str,
+        "a__not_in": str,
+        "a__gt": str,
+        "a__ge": str,
+        "a__lt": str,
+        "a__le": str,
     }

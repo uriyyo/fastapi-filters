@@ -15,7 +15,7 @@ from fastapi import Depends
 from typing_extensions import Self, dataclass_transform
 
 from .fields import FilterField
-from .filters import create_filters
+from .filters import FiltersCreateHooks, create_filters
 from .op import FilterOp
 from .types import AbstractFilterOperator, FiltersResolver, FilterValues
 
@@ -178,6 +178,55 @@ class FilterSet(metaclass=FilterSetMeta):
 
         return self.create(**attrs)
 
+    @classmethod
+    def __filter_field_adapt_type__(
+        cls,
+        field: FilterField[Any],
+        tp: type[Any],
+        op: AbstractFilterOperator,
+    ) -> Any | None:
+        return None
+
+    @classmethod
+    def __filter_field_generate_alias__(
+        cls,
+        name: str,
+        op: AbstractFilterOperator,
+        alias: str | None = None,
+    ) -> str | None:
+        return None
+
+
+@dataclass
+class _FitlerSetFiltersCreateHooks(FiltersCreateHooks):
+    filter_set_cls: type[FilterSet]
+
+    def filter_field_adapt_type(
+        self,
+        field: FilterField[Any],
+        tp: type[Any],
+        op: AbstractFilterOperator,
+    ) -> Any:
+        adapted = self.filter_set_cls.__filter_field_adapt_type__(field, tp, op)
+
+        if adapted is not None:
+            return adapted
+
+        return super().filter_field_adapt_type(field, tp, op)
+
+    def filter_field_generate_alias(
+        self,
+        name: str,
+        op: AbstractFilterOperator,
+        alias: str | None = None,
+    ) -> str:
+        generated = self.filter_set_cls.__filter_field_generate_alias__(name, op, alias)
+
+        if generated is not None:
+            return generated
+
+        return super().filter_field_generate_alias(name, op, alias)
+
 
 TFiltersSet = TypeVar("TFiltersSet", bound=FilterSet)
 
@@ -187,6 +236,7 @@ def _filters_from_set(
 ) -> FiltersResolver:
     return create_filters(
         **{k: v for k, v in filters_set.__filters__.items() if not v.internal},  # type: ignore[arg-type]
+        hooks=_FitlerSetFiltersCreateHooks(filters_set),
     )
 
 

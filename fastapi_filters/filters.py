@@ -1,6 +1,7 @@
 from collections import defaultdict
-from collections.abc import Container, Iterator
-from dataclasses import asdict, make_dataclass
+from collections.abc import Callable, Container, Iterator
+from contextlib import ExitStack
+from dataclasses import asdict, dataclass, make_dataclass
 from typing import (
     Annotated,
     Any,
@@ -25,71 +26,76 @@ from .types import (
 )
 from .utils import async_safe, fields_include_exclude, is_seq, unwrap_seq_type
 
-
-def default_alias_generator(
-    name: str,
-    op: AbstractFilterOperator,
-    alias: str | None = None,
-) -> str:
-    name = alias or name
-    return f"{name}[{op.name.rstrip('_')}]"
-
-
-alias_generator_config: ConfigVar[FilterAliasGenerator] = ConfigVar(
+alias_generator_config: ConfigVar[FilterAliasGenerator | None] = ConfigVar(
     "alias_generator",
-    default=default_alias_generator,
+    default=None,
 )
 
 
-def adapt_type(
-    field: FilterField[Any],
-    tp: type[Any],
-    op: AbstractFilterOperator,
-) -> Any:
-    if field.op_types and op in field.op_types:
-        return field.op_types[op]
+@dataclass
+class FiltersCreateHooks:
+    def filter_field_generate_alias(
+        self,
+        name: str,
+        op: AbstractFilterOperator,
+        alias: str | None = None,
+    ) -> str:
+        # TODO: to many places to do simple things
+        if override := alias_generator_config.get():
+            return override(name, op, alias)
 
-    if is_seq(tp):
-        return CSVList[unwrap_seq_type(tp)]  # type: ignore[misc]
+        name = alias or name
+        return f"{name}[{op.name.rstrip('_')}]"
 
-    if op in {
-        FilterOperator.like,
-        FilterOperator.ilike,
-        FilterOperator.not_like,
-        FilterOperator.not_ilike,
-    }:
-        return str
+    def filter_field_adapt_type(
+        self,
+        field: FilterField[Any],
+        tp: type[Any],
+        op: AbstractFilterOperator,
+    ) -> Any:
 
-    if op == FilterOperator.is_null:
-        return bool
+        if field.op_types and op in field.op_types:
+            return field.op_types[op]
 
-    if op in {FilterOperator.in_, FilterOperator.not_in}:
-        return CSVList[tp]  # type: ignore[valid-type]
+        if is_seq(tp):
+            return CSVList[unwrap_seq_type(tp)]  # type: ignore[misc]
 
-    return tp
+        if op in {
+            FilterOperator.like,
+            FilterOperator.ilike,
+            FilterOperator.not_like,
+            FilterOperator.not_ilike,
+        }:
+            return str
 
+        if op == FilterOperator.is_null:
+            return bool
 
-def field_filter_to_raw_fields(
-    name: str,
-    field: FilterField[Any],
-    alias_generator: FilterAliasGenerator | None = None,
-) -> Iterator[tuple[str, Any, AbstractFilterOperator, str | None]]:
-    if alias_generator is None:
-        alias_generator = alias_generator_config.get()
+        if op in {FilterOperator.in_, FilterOperator.not_in}:
+            return CSVList[tp]  # type: ignore[valid-type]
 
-    yield name, field.type, cast(AbstractFilterOperator, field.default_op), field.alias
+        return tp
 
-    for op in field.operators or ():
-        yield (
-            f"{name}__{op.name}",
-            field.type,
-            op,
-            alias_generator(
-                name,
+    def filter_field_to_raw_fields(
+        self,
+        name: str,
+        field: FilterField[Any],
+    ) -> Iterator[tuple[str, Any, AbstractFilterOperator, str | None]]:
+        yield name, field.type, cast(AbstractFilterOperator, field.default_op), field.alias
+
+        for op in field.operators or ():
+            yield (
+                f"{name}__{op.name}",
+                field.type,
                 op,
-                field.alias,
-            ),
-        )
+                self.filter_field_generate_alias(name, op, field.alias),
+            )
+
+
+filters_create_hooks_factory_config: ConfigVar[Callable[[], FiltersCreateHooks]] = ConfigVar(
+    "filters_create_hooks_factory",
+    default=FiltersCreateHooks,
+)
 
 
 def create_filters_from_model(
@@ -99,6 +105,7 @@ def create_filters_from_model(
     alias_generator: FilterAliasGenerator | None = None,
     include: Container[str] | None = None,
     exclude: Container[str] | None = None,
+    hooks: FiltersCreateHooks | None = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
     checker = fields_include_exclude(model.model_fields, include, exclude)
@@ -112,6 +119,7 @@ def create_filters_from_model(
     return create_filters(
         in_=in_,
         alias_generator=alias_generator,
+        hooks=hooks,
         **{
             **{name: _get_type(field) for name, field in model.model_fields.items() if checker(name)},
             **(overrides or {}),
@@ -123,24 +131,31 @@ def create_filters(
     *,
     in_: FilterPlace | None = None,
     alias_generator: FilterAliasGenerator | None = None,
+    hooks: FiltersCreateHooks | None = None,
     **kwargs: FilterFieldDef,
 ) -> FiltersResolver:
     if in_ is None:
         in_ = Query
 
+    hooks = hooks or FiltersCreateHooks()
+
     fields: dict[str, FilterField[Any]] = {
         name: f_def if isinstance(f_def, FilterField) else FilterField(f_def) for name, f_def in kwargs.items()
     }
 
-    fields_defs = [
-        (name, fname, field, tp, alias, op)
-        for name, field in fields.items()
-        for fname, tp, op, alias in field_filter_to_raw_fields(
-            name,
-            field,
-            alias_generator,
-        )
-    ]
+    with ExitStack() as stack:
+        # TODO: maybe better to remove ConvigVar? To many ways to do the same thing
+        if alias_generator:
+            stack.enter_context(alias_generator_config.set(alias_generator))
+
+        fields_defs = [
+            (name, fname, field, tp, alias, op)
+            for name, field in fields.items()
+            for fname, tp, op, alias in hooks.filter_field_to_raw_fields(
+                name,
+                field,
+            )
+        ]
 
     defs = {fname: (name, op) for name, fname, *_, op in fields_defs}
 
@@ -149,7 +164,10 @@ def create_filters(
         [
             (
                 fname,
-                Annotated[adapt_type(field, tp, op), in_(alias=alias)],
+                Annotated[
+                    hooks.filter_field_adapt_type(field, tp, op),
+                    in_(alias=alias),
+                ],
                 None,
             )
             for _, fname, field, tp, alias, op in fields_defs
@@ -174,6 +192,7 @@ def create_filters(
 
 
 __all__ = [
+    "FiltersCreateHooks",
     "alias_generator_config",
     "create_filters",
     "create_filters_from_model",

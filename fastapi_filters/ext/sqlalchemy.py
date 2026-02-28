@@ -23,6 +23,7 @@ from sqlalchemy.sql.selectable import Select
 from fastapi_filters import FilterField, create_filters
 from fastapi_filters.config import ConfigVar
 from fastapi_filters.filter_set import FilterSet
+from fastapi_filters.filters import FiltersCreateHooks
 from fastapi_filters.operators import FilterOperator
 from fastapi_filters.sorters import create_sorting
 from fastapi_filters.types import (
@@ -324,6 +325,7 @@ def create_filters_from_orm(
     include: Container[str] | None = None,
     exclude: Container[str] | None = None,
     remapping: Mapping[str, str] | None = None,
+    hooks: FiltersCreateHooks | None = None,
     **overrides: FilterFieldDef,
 ) -> FiltersResolver:
     fields = {
@@ -340,6 +342,7 @@ def create_filters_from_orm(
     return create_filters(
         in_=in_,
         alias_generator=alias_generator,
+        hooks=hooks,
         **{**fields, **overrides},
     )
 
