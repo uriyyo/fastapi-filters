@@ -63,7 +63,7 @@ DEFAULT_FILTERS: Mapping[AbstractFilterOperator, Callable[[Any, Any], Any]] = {
     FilterOperator.in_: lambda a, b: a.in_(b),
     FilterOperator.not_in: lambda a, b: a.not_in(b),
     FilterOperator.is_null: lambda a, b: a.is_(None) if b else a.isnot(None),
-    FilterOperator.overlap: lambda a, b: _overlap(a, b),
+    FilterOperator.overlap: lambda a, b: _overlap(a, b),  # noqa: PLW0108
     FilterOperator.not_overlap: lambda a, b: ~_overlap(a, b),
     FilterOperator.contains: lambda a, b: a.contains(b),
     FilterOperator.not_contains: lambda a, b: ~a.contains(b),
