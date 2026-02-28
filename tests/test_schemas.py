@@ -43,7 +43,7 @@ async def test_csv_list_as_query_param(app, client):
 
     res = await client.get("/", params={"q": "1,abc"})
 
-    assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert res.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert res.json() == {
         "detail": [
             IsPartialDict(

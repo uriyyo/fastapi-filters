@@ -4,6 +4,7 @@ from functools import wraps
 from typing import (
     Annotated,
     Any,
+    Literal,
     TypeVar,
     Union,
     get_args,
@@ -32,7 +33,7 @@ def async_safe(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
 
 
 def is_none_type(tp: Any) -> bool:
-    return tp in (type(None), None, None)
+    return tp in (type(None), None, Literal[None])  # noqa: PYI061
 
 
 def is_union(tp: Any) -> bool:
