@@ -26,54 +26,58 @@ pip install fastapi-filters
 
 ## Quickstart
 
-To create filters you need either define them manually using `create_filters` function or automatically generate them
-based on model using `create_filters_from_model` function.
+Define filters using a `FilterSet` class:
 
 ```py
-from typing import List
+from fastapi import Depends, FastAPI
+from pydantic import BaseModel
 
-from fastapi import FastAPI, Depends
-from pydantic import BaseModel, Field
+from fastapi_filters import FilterField, FilterSet, SortingValues, create_sorting
 
-# import all you need from fastapi-filters
-from fastapi_filters import create_filters, create_filters_from_model, FilterValues
-
-app = FastAPI()  # create FastAPI app
+app = FastAPI()
 
 
-class UserOut(BaseModel):  # define your model
-    name: str = Field(..., example="Steve")
-    surname: str = Field(..., example="Rogers")
-    age: int = Field(..., example=102)
+class UserOut(BaseModel):
+    name: str
+    surname: str
+    age: int
 
 
-@app.get("/users")
-async def get_users_manual_filters(
-    # manually define filters
-    filters: FilterValues = Depends(create_filters(name=str, surname=str, age=int)),
-) -> List[UserOut]:
-    pass
+class UserFilters(FilterSet):
+    name: FilterField[str]
+    surname: FilterField[str]
+    age: FilterField[int]
 
 
 @app.get("/users")
-async def get_users_auto_filters(
-    # or automatically generate filters from pydantic model
-    filters: FilterValues = Depends(create_filters_from_model(UserOut)),
-) -> List[UserOut]:
+async def get_users(
+    filters: UserFilters = Depends(),
+    sorting: SortingValues = Depends(create_sorting("name", "age")),
+) -> list[UserOut]:
     pass
 ```
 
-Currently, `fastapi-filters` supports `SQLAlchemy` integration.
+Query parameters are auto-generated based on field types:
+
+```
+GET /users?name[eq]=Steve&age[gt]=30&sort=+age
+```
+
+`fastapi-filters` supports `SQLAlchemy`, `Tortoise ORM`, `Beanie` (MongoDB), and raw SQL integrations.
 
 ```py
-from fastapi_filters.ext.sqlalchemy import apply_filters
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from fastapi_filters.ext.sqlalchemy import apply_filters_and_sorting
 
 
 @app.get("/users")
 async def get_users(
     db: AsyncSession = Depends(get_db),
-    filters: FilterValues = Depends(create_filters_from_model(UserOut)),
-) -> List[UserOut]:
-    query = apply_filters(select(UserOut), filters)
-    return (await db.scalars(query)).all()
+    filters: UserFilters = Depends(),
+    sorting: SortingValues = Depends(create_sorting("name", "age")),
+) -> list[UserOut]:
+    stmt = apply_filters_and_sorting(select(User), filters, sorting)
+    return (await db.scalars(stmt)).all()
 ```

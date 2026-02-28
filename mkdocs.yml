@@ -1,0 +1,99 @@
+site_name: FastAPI Filters
+site_author: Yurii Karabas
+site_description: Declarative filtering and sorting for FastAPI
+copyright: "Copyright &copy; 2026 Yurii Karabas"
+repo_url: https://github.com/uriyyo/fastapi-filters
+repo_name: uriyyo/fastapi-filters
+
+theme:
+  name: 'material'
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/lightbulb-outline
+        name: "Switch to dark mode"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/lightbulb
+        name: "Switch to light mode"
+  features:
+    - content.tabs.link
+    - content.code.annotate
+    - content.code.copy
+    - announce.dismiss
+    - navigation.footer
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.preview
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - "General": index.md
+  - "Learn":
+      - "Tutorial - User Guide":
+          - "First Steps": learn/tutorial/first_steps.md
+          - "FilterSet": learn/tutorial/filter_set.md
+          - "FilterField": learn/tutorial/filter_field.md
+          - "Operators": learn/tutorial/operators.md
+          - "Programmatic Filters": learn/tutorial/programmatic_filters.md
+          - "Sorting": learn/tutorial/sorting.md
+          - "OpenAPI Docs": learn/tutorial/openapi_docs.md
+      - "Database Integrations":
+          - "SQLAlchemy": learn/integrations/sqlalchemy.md
+          - "Tortoise ORM": learn/integrations/tortoise.md
+          - "Beanie (MongoDB)": learn/integrations/beanie.md
+          - "Raw SQL": learn/integrations/raw_sql.md
+      - "Real-World Usage":
+          - "Overview": learn/real_world/overview.md
+  - "Contributing": contributing.md
+  - "License": license.md
+
+markdown_extensions:
+  - tables
+  - toc:
+      permalink: true
+      title: Page contents
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.extra
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - mdx_include:
+      base_path: docs
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/uriyyo/fastapi-filters/
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/uriyyo/
+
+watch:
+  - docs
+  - README.md
+  - mkdocs.yml

@@ -57,6 +57,13 @@ dev = [
     "faker>=19.3",
     "asyncpg>=0.28",
 ]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.50",
+    "pymdown-extensions~=10.14",
+    "fontawesome-markdown>=0.2.6",
+    "mdx-include",
+]
 
 [build-system]
 requires = ["hatchling"]
