@@ -58,4 +58,5 @@ The following pages walk through the core building blocks:
 | [Operators](operators.md) | All available operators and how they are auto-generated per type |
 | [Programmatic Filters](programmatic_filters.md) | Building `FilterOp` objects with Python operators (`>`, `==`, `>>`) |
 | [Sorting](sorting.md) | Adding sort support to your endpoints |
+| [CSVList](csv_list.md) | Parsing comma-separated query params and customizing the separator |
 | [OpenAPI Docs](openapi_docs.md) | Fixing Swagger UI for CSV list parameters |

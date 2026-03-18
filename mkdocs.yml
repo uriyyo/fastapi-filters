@@ -53,6 +53,8 @@ nav:
           - "Operators": learn/tutorial/operators.md
           - "Programmatic Filters": learn/tutorial/programmatic_filters.md
           - "Sorting": learn/tutorial/sorting.md
+          - "CSVList": learn/tutorial/csv_list.md
+          - "Configuration": learn/tutorial/configuration.md
           - "OpenAPI Docs": learn/tutorial/openapi_docs.md
       - "Database Integrations":
           - "SQLAlchemy": learn/integrations/sqlalchemy.md
