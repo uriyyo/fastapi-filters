@@ -1,3 +1,4 @@
+from fastapi_filters.configs import csv_separator_config
 import pytest
 from dirty_equals import IsPartialDict
 from fastapi import Query, status
@@ -12,6 +13,11 @@ def test_csv_list():
     assert parse_obj_as(CSVList[int], "1") == [1]
     assert parse_obj_as(CSVList[int], "1,2") == [1, 2]
     assert parse_obj_as(CSVList[int], "1,2,3") == [1, 2, 3]
+
+
+def test_csv_list_with_custom_separator():
+    with csv_separator_config.set(";"):
+        assert parse_obj_as(CSVList[int], "1;2;3") == [1, 2, 3]
 
 
 def test_csv_list_errors():

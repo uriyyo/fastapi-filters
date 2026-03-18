@@ -5,9 +5,11 @@ from .operators import (
 from .operators import (
     filter_operators_generator_config as filter_operators_generator,
 )
+from .schemas import csv_separator_config
 
 __all__ = [
     "alias_generator",
+    "csv_separator_config",
     "disabled_filters",
     "filter_operators_generator",
 ]
