@@ -1,9 +1,9 @@
-from fastapi_filters.configs import csv_separator_config
 import pytest
 from dirty_equals import IsPartialDict
 from fastapi import Query, status
 from pydantic import ValidationError
 
+from fastapi_filters.configs import csv_separator_config
 from fastapi_filters.schemas import CSVList
 
 from .utils import parse_obj_as
