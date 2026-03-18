@@ -2,15 +2,17 @@ from typing import Annotated, Any, TypeAlias, TypeVar
 
 from pydantic import BeforeValidator, GetPydanticSchema
 
+from fastapi_filters.settings import app_settings
+
 T = TypeVar("T")
 
 
 def csv_list_validator(v: Any) -> Any:
     match v:
         case str():
-            return v.split(",")
+            return v.split(app_settings.csv_separator)
         case [str() as s]:
-            return s.split(",")
+            return s.split(app_settings.csv_separator)
         case _:
             return v
 
