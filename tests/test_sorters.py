@@ -25,6 +25,25 @@ async def test_filters_as_dep(app, client):
     assert res.json() == [["name", "asc", None], ["age", "desc", None]]
 
 
+@pytest.mark.asyncio
+async def test_sorting_default_as_dep(app, client):
+    @app.get("/")
+    async def route(
+        sorting: SortingValues = Depends(create_sorting("name", "age", default="+age")),
+    ) -> SortingValues:
+        return sorting
+
+    res = await client.get("/")
+
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() == [["age", "asc", None]]
+
+    res = await client.get("/", params={"sort": "-name"})
+
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() == [["name", "desc", None]]
+
+
 def test_create_sorting():
     model = create_sorting("name", "age", "created_at")
 
