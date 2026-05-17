@@ -117,7 +117,7 @@ async def get_users(
     )
 
     async with AsyncSession(engine) as session:
-        return await session.scalars(stmt)
+        return (await session.scalars(stmt)).all()
 
 
 if __name__ == "__main__":
