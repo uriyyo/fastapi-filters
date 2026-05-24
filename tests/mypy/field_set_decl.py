@@ -24,13 +24,13 @@ reveal_type(filter_set.d)
 
 # output:
 """
-tests/mypy/field_set_decl.py:13:13: note: Revealed type is "fastapi_filters.fields.FilterField[builtins.int]"
-tests/mypy/field_set_decl.py:14:13: note: Revealed type is "fastapi_filters.fields.FilterField[builtins.float]"
-tests/mypy/field_set_decl.py:15:13: note: Revealed type is "fastapi_filters.fields.FilterField[builtins.str]"
-tests/mypy/field_set_decl.py:16:13: note: Revealed type is "fastapi_filters.fields.FilterField[builtins.bool]"
-tests/mypy/field_set_decl.py:20:13: note: Revealed type is "builtins.dict[enum.Enum, builtins.int | typing.Sequence[builtins.int] | builtins.bool]"
-tests/mypy/field_set_decl.py:21:13: note: Revealed type is "builtins.dict[enum.Enum, builtins.float | typing.Sequence[builtins.float] | builtins.bool]"
-tests/mypy/field_set_decl.py:22:13: note: Revealed type is "builtins.dict[enum.Enum, builtins.str | typing.Sequence[builtins.str] | builtins.bool]"
-tests/mypy/field_set_decl.py:23:13: note: Revealed type is "builtins.dict[enum.Enum, builtins.bool | typing.Sequence[builtins.bool]]"
+tests/mypy/field_set_decl.py:13:13: note: Revealed type is "fastapi_filters.fields.FilterField[int]"
+tests/mypy/field_set_decl.py:14:13: note: Revealed type is "fastapi_filters.fields.FilterField[float]"
+tests/mypy/field_set_decl.py:15:13: note: Revealed type is "fastapi_filters.fields.FilterField[str]"
+tests/mypy/field_set_decl.py:16:13: note: Revealed type is "fastapi_filters.fields.FilterField[bool]"
+tests/mypy/field_set_decl.py:20:13: note: Revealed type is "dict[enum.Enum, int | typing.Sequence[int] | bool]"
+tests/mypy/field_set_decl.py:21:13: note: Revealed type is "dict[enum.Enum, float | typing.Sequence[float] | bool]"
+tests/mypy/field_set_decl.py:22:13: note: Revealed type is "dict[enum.Enum, str | typing.Sequence[str] | bool]"
+tests/mypy/field_set_decl.py:23:13: note: Revealed type is "dict[enum.Enum, bool | typing.Sequence[bool]]"
 Success: no issues found in 1 source file
 """
