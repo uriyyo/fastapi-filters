@@ -24,7 +24,15 @@ from .types import (
     FiltersResolver,
     FilterValues,
 )
-from .utils import async_safe, fields_include_exclude, is_seq, unwrap_seq_type
+from .utils import (
+    async_safe,
+    fields_include_exclude,
+    is_optional,
+    is_seq,
+    unwrap_annotated,
+    unwrap_optional_type,
+    unwrap_seq_type,
+)
 
 alias_generator_config: ConfigVar[FilterAliasGenerator | None] = ConfigVar(
     "alias_generator",
@@ -57,8 +65,15 @@ class FiltersCreateHooks:
         if field.op_types and op in field.op_types:
             return field.op_types[op]
 
-        if is_seq(tp):
-            return CSVList[unwrap_seq_type(tp)]  # type: ignore[misc]
+        if op == FilterOperator.is_null:
+            return bool
+
+        seq_type = unwrap_annotated(tp)
+        if is_optional(seq_type):
+            seq_type = unwrap_optional_type(seq_type)
+
+        if is_seq(seq_type):
+            return CSVList[unwrap_seq_type(seq_type)]  # type: ignore[misc]
 
         if op in {
             FilterOperator.like,
@@ -67,9 +82,6 @@ class FiltersCreateHooks:
             FilterOperator.not_ilike,
         }:
             return str
-
-        if op == FilterOperator.is_null:
-            return bool
 
         if op in {FilterOperator.in_, FilterOperator.not_in}:
             return CSVList[tp]  # type: ignore[valid-type]

@@ -48,6 +48,10 @@ By default:
 - Scalar types use `eq`
 - Sequence types use `overlap`
 
+Optional wrappers do not change the default for the wrapped type. For example,
+`FilterField[list[str] | None]` uses `overlap` for the bare `tags=...` query
+parameter and also exposes `tags[is_null]`.
+
 You can override it:
 
 ```python
@@ -124,6 +128,12 @@ class UserFilters(FilterSet):
 ```
 
 Sequence fields automatically get sequence-specific operators: `overlap`, `not_overlap`, `contains`, `not_contains`.
+Optional sequence fields also get `is_null`:
+
+```python
+class UserFilters(FilterSet):
+    tags: FilterField[list[str] | None]
+```
 
 ---
 
@@ -139,6 +149,7 @@ class UserFilters(FilterSet):
 
 The `deleted_at` field will have all the standard `datetime` operators plus `is_null`.
 Use `deleted_at[is_null]=true` or `deleted_at[is_null]=false` in query parameters.
+For optional sequence fields, sequence operators are preserved and `is_null` is added.
 
 ---
 

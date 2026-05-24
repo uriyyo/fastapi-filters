@@ -47,7 +47,7 @@ The library generates operators based on the field's Python type:
 
 | Operators |
 |-----------|
-| `eq`, `ne`, `in`, `not_in`, `like`, `ilike`, `not_like`, `not_ilike`, `gt`, `ge`, `lt`, `le` |
+| `eq`, `ne`, `in`, `not_in`, `like`, `ilike`, `not_like`, `not_ilike` |
 
 ### `list[T]` (Sequence types)
 
@@ -58,6 +58,18 @@ The library generates operators based on the field's Python type:
 ### `Optional[T]` (`T | None`)
 
 All operators for type `T` plus `is_null`.
+
+For optional sequence types such as `list[str] | None`, this means the sequence
+operators plus `is_null`; the default bare query parameter still uses `overlap`.
+
+---
+
+## Default Operator
+
+Each field also has a default operator for bare query parameters:
+
+- Scalar types use `eq`: `name=John`
+- Sequence types use `overlap`: `tags=python,fastapi`
 
 ---
 

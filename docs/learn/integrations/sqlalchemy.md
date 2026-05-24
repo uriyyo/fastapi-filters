@@ -189,6 +189,12 @@ create_filters_from_orm(
 )
 ```
 
+PostgreSQL `ARRAY` columns are detected as sequence fields. Because SQLAlchemy
+columns are nullable by default, generated filters for nullable arrays include
+`is_null` plus sequence operators such as `overlap`, `not_overlap`, `contains`,
+and `not_contains`. A bare query parameter such as `marks=1,2` uses the sequence
+default operator, `overlap`.
+
 !!! tip
 
     Prefer using `FilterSet` over `create_filters_from_orm` for new code. `FilterSet` gives you

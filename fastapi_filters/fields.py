@@ -9,15 +9,26 @@ from typing import (
     overload,
 )
 
+from fastapi_filters.errors import InvalidDefaultOperatorError
+
 from .op import FilterOpBuilder
 from .operators import FilterOperator, get_filter_operators
-from .utils import is_seq
+from .utils import is_optional, is_seq, unwrap_annotated, unwrap_optional_type
 
 if TYPE_CHECKING:
     from .types import AbstractFilterOperator
 
 
 T_co = TypeVar("T_co", covariant=True)
+
+
+def _is_sequence_type(tp: Any) -> bool:
+    tp = unwrap_annotated(tp)
+
+    if is_optional(tp):
+        tp = unwrap_optional_type(tp)
+
+    return is_seq(tp)
 
 
 @dataclass(eq=False, order=False)
@@ -58,10 +69,13 @@ class FilterField(FilterOpBuilder[T_co]):
             self.operators = [*get_filter_operators(self.type)]
 
         if self.default_op is None:
-            if is_seq(self.type):
+            if _is_sequence_type(self.type):
                 self.default_op = FilterOperator.overlap
             else:
                 self.default_op = FilterOperator.eq
+
+        if self.default_op and self.operators is not None and self.default_op not in self.operators:
+            raise InvalidDefaultOperatorError(f"default_op {self.default_op} is not in operators {self.operators}")
 
 
 __all__ = [
