@@ -55,6 +55,34 @@ async def test_filters_as_dep(app, client):
 
 
 @pytest.mark.asyncio
+async def test_optional_sequence_filter_default_op(app, client):
+    resolver = create_filters(tags=list[str] | None)
+
+    assert resolver.__defs__ == {
+        "tags": ("tags", FilterOperator.overlap),
+        "tags__is_null": ("tags", FilterOperator.is_null),
+        "tags__overlap": ("tags", FilterOperator.overlap),
+        "tags__not_overlap": ("tags", FilterOperator.not_overlap),
+        "tags__contains": ("tags", FilterOperator.contains),
+        "tags__not_contains": ("tags", FilterOperator.not_contains),
+    }
+
+    @app.get("/optional-sequence")
+    async def route(filters: FilterValues = Depends(resolver)) -> FilterValues:
+        return filters
+
+    res = await client.get(
+        "/optional-sequence",
+        params={"tags": "a,b", "tags[is_null]": "false"},
+    )
+
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() == {
+        "tags": {"overlap": ["a", "b"], "is_null": False},
+    }
+
+
+@pytest.mark.asyncio
 async def test_filters(app):
     resolver = create_filters(
         a=FilterField(

@@ -262,7 +262,7 @@ def test_create_filters_from_orm():
     resolver = create_filters_from_orm(User, include={"languages"})
 
     assert resolver.__defs__ == {
-        "languages": ("languages", FilterOperator.eq),
+        "languages": ("languages", FilterOperator.overlap),
         "languages__is_null": ("languages", FilterOperator.is_null),
         "languages__overlap": ("languages", FilterOperator.overlap),
         "languages__not_overlap": ("languages", FilterOperator.not_overlap),
