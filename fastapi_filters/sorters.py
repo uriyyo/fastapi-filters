@@ -37,7 +37,7 @@ def create_sorting(
 
     normalized_fields = [(f, None) if isinstance(f, str) else f for f in fields]
 
-    defs = {f"{d}{f}": (f, v, n) for (v, d) in (("asc", "+"), ("desc", "-")) for f, n in normalized_fields}
+    defs = {f"{d}{f}": (f, v, n) for (v, d) in (("asc", "+"), ("asc", ""), ("desc", "-")) for f, n in normalized_fields}
     tp = Literal[tuple(defs)]  # type: ignore[valid-type]
 
     default = [default] if isinstance(default, str) else default

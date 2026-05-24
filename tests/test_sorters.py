@@ -48,10 +48,13 @@ def test_create_sorting():
     model = create_sorting("name", "age", "created_at")
 
     assert model.__defs__ == {
+        "age": ("age", "asc", None),
         "+age": ("age", "asc", None),
         "-age": ("age", "desc", None),
+        "name": ("name", "asc", None),
         "+name": ("name", "asc", None),
         "-name": ("name", "desc", None),
+        "created_at": ("created_at", "asc", None),
         "+created_at": ("created_at", "asc", None),
         "-created_at": ("created_at", "desc", None),
     }
@@ -71,10 +74,13 @@ def test_create_sorting_from_model():
     model = create_sorting_from_model(User)
 
     assert model.__defs__ == {
+        "age": ("age", "asc", None),
         "+age": ("age", "asc", None),
         "-age": ("age", "desc", None),
+        "name": ("name", "asc", None),
         "+name": ("name", "asc", None),
         "-name": ("name", "desc", None),
+        "created_at": ("created_at", "asc", None),
         "+created_at": ("created_at", "asc", None),
         "-created_at": ("created_at", "desc", None),
     }

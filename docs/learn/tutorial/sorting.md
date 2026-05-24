@@ -22,10 +22,11 @@ async def get_users(
     return {"sorting": sorting}
 ```
 
-Clients specify sort order using `+` (ascending) and `-` (descending) prefixes:
+Clients specify sort order using `-` for descending. Fields without a prefix are ascending;
+`+field` is also accepted for explicit ascending order.
 
 ```
-GET /users?sort=+age,-created_at
+GET /users?sort=age,-created_at
 ```
 
 ---
@@ -37,7 +38,7 @@ Set a default sort order that applies when no `sort` parameter is provided:
 ```python
 sorting = create_sorting(
     "age", "created_at",
-    default="+age",
+    default="age",
 )
 
 # Multiple defaults
@@ -141,7 +142,7 @@ sorting = create_sorting(
 )
 ```
 
-Now clients use `?order_by=+age,-created_at`.
+Now clients use `?order_by=age,-created_at`.
 
 ---
 
@@ -154,7 +155,7 @@ Now clients use `?order_by=+age,-created_at`.
 - `SortingNulls` -- `"bigger"`, `"smaller"`, or `None`
 
 ```python
-# GET /users?sort=+age,-created_at
+# GET /users?sort=age,-created_at
 # Produces:
 [
     ("age", "asc", None),
