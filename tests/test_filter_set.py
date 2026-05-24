@@ -14,13 +14,15 @@ from fastapi_filters import (
 from fastapi_filters.types import AbstractFilterOperator
 from fastapi_filters.utils import unwrap_annotated
 
+_FILTER_FIELD_ATTRS = ("type", "operators", "default_op", "name", "alias", "internal", "op_types")
+
 
 @dataclass
 class _CmpFilterField:  # noqa: PLW1641
     val: FilterField[Any]
 
     def __eq__(self, other: FilterField[Any]) -> bool:
-        return fields(self.val) == fields(other)
+        return all(getattr(self.val, attr) == getattr(other, attr) for attr in _FILTER_FIELD_ATTRS)
 
 
 def test_filter_set_decl():
@@ -63,6 +65,53 @@ def test_filter_set_decl_mult_inheritance():
     }
 
     assert _FilterSet.__filters__ == {k: _CmpFilterField(v) for k, v in _fields.items()}
+
+
+def test_filter_set_sequence_field():
+    class _FilterSet(FilterSet):
+        a: FilterField[list[int]]
+
+    field = _FilterSet.__filters__["a"]
+
+    assert field.type == list[int]
+    assert field.default_op == FilterOperator.overlap
+    assert field.operators is not None
+    assert FilterOperator.overlap in field.operators
+
+
+def test_filter_set_inherited_customization_preserved():
+    class _Base(FilterSet):
+        a: FilterField[int] = FilterField(
+            default_op=FilterOperator.ne,
+            operators=[FilterOperator.eq, FilterOperator.ne],
+        )
+
+    class _Child(_Base):
+        b: FilterField[str]
+
+    assert _Child.__filters__["a"].default_op == FilterOperator.ne
+    assert _Child.__filters__["a"].operators == [FilterOperator.eq, FilterOperator.ne]
+
+
+def test_filter_set_reused_field():
+    shared = FilterField(operators=[FilterOperator.eq, FilterOperator.ne])
+
+    class _FilterSet(FilterSet):
+        a: FilterField[int] = shared
+        b: FilterField[str] = shared
+
+    assert _FilterSet.a.name == "a"
+    assert _FilterSet.b.name == "b"
+    assert _FilterSet.a is not _FilterSet.b
+    assert _FilterSet.a is not shared
+
+    assert shared.name is None
+
+    assert _FilterSet.a.type is int
+    assert _FilterSet.b.type is str
+
+    assert (_FilterSet.a == 1).name == "a"
+    assert (_FilterSet.b == "x").name == "b"
 
 
 def test_filter_field_filter_values():

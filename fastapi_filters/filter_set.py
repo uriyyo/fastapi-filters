@@ -1,17 +1,16 @@
 import inspect
 from collections.abc import Awaitable, Callable, Mapping, Sequence
-from dataclasses import InitVar, asdict, dataclass, replace
+from dataclasses import dataclass
 from typing import (
     Any,
     ClassVar,
     TypeVar,
-    cast,
     get_args,
     get_origin,
-    get_type_hints,
 )
 
 from fastapi import Depends
+from pydantic import BaseModel, model_validator
 from typing_extensions import Self, dataclass_transform
 
 from .fields import FilterField
@@ -22,72 +21,71 @@ from .types import AbstractFilterOperator, FiltersResolver, FilterValues
 T_co = TypeVar("T_co", covariant=True)
 
 
-class FilterSetMeta(type):
-    def __init__(
-        cls,
-        name: str,
-        bases: Any,
-        namespace: dict[str, Any],
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(name, bases, namespace, **kwargs)
+@dataclass_transform(
+    field_specifiers=(FilterField,),
+)
+class FilterSet(BaseModel):
+    __filters__: ClassVar[dict[str, FilterField[Any]]] = {}
 
-        hints = get_type_hints(cls, include_extras=True)
-        specs = {key: get_args(value)[0] for key, value in hints.items() if get_origin(value) is FilterField}
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
 
-        cls.__filters__: dict[str, FilterField[Any]] = {}
-        for base in bases:
-            cls.__filters__.update(getattr(base, "__filters__", {}))
+        filters: dict[str, FilterField[Any]] = {}
+        for field_name, field_info in cls.model_fields.items():
+            annotation = field_info.annotation
 
-        for key, value in specs.items():
-            try:
-                filter_field = getattr(cls, key)
-            except AttributeError:
-                filter_field = FilterField(value)
-                setattr(cls, key, filter_field)
+            if get_origin(annotation) is not FilterField:
+                continue
 
-            if filter_field.type is None:
-                filter_field = replace(filter_field, type=value)
+            (elem_type,) = get_args(annotation) or (None,)
+            spec = field_info.default if isinstance(field_info.default, FilterField) else None
 
-            filter_field.__set_name__(cls, key)
-            cls.__filters__[key] = filter_field
+            if spec is None:
+                filter_field: FilterField[Any] = FilterField(
+                    type=elem_type,
+                    name=field_name,
+                )
+            else:
+                filter_field = spec.replace(
+                    type=spec.type if spec.type is not None else elem_type,
+                    name=field_name,
+                )
 
-        for key in cls.__filters__:  # used to add default value for dataclass
-            setattr(cls, key, None)
+            filters[field_name] = filter_field
 
-        d_cls = dataclass(
-            cast(type[Any], cls),
-            kw_only=True,
-        )
+            # expose the field at the class var for the ``Cls.field == value`` DSL
+            setattr(cls, field_name, filter_field)
 
-        for key, value in cls.__filters__.items():
-            setattr(d_cls, key, value)
-
-        try:
-            _ = FilterSet
-        except NameError:
-            return
-
-        d_cls.__signature__ = inspect.Signature(
+        cls.__filters__ = filters
+        cls.__signature__ = inspect.Signature(
             parameters=[
                 inspect.Parameter(
                     name="__values__",
                     kind=inspect.Parameter.KEYWORD_ONLY,
-                    default=Depends(_filters_from_set(d_cls)),
+                    default=Depends(_filters_from_set(cls)),
                     annotation=FilterValues,
                 )
             ],
-            return_annotation=FilterSet,
+            return_annotation=cls,
         )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _spread_values(cls, data: Any) -> Any:
+        match data:
+            case {"__values__": {**values}}:
+                data = {**data, **values}
 
-@dataclass_transform(
-    field_specifiers=(FilterField,),
-)
-class FilterSet(metaclass=FilterSetMeta):
-    __values__: InitVar[FilterValues | None] = None  # type: ignore[assignment]
+        return data
 
-    __filters__: ClassVar[dict[str, FilterField[Any]]]
+    def model_post_init(self, context: Any, /) -> None:
+        for key in type(self).__filters__:
+            match getattr(self, key, None):
+                case None | FilterField():
+                    object.__setattr__(self, key, {})
+
+        self.init_filter_set()
 
     @classmethod
     def create(
@@ -95,20 +93,6 @@ class FilterSet(metaclass=FilterSetMeta):
         **kwargs: Mapping[AbstractFilterOperator, Sequence[Any] | bool | Any],
     ) -> Self:
         return cls(**kwargs)
-
-    def __post_init__(
-        self,
-        __values__: FilterValues | None,
-    ) -> None:
-        for key, value in (__values__ or {}).items():
-            setattr(self, key, value)
-
-        for key in asdict(self):  # type: ignore[call-overload]
-            # auto replace uninitialized fields with empty dict
-            if getattr(self, key) is None:
-                setattr(self, key, {})
-
-        self.init_filter_set()
 
     def __bool__(self) -> bool:
         return bool(self.filter_values)

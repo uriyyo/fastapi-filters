@@ -22,10 +22,10 @@ classifiers = [
     'Programming Language :: Python :: 3 :: Only',
 ]
 dependencies = [
-    "fastapi>=0.100.0",
-    "pydantic>=2.0.0",
+    "fastapi>=0.136.0",
+    "pydantic>=2.13.0",
     "typing-extensions>=4.4.0",
-    "typing-inspect>=0.4.0",
+    "typing-inspection>=0.4.2",
 ]
 
 [project.optional-dependencies]
