@@ -275,14 +275,19 @@ def test_create_sorting_from_orm():
     resolver = create_sorting_from_orm(User)
 
     assert resolver.__defs__ == {
+        "id": ("id", "asc", None),
         "-id": ("id", "desc", None),
         "+id": ("id", "asc", None),
+        "age": ("age", "asc", None),
         "+age": ("age", "asc", None),
         "-age": ("age", "desc", None),
+        "created_at": ("created_at", "asc", None),
         "-created_at": ("created_at", "desc", None),
         "+created_at": ("created_at", "asc", None),
+        "languages": ("languages", "asc", None),
         "-languages": ("languages", "desc", None),
         "+languages": ("languages", "asc", None),
+        "name": ("name", "asc", None),
         "-name": ("name", "desc", None),
         "+name": ("name", "asc", None),
     }
