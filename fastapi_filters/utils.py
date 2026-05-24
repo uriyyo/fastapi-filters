@@ -1,8 +1,6 @@
-import types
 from collections.abc import Awaitable, Callable, Container, Iterable, Sequence
 from functools import wraps
 from typing import (
-    Annotated,
     Any,
     Literal,
     TypeVar,
@@ -11,14 +9,11 @@ from typing import (
     get_origin,
 )
 
-from fastapi.dependencies.utils import lenient_issubclass
+from fastapi._compat.shared import field_annotation_is_complex, lenient_issubclass
 from pydantic.fields import FieldInfo
 from typing_extensions import ParamSpec
-
-try:
-    from fastapi._compat.shared import field_annotation_is_complex
-except ImportError:
-    from fastapi._compat import field_annotation_is_complex  # type: ignore[attr-defined,no-redef]
+from typing_inspection import typing_objects
+from typing_inspection.introspection import is_union_origin
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -33,18 +28,19 @@ def async_safe(f: Callable[P, T]) -> Callable[P, Awaitable[T]]:
 
 
 def is_none_type(tp: Any) -> bool:
-    return tp in (type(None), None, Literal[None])  # noqa: PYI061
-
-
-def is_union(tp: Any) -> bool:
-    return tp in (Union, types.UnionType) or get_origin(tp) in (Union, types.UnionType)
+    return tp in (typing_objects.NoneType, None, Literal[None])  # noqa: PYI061
 
 
 def is_optional(tp: Any) -> bool:
-    return is_union(get_origin(tp)) and any(is_none_type(arg) for arg in get_args(tp))
+    return is_union_origin(get_origin(tp)) and any(is_none_type(arg) for arg in get_args(tp))
 
 
 def is_seq(tp: Any) -> bool:
+    tp = unwrap_annotated(tp)
+
+    if is_optional(tp):
+        tp = unwrap_optional_type(tp)
+
     return not lenient_issubclass(tp, (str, bytes)) and (
         lenient_issubclass(tp, Sequence) or lenient_issubclass(get_origin(tp), Sequence)
     )
@@ -82,7 +78,7 @@ def unwrap_type(tp: Any) -> Any:
 
 
 def unwrap_annotated(tp: Any) -> Any:
-    if get_origin(tp) is Annotated:
+    if typing_objects.is_annotated(get_origin(tp)):
         return tp.__origin__
 
     return tp
