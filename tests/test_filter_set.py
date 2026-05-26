@@ -317,3 +317,44 @@ def test_filter_set_hooks():
         "a__lt": str,
         "a__le": str,
     }
+
+
+@pytest.mark.asyncio
+async def test_internal_filter_field_excluded_from_dependency(app, client):
+    class _FilterSet(FilterSet):
+        name: FilterField[str]
+        tenant_id: FilterField[int] = FilterField(internal=True)
+
+    @app.get("/test")
+    async def route(
+        _filters: _FilterSet = Depends(),
+    ):
+        assert isinstance(_filters, _FilterSet)
+        return _filters.filter_values
+
+    response = await client.get(
+        "/test",
+        params={
+            "name[eq]": "John",
+            "tenant_id[eq]": "1",
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"name": {"eq": "John"}}
+
+
+def test_internal_filter_field_can_be_set_programmatically():
+    class _FilterSet(FilterSet):
+        name: FilterField[str]
+        tenant_id: FilterField[int] = FilterField(internal=True)
+
+    filters = _FilterSet.from_ops(
+        _FilterSet.name == "John",
+        _FilterSet.tenant_id == 1,
+    )
+
+    assert filters.filter_values == {
+        "name": {FilterOperator.eq: "John"},
+        "tenant_id": {FilterOperator.eq: 1},
+    }
