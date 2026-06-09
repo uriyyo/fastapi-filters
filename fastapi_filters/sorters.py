@@ -50,7 +50,8 @@ def create_sorting(
     async def _get_sorters(
         sort: Annotated[CSVList[tp], in_(alias=alias)] = default,  # type: ignore[valid-type,assignment]
     ) -> SortingValues:
-        return cast(SortingValues, [defs[f] for f in sort or ()])
+        # Strip whitespace to handle URL-encoded '+' (decoded as space)
+        return cast(SortingValues, [defs[f.strip()] for f in sort or ()])
 
     _get_sorters.__tp__ = tp  # type: ignore[attr-defined]
     _get_sorters.__defs__ = defs  # type: ignore[attr-defined]
