@@ -60,7 +60,7 @@ dev = [
 docs = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.5.50",
-    "pymdown-extensions~=10.14",
+    "pymdown-extensions>=10.14,<12.0",
     "fontawesome-markdown>=0.2.6",
     "mdx-include",
 ]
